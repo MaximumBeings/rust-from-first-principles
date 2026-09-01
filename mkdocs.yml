@@ -60,6 +60,7 @@ nav:
   - Getting Started: getting-started.md
   - "Part 0 — Rust Foundations":
       - "1. Variables, Ownership, and Types": part0/01-variables-ownership-types.md
+      - "2. Struct Design Patterns": part0/02-struct-design-patterns.md
 
 extra:
   social:
