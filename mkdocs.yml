@@ -67,6 +67,7 @@ nav:
   - "Part 1 — Core Tensor Infrastructure":
       - "6. The Tensor": part1/01-core-tensor-structure.md
       - "7. Memory Layout Design": part1/02-memory-layout-design.md
+      - "8. Tensor Creation Functions": part1/03-tensor-creation-functions.md
 
 extra:
   social:
