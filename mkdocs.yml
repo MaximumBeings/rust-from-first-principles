@@ -62,6 +62,7 @@ nav:
       - "1. Variables, Ownership, and Types": part0/01-variables-ownership-types.md
       - "2. Struct Design Patterns": part0/02-struct-design-patterns.md
       - "3. Memory Layout Strategies": part0/03-memory-layout-strategies.md
+      - "4. GPU Programming Introduction": part0/04-gpu-programming-introduction.md
 
 extra:
   social:
