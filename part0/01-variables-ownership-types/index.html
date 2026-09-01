@@ -1,0 +1,1962 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Building a GPU-Native Tensor and Autodiff Framework in Rust, One Layer at a Time">
+      
+      
+        <meta name="author" content="Oluwaseyi Awoga">
+      
+      
+      
+        <link rel="prev" href="../../getting-started/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>1. Variables, Ownership, and Types - Rust From First Principles — Under Development</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#chapter-1-variables-ownership-and-types" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Rust From First Principles — Under Development" class="md-header__button md-logo" aria-label="Rust From First Principles — Under Development" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="m508.5 249.8-21.8-13.5c-.2-2-.3-3.9-.5-5.9l18.7-17.5c.9-.9 1.6-1.9 2-3.1s.5-2.5.2-3.7-.8-2.4-1.6-3.3-1.8-1.7-3-2.1l-24-9c-.5-1.9-1.1-3.8-1.7-5.6l15-20.8c.7-1 1.2-2.2 1.3-3.4s0-2.5-.5-3.7-1.2-2.2-2.2-2.9-2.1-1.3-3.4-1.5l-25.4-4.2c-.9-1.7-1.8-3.4-2.7-5.2l10.7-23.4c.5-1.1.7-2.4.6-3.6s-.5-2.4-1.2-3.5-1.6-1.9-2.8-2.5-2.4-.8-3.6-.8l-25.8.9c-1.2-1.5-2.4-2.9-3.6-4.4l5.8-25.3c.3-1.2.3-2.5-.1-3.7s-1-2.3-1.9-3.2-2-1.5-3.2-1.9-2.5-.4-3.7-.1l-25.1 6c-1.4-1.2-2.9-2.4-4.4-3.6l.9-25.8c.1-1.3-.2-2.5-.8-3.6s-1.4-2.1-2.5-2.8-2.2-1.1-3.5-1.2-2.5.1-3.7.6l-23.3 10.7-5.1-2.7-4.2-25.4c-.2-1.2-.7-2.4-1.5-3.4s-1.8-1.7-2.9-2.2-2.4-.7-3.7-.5-2.4.6-3.4 1.3l-20.9 15c-1.9-.6-3.8-1.1-5.6-1.7l-9-24c-.4-1.2-1.2-2.2-2.1-3S307.2 5.2 306 5s-2.5-.2-3.7.2-2.3 1.1-3.1 2l-17.6 18.7c-2-.2-3.9-.4-5.9-.5L262.3 3.5c-.7-1.1-1.6-1.9-2.7-2.6S257.3 0 256 0s-2.5.3-3.6.9-2 1.5-2.7 2.6l-13.5 21.8c-2 .2-3.9.3-5.9.6L212.9 7.1c-.9-.9-1.9-1.6-3.1-2s-2.5-.5-3.7-.2-2.4.8-3.3 1.6-1.7 1.8-2.1 3l-9 24c-1.9.6-3.8 1.1-5.7 1.7l-20.8-15c-1-.7-2.2-1.2-3.4-1.3s-2.5 0-3.7.5-2.2 1.2-2.9 2.2-1.3 2.1-1.5 3.4l-4.2 25.4c-1.7.9-3.4 1.8-5.2 2.7l-23.4-10.5c-1.1-.5-2.4-.7-3.7-.6s-2.5.5-3.5 1.2-1.9 1.7-2.5 2.8-.8 2.4-.8 3.6l.9 25.8c-1.5 1.2-3 2.4-4.4 3.6l-25.1-6c-1.2-.3-2.5-.3-3.7.1s-2.3 1-3.2 1.9-1.5 2-1.9 3.2-.4 2.5-.1 3.7l6 25.1c-1.2 1.4-2.4 2.9-3.6 4.4l-25.8-.9c-1.3 0-2.5.2-3.6.8s-2.1 1.4-2.8 2.4-1.1 2.2-1.2 3.5.1 2.5.6 3.6l10.7 23.4c-.9 1.7-1.8 3.4-2.7 5.2l-25.4 4.1c-1.2.2-2.4.7-3.4 1.5s-1.7 1.8-2.2 2.9-.7 2.4-.5 3.7.6 2.4 1.3 3.4l15 20.8c-.6 1.9-1.1 3.8-1.7 5.7l-24 9c-1.2.4-2.2 1.2-3 2.1s-1.4 2.1-1.6 3.3-.2 2.5.2 3.7 1.1 2.3 2 3.1l18.7 17.5c-.2 2-.4 3.9-.6 5.9L3.5 249.8c-1.1.7-1.9 1.6-2.6 2.7s-.9 2.3-.9 3.6.3 2.5.9 3.6 1.5 2 2.6 2.7l21.8 13.5c.2 2 .3 3.9.6 5.9L7.1 299.1c-.9.9-1.6 1.9-2 3.1s-.5 2.5-.2 3.7.8 2.4 1.6 3.3 1.8 1.7 3 2.1l24 9c.6 1.9 1.1 3.8 1.7 5.6l-15 20.8c-.7 1-1.2 2.2-1.3 3.4s0 2.5.5 3.7 1.2 2.2 2.2 2.9 2.1 1.3 3.4 1.5l25.4 4.2 2.7 5.1-10.5 23.6c-.5 1.1-.7 2.4-.6 3.6s.5 2.5 1.2 3.5c.7 1.1 1.6 1.9 2.7 2.5s2.4.8 3.6.8l25.8-.9c1.2 1.5 2.4 2.9 3.6 4.4L73 430.2c-.3 1.2-.3 2.5.1 3.7s1 2.3 1.9 3.2 2 1.5 3.2 1.9 2.5.4 3.7.1l25.2-5.9c1.5 1.2 2.9 2.4 4.4 3.6l-.9 25.8c0 1.3.2 2.5.8 3.6s1.4 2.1 2.5 2.8 2.2 1.1 3.5 1.2 2.5-.1 3.6-.6l23.4-10.7 5.1 2.7 4.2 25.4c.2 1.2.7 2.4 1.5 3.4s1.8 1.8 2.9 2.2 2.4.7 3.7.5 2.4-.6 3.4-1.3l20.8-15c1.9.6 3.8 1.1 5.6 1.7l9 24c.4 1.2 1.2 2.2 2.1 3s2.1 1.4 3.3 1.6 2.5.2 3.7-.2 2.3-1.1 3.1-2l17.5-18.7c2 .2 3.9.4 5.9.6l13.5 21.8c.7 1.1 1.6 1.9 2.7 2.6s2.3.9 3.6.9 2.5-.3 3.6-.9 2-1.5 2.7-2.6l13.5-21.8c2-.2 3.9-.3 5.9-.6l17.5 18.7c.9.9 1.9 1.6 3.1 2s2.5.5 3.7.2 2.4-.8 3.3-1.6 1.7-1.8 2.1-3l9-24c1.9-.6 3.8-1.1 5.6-1.7l20.8 15c1 .7 2.2 1.2 3.4 1.3s2.5 0 3.7-.5 2.2-1.2 2.9-2.2 1.3-2.1 1.5-3.4l4.2-25.4 5.1-2.7 23.4 10.7c1.1.5 2.4.7 3.6.6s2.4-.5 3.5-1.2 1.9-1.6 2.5-2.8.8-2.4.8-3.6l-.9-25.8c1.5-1.2 2.9-2.4 4.4-3.6l25.2 5.9c1.2.3 2.5.3 3.7-.1s2.3-1 3.2-1.9 1.5-2 1.9-3.2.4-2.5.1-3.7l-5.9-25.2c1.2-1.4 2.4-2.9 3.6-4.4l25.8.9c1.3.1 2.5-.2 3.6-.8s2.1-1.4 2.8-2.5c.7-1 1.1-2.2 1.2-3.5s-.1-2.5-.6-3.6l-10.7-23.4 2.7-5.1 25.4-4.2c1.2-.2 2.4-.7 3.4-1.5s1.8-1.8 2.2-2.9.7-2.4.5-3.7-.6-2.4-1.3-3.4l-15-20.8c.6-1.9 1.1-3.8 1.7-5.6l24-9c1.2-.4 2.2-1.2 3-2.1s1.4-2.1 1.6-3.3.2-2.5-.2-3.7-1.1-2.3-2-3.1l-18.7-17.5c.2-1.9.4-3.9.6-5.9l21.8-13.5c1.1-.7 1.9-1.6 2.6-2.7s.9-2.3.9-3.6-.3-2.5-.9-3.6-1.5-2-2.6-2.7m-151 129.1c-3.6-.8-7.4-.1-10.5 1.9s-5.3 5.2-6 8.8l-7.6 35.7c-24.6 11.1-51.3 16.8-78.3 16.7s-53.6-6.1-78.1-17.4l-7.6-35.7c-.4-1.8-1.1-3.5-2.1-5s-2.4-2.8-3.9-3.8-3.2-1.7-5-2-3.6-.3-5.4.1l-31.5 6.8c-5.8-6-11.3-12.5-16.3-19.2h153.2c1.7 0 2.9-.3 2.9-1.9v-54.2c0-1.6-1.2-1.9-2.9-1.9h-44.8v-34.4h48.5c4.4 0 23.7 1.3 29.8 25.9 1.9 7.5 6.2 32.1 9.1 40 2.9 8.8 14.6 26.5 27.1 26.5h79c-5.3 7.1-11.1 13.8-17.3 20.1l-32.1-6.9zm25.8 34.5c0 3-.9 6-2.6 8.5s-4 4.5-6.8 5.6-5.8 1.5-8.8.9-5.7-2-7.8-4.2-3.6-4.8-4.2-7.8-.3-6 .8-8.8 3.1-5.2 5.6-6.9 5.4-2.6 8.5-2.6h.4c4 .1 7.7 1.8 10.5 4.6s4.3 6.7 4.3 10.6h.1zm-225.6-.7c0 3-.9 6-2.6 8.5s-4.1 4.5-6.8 5.6-5.8 1.5-8.8.9-5.7-2-7.8-4.2-3.6-4.8-4.2-7.8-.3-6 .9-8.8 3.1-5.2 5.6-6.8 5.4-2.6 8.5-2.6h.5c4 .1 7.7 1.8 10.5 4.6s4.3 6.7 4.3 10.6h.1zM69.6 234.2l32.8-14.6c1.7-.7 3.2-1.8 4.4-3.1s2.2-2.9 2.9-4.6 1-3.5.9-5.3-.5-3.6-1.2-5.3l-6.8-15.2h26.6v119.7H75.6c-6.6-23.2-8.7-47.6-6.1-71.6zm-11.3-36.1c0-2 .4-4 1.2-5.8s1.9-3.5 3.3-4.9 3.1-2.5 4.9-3.3 3.8-1.2 5.8-1.2h.5c3 .1 5.9 1 8.3 2.8s4.3 4.1 5.4 6.9 1.3 5.8.7 8.8-2.1 5.6-4.3 7.7-4.9 3.5-7.8 4.1-6 .2-8.7-.9-5.1-3.1-6.8-5.6-2.5-5.4-2.5-8.4zm155.2 24.5v-35.3h63.3c3.3 0 23.1 3.8 23.1 18.6 0 12.3-15.2 16.7-27.7 16.7zM399 306.7c-9.8 1.1-20.6-4.1-22-10.1-5.8-32.5-15.4-39.4-30.6-51.4 18.9-12 38.5-29.6 38.5-53.3 0-25.5-17.5-41.6-29.4-49.5-16.8-11-35.3-13.2-40.3-13.2H116.3c27.5-30.7 64.4-51.5 104.9-59.2l23.5 24.6c1.3 1.3 2.8 2.4 4.4 3.1s3.5 1.1 5.3 1.2 3.6-.3 5.3-.9 3.2-1.7 4.6-2.9l26.3-25c26.8 5 52.1 15.8 74.3 31.6s40.6 36.2 54.1 59.9l-18 40.6c-1.5 3.4-1.5 7.2-.2 10.6s3.9 6.2 7.3 7.7l34.6 15.3c1.1 10.8 1.2 21.7.4 32.5h-19.3c-1.9 0-2.7 1.3-2.7 3.1v8.8c0 20.8-11.7 25.3-22 26.5zM240 60.2c0-4 1.6-7.9 4.5-10.7s6.7-4.5 10.7-4.5h.4c3 .1 5.9 1 8.4 2.8s4.3 4.1 5.4 6.9 1.3 5.8.7 8.8-2.1 5.6-4.3 7.7-4.9 3.5-7.8 4-6 .2-8.7-.9-5.1-3.1-6.8-5.6-2.5-5.4-2.5-8.4zM436.8 214c-2 0-4-.4-5.8-1.2s-3.5-1.9-4.9-3.3-2.5-3.1-3.3-4.9-1.2-3.8-1.2-5.8.4-4 1.2-5.8 1.9-3.5 3.3-4.9 3.1-2.5 4.9-3.3 3.8-1.2 5.8-1.2h.4c4 .1 7.9 1.7 10.7 4.6s4.4 6.8 4.3 10.8-1.7 7.9-4.6 10.7-6.8 4.4-10.8 4.3"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Rust From First Principles — Under Development
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              1. Variables, Ownership, and Types
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-orange" data-md-color-accent="deep-orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Rust From First Principles — Under Development" class="md-nav__button md-logo" aria-label="Rust From First Principles — Under Development" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="m508.5 249.8-21.8-13.5c-.2-2-.3-3.9-.5-5.9l18.7-17.5c.9-.9 1.6-1.9 2-3.1s.5-2.5.2-3.7-.8-2.4-1.6-3.3-1.8-1.7-3-2.1l-24-9c-.5-1.9-1.1-3.8-1.7-5.6l15-20.8c.7-1 1.2-2.2 1.3-3.4s0-2.5-.5-3.7-1.2-2.2-2.2-2.9-2.1-1.3-3.4-1.5l-25.4-4.2c-.9-1.7-1.8-3.4-2.7-5.2l10.7-23.4c.5-1.1.7-2.4.6-3.6s-.5-2.4-1.2-3.5-1.6-1.9-2.8-2.5-2.4-.8-3.6-.8l-25.8.9c-1.2-1.5-2.4-2.9-3.6-4.4l5.8-25.3c.3-1.2.3-2.5-.1-3.7s-1-2.3-1.9-3.2-2-1.5-3.2-1.9-2.5-.4-3.7-.1l-25.1 6c-1.4-1.2-2.9-2.4-4.4-3.6l.9-25.8c.1-1.3-.2-2.5-.8-3.6s-1.4-2.1-2.5-2.8-2.2-1.1-3.5-1.2-2.5.1-3.7.6l-23.3 10.7-5.1-2.7-4.2-25.4c-.2-1.2-.7-2.4-1.5-3.4s-1.8-1.7-2.9-2.2-2.4-.7-3.7-.5-2.4.6-3.4 1.3l-20.9 15c-1.9-.6-3.8-1.1-5.6-1.7l-9-24c-.4-1.2-1.2-2.2-2.1-3S307.2 5.2 306 5s-2.5-.2-3.7.2-2.3 1.1-3.1 2l-17.6 18.7c-2-.2-3.9-.4-5.9-.5L262.3 3.5c-.7-1.1-1.6-1.9-2.7-2.6S257.3 0 256 0s-2.5.3-3.6.9-2 1.5-2.7 2.6l-13.5 21.8c-2 .2-3.9.3-5.9.6L212.9 7.1c-.9-.9-1.9-1.6-3.1-2s-2.5-.5-3.7-.2-2.4.8-3.3 1.6-1.7 1.8-2.1 3l-9 24c-1.9.6-3.8 1.1-5.7 1.7l-20.8-15c-1-.7-2.2-1.2-3.4-1.3s-2.5 0-3.7.5-2.2 1.2-2.9 2.2-1.3 2.1-1.5 3.4l-4.2 25.4c-1.7.9-3.4 1.8-5.2 2.7l-23.4-10.5c-1.1-.5-2.4-.7-3.7-.6s-2.5.5-3.5 1.2-1.9 1.7-2.5 2.8-.8 2.4-.8 3.6l.9 25.8c-1.5 1.2-3 2.4-4.4 3.6l-25.1-6c-1.2-.3-2.5-.3-3.7.1s-2.3 1-3.2 1.9-1.5 2-1.9 3.2-.4 2.5-.1 3.7l6 25.1c-1.2 1.4-2.4 2.9-3.6 4.4l-25.8-.9c-1.3 0-2.5.2-3.6.8s-2.1 1.4-2.8 2.4-1.1 2.2-1.2 3.5.1 2.5.6 3.6l10.7 23.4c-.9 1.7-1.8 3.4-2.7 5.2l-25.4 4.1c-1.2.2-2.4.7-3.4 1.5s-1.7 1.8-2.2 2.9-.7 2.4-.5 3.7.6 2.4 1.3 3.4l15 20.8c-.6 1.9-1.1 3.8-1.7 5.7l-24 9c-1.2.4-2.2 1.2-3 2.1s-1.4 2.1-1.6 3.3-.2 2.5.2 3.7 1.1 2.3 2 3.1l18.7 17.5c-.2 2-.4 3.9-.6 5.9L3.5 249.8c-1.1.7-1.9 1.6-2.6 2.7s-.9 2.3-.9 3.6.3 2.5.9 3.6 1.5 2 2.6 2.7l21.8 13.5c.2 2 .3 3.9.6 5.9L7.1 299.1c-.9.9-1.6 1.9-2 3.1s-.5 2.5-.2 3.7.8 2.4 1.6 3.3 1.8 1.7 3 2.1l24 9c.6 1.9 1.1 3.8 1.7 5.6l-15 20.8c-.7 1-1.2 2.2-1.3 3.4s0 2.5.5 3.7 1.2 2.2 2.2 2.9 2.1 1.3 3.4 1.5l25.4 4.2 2.7 5.1-10.5 23.6c-.5 1.1-.7 2.4-.6 3.6s.5 2.5 1.2 3.5c.7 1.1 1.6 1.9 2.7 2.5s2.4.8 3.6.8l25.8-.9c1.2 1.5 2.4 2.9 3.6 4.4L73 430.2c-.3 1.2-.3 2.5.1 3.7s1 2.3 1.9 3.2 2 1.5 3.2 1.9 2.5.4 3.7.1l25.2-5.9c1.5 1.2 2.9 2.4 4.4 3.6l-.9 25.8c0 1.3.2 2.5.8 3.6s1.4 2.1 2.5 2.8 2.2 1.1 3.5 1.2 2.5-.1 3.6-.6l23.4-10.7 5.1 2.7 4.2 25.4c.2 1.2.7 2.4 1.5 3.4s1.8 1.8 2.9 2.2 2.4.7 3.7.5 2.4-.6 3.4-1.3l20.8-15c1.9.6 3.8 1.1 5.6 1.7l9 24c.4 1.2 1.2 2.2 2.1 3s2.1 1.4 3.3 1.6 2.5.2 3.7-.2 2.3-1.1 3.1-2l17.5-18.7c2 .2 3.9.4 5.9.6l13.5 21.8c.7 1.1 1.6 1.9 2.7 2.6s2.3.9 3.6.9 2.5-.3 3.6-.9 2-1.5 2.7-2.6l13.5-21.8c2-.2 3.9-.3 5.9-.6l17.5 18.7c.9.9 1.9 1.6 3.1 2s2.5.5 3.7.2 2.4-.8 3.3-1.6 1.7-1.8 2.1-3l9-24c1.9-.6 3.8-1.1 5.6-1.7l20.8 15c1 .7 2.2 1.2 3.4 1.3s2.5 0 3.7-.5 2.2-1.2 2.9-2.2 1.3-2.1 1.5-3.4l4.2-25.4 5.1-2.7 23.4 10.7c1.1.5 2.4.7 3.6.6s2.4-.5 3.5-1.2 1.9-1.6 2.5-2.8.8-2.4.8-3.6l-.9-25.8c1.5-1.2 2.9-2.4 4.4-3.6l25.2 5.9c1.2.3 2.5.3 3.7-.1s2.3-1 3.2-1.9 1.5-2 1.9-3.2.4-2.5.1-3.7l-5.9-25.2c1.2-1.4 2.4-2.9 3.6-4.4l25.8.9c1.3.1 2.5-.2 3.6-.8s2.1-1.4 2.8-2.5c.7-1 1.1-2.2 1.2-3.5s-.1-2.5-.6-3.6l-10.7-23.4 2.7-5.1 25.4-4.2c1.2-.2 2.4-.7 3.4-1.5s1.8-1.8 2.2-2.9.7-2.4.5-3.7-.6-2.4-1.3-3.4l-15-20.8c.6-1.9 1.1-3.8 1.7-5.6l24-9c1.2-.4 2.2-1.2 3-2.1s1.4-2.1 1.6-3.3.2-2.5-.2-3.7-1.1-2.3-2-3.1l-18.7-17.5c.2-1.9.4-3.9.6-5.9l21.8-13.5c1.1-.7 1.9-1.6 2.6-2.7s.9-2.3.9-3.6-.3-2.5-.9-3.6-1.5-2-2.6-2.7m-151 129.1c-3.6-.8-7.4-.1-10.5 1.9s-5.3 5.2-6 8.8l-7.6 35.7c-24.6 11.1-51.3 16.8-78.3 16.7s-53.6-6.1-78.1-17.4l-7.6-35.7c-.4-1.8-1.1-3.5-2.1-5s-2.4-2.8-3.9-3.8-3.2-1.7-5-2-3.6-.3-5.4.1l-31.5 6.8c-5.8-6-11.3-12.5-16.3-19.2h153.2c1.7 0 2.9-.3 2.9-1.9v-54.2c0-1.6-1.2-1.9-2.9-1.9h-44.8v-34.4h48.5c4.4 0 23.7 1.3 29.8 25.9 1.9 7.5 6.2 32.1 9.1 40 2.9 8.8 14.6 26.5 27.1 26.5h79c-5.3 7.1-11.1 13.8-17.3 20.1l-32.1-6.9zm25.8 34.5c0 3-.9 6-2.6 8.5s-4 4.5-6.8 5.6-5.8 1.5-8.8.9-5.7-2-7.8-4.2-3.6-4.8-4.2-7.8-.3-6 .8-8.8 3.1-5.2 5.6-6.9 5.4-2.6 8.5-2.6h.4c4 .1 7.7 1.8 10.5 4.6s4.3 6.7 4.3 10.6h.1zm-225.6-.7c0 3-.9 6-2.6 8.5s-4.1 4.5-6.8 5.6-5.8 1.5-8.8.9-5.7-2-7.8-4.2-3.6-4.8-4.2-7.8-.3-6 .9-8.8 3.1-5.2 5.6-6.8 5.4-2.6 8.5-2.6h.5c4 .1 7.7 1.8 10.5 4.6s4.3 6.7 4.3 10.6h.1zM69.6 234.2l32.8-14.6c1.7-.7 3.2-1.8 4.4-3.1s2.2-2.9 2.9-4.6 1-3.5.9-5.3-.5-3.6-1.2-5.3l-6.8-15.2h26.6v119.7H75.6c-6.6-23.2-8.7-47.6-6.1-71.6zm-11.3-36.1c0-2 .4-4 1.2-5.8s1.9-3.5 3.3-4.9 3.1-2.5 4.9-3.3 3.8-1.2 5.8-1.2h.5c3 .1 5.9 1 8.3 2.8s4.3 4.1 5.4 6.9 1.3 5.8.7 8.8-2.1 5.6-4.3 7.7-4.9 3.5-7.8 4.1-6 .2-8.7-.9-5.1-3.1-6.8-5.6-2.5-5.4-2.5-8.4zm155.2 24.5v-35.3h63.3c3.3 0 23.1 3.8 23.1 18.6 0 12.3-15.2 16.7-27.7 16.7zM399 306.7c-9.8 1.1-20.6-4.1-22-10.1-5.8-32.5-15.4-39.4-30.6-51.4 18.9-12 38.5-29.6 38.5-53.3 0-25.5-17.5-41.6-29.4-49.5-16.8-11-35.3-13.2-40.3-13.2H116.3c27.5-30.7 64.4-51.5 104.9-59.2l23.5 24.6c1.3 1.3 2.8 2.4 4.4 3.1s3.5 1.1 5.3 1.2 3.6-.3 5.3-.9 3.2-1.7 4.6-2.9l26.3-25c26.8 5 52.1 15.8 74.3 31.6s40.6 36.2 54.1 59.9l-18 40.6c-1.5 3.4-1.5 7.2-.2 10.6s3.9 6.2 7.3 7.7l34.6 15.3c1.1 10.8 1.2 21.7.4 32.5h-19.3c-1.9 0-2.7 1.3-2.7 3.1v8.8c0 20.8-11.7 25.3-22 26.5zM240 60.2c0-4 1.6-7.9 4.5-10.7s6.7-4.5 10.7-4.5h.4c3 .1 5.9 1 8.4 2.8s4.3 4.1 5.4 6.9 1.3 5.8.7 8.8-2.1 5.6-4.3 7.7-4.9 3.5-7.8 4-6 .2-8.7-.9-5.1-3.1-6.8-5.6-2.5-5.4-2.5-8.4zM436.8 214c-2 0-4-.4-5.8-1.2s-3.5-1.9-4.9-3.3-2.5-3.1-3.3-4.9-1.2-3.8-1.2-5.8.4-4 1.2-5.8 1.9-3.5 3.3-4.9 3.1-2.5 4.9-3.3 3.8-1.2 5.8-1.2h.4c4 .1 7.9 1.7 10.7 4.6s4.4 6.8 4.3 10.8-1.7 7.9-4.6 10.7-6.8 4.4-10.8 4.3"/></svg>
+
+    </a>
+    Rust From First Principles — Under Development
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 0 — Rust Foundations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 0 — Rust Foundations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. Variables, Ownership, and Types
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. Variables, Ownership, and Types
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#11-what-a-type-actually-is-foundational" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 What a Type Actually Is [FOUNDATIONAL]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.1 What a Type Actually Is [FOUNDATIONAL]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-111-one-declaration-traced-to-the-bit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 1.1.1 — One declaration, traced to the bit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ascii-diagram-one-stack-frame-three-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ASCII Diagram — one stack frame, three variables
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-type-inference-vs-dynamic-typing-foundational" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Type Inference vs. Dynamic Typing [FOUNDATIONAL]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.2 Type Inference vs. Dynamic Typing [FOUNDATIONAL]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-121-the-same-looking-line-two-different-outcomes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 1.2.1 — the same-looking line, two different outcomes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-ownership-the-type-systems-third-axis-foundational" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Ownership: The Type System's Third Axis [FOUNDATIONAL]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.3 Ownership: The Type System&#39;s Third Axis [FOUNDATIONAL]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-131-a-real-genuinely-captured-move-violation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 1.3.1 — a real, genuinely captured move violation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-132-the-fix-an-explicit-independent-copy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 1.3.2 — the fix: an explicit, independent copy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-ownership-at-a-function-call-boundary-move-vs-borrow-foundational" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 Ownership at a Function Call Boundary: Move vs. Borrow [FOUNDATIONAL]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.4 Ownership at a Function Call Boundary: Move vs. Borrow [FOUNDATIONAL]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-141-a-real-genuinely-captured-call-boundary-violation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 1.4.1 — a real, genuinely captured call-boundary violation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-142-the-fix-borrow-first-move-last" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 1.4.2 — the fix: borrow first, move last
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-fixed-size-arrays-and-compiler-enforced-alignment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.5 Fixed-Size Arrays and Compiler-Enforced Alignment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.5 Fixed-Size Arrays and Compiler-Enforced Alignment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-151-genuinely-measured-not-assumed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 1.5.1 — genuinely measured, not assumed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-runnable-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete Runnable Code
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Complete Runnable Code">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#file-01_stack_typesrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: 01_stack_types.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-02_type_inferencers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: 02_type_inference.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-03b_move_fixedrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: 03b_move_fixed.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-04_ownership_functionsrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: 04_ownership_functions.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-05_layout_typesrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: 05_layout_types.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-06_explicit_castrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: 06_explicit_cast.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-07_borrow_conflictrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: 07_borrow_conflict.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chapter-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chapter Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#self-check-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self-Check Questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-we-go-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where We Go Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Solutions
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#11-what-a-type-actually-is-foundational" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 What a Type Actually Is [FOUNDATIONAL]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.1 What a Type Actually Is [FOUNDATIONAL]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-111-one-declaration-traced-to-the-bit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 1.1.1 — One declaration, traced to the bit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ascii-diagram-one-stack-frame-three-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ASCII Diagram — one stack frame, three variables
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-type-inference-vs-dynamic-typing-foundational" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Type Inference vs. Dynamic Typing [FOUNDATIONAL]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.2 Type Inference vs. Dynamic Typing [FOUNDATIONAL]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-121-the-same-looking-line-two-different-outcomes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 1.2.1 — the same-looking line, two different outcomes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-ownership-the-type-systems-third-axis-foundational" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Ownership: The Type System's Third Axis [FOUNDATIONAL]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.3 Ownership: The Type System&#39;s Third Axis [FOUNDATIONAL]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-131-a-real-genuinely-captured-move-violation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 1.3.1 — a real, genuinely captured move violation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-132-the-fix-an-explicit-independent-copy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 1.3.2 — the fix: an explicit, independent copy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-ownership-at-a-function-call-boundary-move-vs-borrow-foundational" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 Ownership at a Function Call Boundary: Move vs. Borrow [FOUNDATIONAL]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.4 Ownership at a Function Call Boundary: Move vs. Borrow [FOUNDATIONAL]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-141-a-real-genuinely-captured-call-boundary-violation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 1.4.1 — a real, genuinely captured call-boundary violation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-142-the-fix-borrow-first-move-last" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 1.4.2 — the fix: borrow first, move last
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-fixed-size-arrays-and-compiler-enforced-alignment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.5 Fixed-Size Arrays and Compiler-Enforced Alignment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.5 Fixed-Size Arrays and Compiler-Enforced Alignment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-151-genuinely-measured-not-assumed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 1.5.1 — genuinely measured, not assumed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-runnable-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete Runnable Code
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Complete Runnable Code">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#file-01_stack_typesrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: 01_stack_types.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-02_type_inferencers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: 02_type_inference.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-03b_move_fixedrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: 03b_move_fixed.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-04_ownership_functionsrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: 04_ownership_functions.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-05_layout_typesrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: 05_layout_types.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-06_explicit_castrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: 06_explicit_cast.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-07_borrow_conflictrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: 07_borrow_conflict.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chapter-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chapter Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#self-check-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self-Check Questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-we-go-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where We Go Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Solutions
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="chapter-1-variables-ownership-and-types">Chapter 1: Variables, Ownership, and Types<a class="headerlink" href="#chapter-1-variables-ownership-and-types" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>"A type is a promise you make to the compiler about what a piece of memory means. Every type in this book's Rust code carries a second, unavoidable promise as well: who owns it, and therefore who is responsible for freeing it — a promise the compiler checks with the same rigor it checks whether a byte means a signed integer or an IEEE-754 float, and one no C++ compiler enforces at all."</p>
+</blockquote>
+<p><strong>What you will understand by the end of this chapter:</strong></p>
+<ul>
+<li>What actually happens in memory when you write <code>let x: i32 = 42</code> — the stack slot, the byte width, and why the compiler needs to know the type before that line runs, exactly as in any statically typed language</li>
+<li>Why Rust's type inference (<code>let a = 10</code>) is not the same thing as Python's dynamic typing, even though neither one has a visible type annotation</li>
+<li>What ownership actually is: a compile-time-tracked answer to "who is responsible for freeing this value," enforced by the borrow checker with the same rigor as any other type rule — Rust's genuine second axis, the way <code>__host__</code>/<code>__device__</code> is CUDA C++'s</li>
+<li>Why moving a value out from under a live reference, or using a value after it has been moved, is caught at compile time in Rust — where the equivalent pattern in C++ either doesn't compile for unrelated reasons or, worse, compiles cleanly into undefined behavior</li>
+<li>Why a plain Rust array like <code>[f32; 4]</code> does <em>not</em> automatically get the same 16-byte alignment CUDA's <code>float4</code> gets for free — and how <code>#[repr(align(16))]</code> gets it explicitly, genuinely measured with <code>size_of</code>/<code>align_of</code></li>
+</ul>
+<p><strong>What you need to know first:</strong></p>
+<ul>
+<li>General programming experience — this chapter assumes familiarity with basic programming concepts, not prior Rust or GPU exposure</li>
+<li>No prior Rust exposure is assumed — this is the first technical chapter of the book</li>
+<li>If you've read the CUDA, Mojo, or Triton editions of this book, this chapter opens differently on purpose. CUDA C++'s (and, in its own way, Mojo's) earliest distinguishing idea is a second compiler-enforced axis about <em>where</em> code runs — host versus device. Rust's earliest distinguishing idea is a second compiler-enforced axis about <em>who owns</em> a value. That axis has no equivalent in any of the three sibling books: nothing in C++, Mojo, or the Python host Triton relies on tracks ownership at compile time the way Rust does. No GPU content appears in this chapter at all — that begins in Part 0, Chapter 4, once the ownership foundation this chapter builds is in place. It isn't a detour: the <code>cudarc</code> buffer handles Chapter 4 introduces are themselves ordinary owned Rust values, freed automatically through the exact mechanism this chapter covers.</li>
+</ul>
+<h2 id="11-what-a-type-actually-is-foundational">1.1 What a Type Actually Is <code>[FOUNDATIONAL]</code><a class="headerlink" href="#11-what-a-type-actually-is-foundational" title="Permanent link">&para;</a></h2>
+<h3 id="intuition">Intuition<a class="headerlink" href="#intuition" title="Permanent link">&para;</a></h3>
+<p>Think about shipping a package through a courier service. Before the courier will take it, you declare what's inside and how much it weighs — not because the courier is nosy, but because that declaration determines everything downstream: which truck it goes on, how it's stacked, whether it needs a fragile sticker. A type is that same declaration, attached not to a package but to a region of computer memory. <code>i32</code> means "this is 4 bytes, interpret those bytes as a signed whole number." <code>f32</code> means "this is 4 bytes, interpret them according to the IEEE-754 rules for a 32-bit floating-point number." Once the compiler knows the label, every later instruction touching that memory already knows exactly how many bytes to read and how to interpret them — no inspection required at the moment of use.</p>
+<h3 id="background">Background<a class="headerlink" href="#background" title="Permanent link">&para;</a></h3>
+<p>A <strong>statically typed</strong> language fixes the type of every variable before the program runs — either because you wrote it explicitly or because the compiler deduced it unambiguously. Rust, like C, C++, and CUDA C++, is statically typed. A <strong>dynamically typed</strong> language, like Python, attaches the type to the <em>value</em> at runtime instead of the variable: the name has no type of its own, it just currently points at some object, and that object carries its own type tag checked on every operation.</p>
+<table>
+<thead>
+<tr>
+<th>Language</th>
+<th>Type known at</th>
+<th>Where the value lives</th>
+<th>Type check per use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rust / C / C++</td>
+<td>Compile time (mandatory)</td>
+<td>Stack (usually, for these types)</td>
+<td>None</td>
+</tr>
+<tr>
+<td>Python</td>
+<td>Runtime (attached to the object)</td>
+<td>Heap (always)</td>
+<td>Every operation</td>
+</tr>
+</tbody>
+</table>
+<h3 id="worked-example-111-one-declaration-traced-to-the-bit">Worked Example 1.1.1 — One declaration, traced to the bit<a class="headerlink" href="#worked-example-111-one-declaration-traced-to-the-bit" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">let</span><span class="w"> </span><span class="n">x</span><span class="p">:</span><span class="w"> </span><span class="kt">i32</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">42</span><span class="p">;</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kd">let</span><span class="w"> </span><span class="n">y</span><span class="p">:</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">3.14159</span><span class="p">;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kd">let</span><span class="w"> </span><span class="n">z</span><span class="p">:</span><span class="w"> </span><span class="kt">f64</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">2.71828</span><span class="p">;</span>
+</code></pre></div>
+<p>The complete, compiled, and genuinely run version — wrapped in a <code>main</code> function with <code>println!</code> calls that print not just the values but their exact bit patterns — is <code>01_stack_types.rs</code>, shown in full further below.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>rustc<span class="w"> </span>-O<span class="w"> </span>01_stack_types.rs<span class="w"> </span>-o<span class="w"> </span>01_stack_types
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>./01_stack_types
+</code></pre></div>
+<p>Genuinely compiled and run:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>x=42 y=3.14159 z=2.71828
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>size_of(i32)=4 size_of(f32)=4 size_of(f64)=8
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>x bits (two&#39;s complement, 32-bit): 00000000000000000000000000101010
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>y bits (IEEE-754 binary32):        01000000010010010000111111010000
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>z bits (IEEE-754 binary64):        0100000000000101101111110000100110010101101010101111011110010000
+</code></pre></div>
+<p>The compiler reserves 4 bytes for <code>x</code> and writes the two's-complement bit pattern for <code>42</code>. It reserves another 4 bytes for <code>y</code> (a Rust <code>f32</code> is IEEE-754 single precision, exactly like C++'s <code>float</code>) and writes the bit pattern for <code>3.14159</code>. It reserves 8 bytes for <code>z</code> (<code>f64</code> is IEEE-754 double precision) and writes the bit pattern for <code>2.71828</code>. <code>y.to_bits()</code> and <code>z.to_bits()</code> aren't a trick — they're ordinary standard-library methods that reinterpret the float's existing bytes as an unsigned integer of the same width, so the binary strings above are the actual bytes the first <code>println!</code> line already used to produce <code>3.14159</code> and <code>2.71828</code>, not a separately-computed approximation.</p>
+<h3 id="ascii-diagram-one-stack-frame-three-variables">ASCII Diagram — one stack frame, three variables<a class="headerlink" href="#ascii-diagram-one-stack-frame-three-variables" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Stack frame for a function containing:
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    let x: i32 = 42;
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    let y: f32 = 3.14159;
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    let z: f64 = 2.71828;
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>High address
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a> +--------------------------+
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a> | ... caller&#39;s frame ...   |
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a> +--------------------------+
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a> | z  (8 bytes, f64)        |  &lt;- 0100000000000101101111110000100110010101101010101111011110010000
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a> +--------------------------+
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a> | y  (4 bytes, f32)        |  &lt;- 01000000010010010000111111010000  (padded to 32 bits shown)
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a> +--------------------------+
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a> | x  (4 bytes, i32)        |  &lt;- 00000000000000000000000000101010  (two&#39;s-complement 42)
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a> +--------------------------+
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>Low address                    &lt;- stack pointer sits here
+</code></pre></div>
+<blockquote>
+<p><code>[COMMON TRAP]</code> C++ silently converts between <code>float</code> and <code>double</code> wherever a narrowing conversion is contextually allowed — <code>float x = 3.14159265358979;</code> compiles cleanly and quietly rounds, discarding precision with no warning by default. Rust closes this off entirely: there is no implicit numeric conversion between <em>any</em> two numeric types, narrowing or widening. Genuinely captured:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">let</span><span class="w"> </span><span class="n">precise</span><span class="p">:</span><span class="w"> </span><span class="kt">f64</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">3.14159265358979</span><span class="p">;</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kd">let</span><span class="w"> </span><span class="n">narrowed</span><span class="p">:</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">precise</span><span class="p">;</span><span class="w">  </span><span class="c1">// no implicit f64 -&gt; f32 conversion in Rust</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>rustc<span class="w"> </span>06_no_silent_narrowing.rs
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>error[E0308]: mismatched types
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a> --&gt; 06_no_silent_narrowing.rs:3:25
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  |
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>3 |     let narrowed: f32 = precise;
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>  |                   ---   ^^^^^^^ expected `f32`, found `f64`
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>  |                   |
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>  |                   expected due to this
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>error: aborting due to 1 previous error
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>For more information about this error, try `rustc --explain E0308`.
+</code></pre></div>
+<p>The fix has to be spelled out explicitly with <code>as</code>, which makes the precision loss visible at the call site instead of silent:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kd">let</span><span class="w"> </span><span class="n">narrowed</span><span class="p">:</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">precise</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">;</span>
+</code></pre></div>
+<p>Genuinely compiled and run — <code>06_explicit_cast.rs</code> further below:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>precise=3.14159265358979 narrowed=3.1415927
+</code></pre></div>
+</blockquote>
+<h2 id="12-type-inference-vs-dynamic-typing-foundational">1.2 Type Inference vs. Dynamic Typing <code>[FOUNDATIONAL]</code><a class="headerlink" href="#12-type-inference-vs-dynamic-typing-foundational" title="Permanent link">&para;</a></h2>
+<h3 id="intuition_1">Intuition<a class="headerlink" href="#intuition_1" title="Permanent link">&para;</a></h3>
+<p>Imagine two tailors. The first takes your measurements once, at your very first fitting, and cuts a suit that is permanently your size — it never adjusts itself later. The second doesn't measure you up front at all; every time you put the suit on, they re-measure and refit it to whatever you are <em>that day</em>. Rust's <code>let a = 10;</code> is the first tailor: the compiler looks at <code>10</code> once, at compile time, deduces <code>i32</code> (Rust's default integer type), and <code>a</code> is an <code>i32</code> for the rest of its scope, exactly as if you had written <code>let a: i32 = 10;</code> yourself. Python's <code>a = 10</code> is the second tailor: <code>a</code> has no fixed size at all, and nothing stops the next line from repointing it at a string.</p>
+<h3 id="background_1">Background<a class="headerlink" href="#background_1" title="Permanent link">&para;</a></h3>
+<p><strong>Type inference</strong> is a compile-time process — the compiler looks at the initializer (and, in Rust, sometimes at how the variable is used later in the function too) and locks a concrete type in for the variable's whole scope. No inference happens while the program runs; by execution time, <code>let</code>-inferred variables are indistinguishable from explicitly-typed ones. <strong>Dynamic typing</strong> has no such compile-time fixing step, because the type belongs to the object a name currently references, not to the name itself.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Rust <code>let a = 10;</code></th>
+<th>Python <code>a = 10</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>When is the type decided?</td>
+<td>Once, at compile time</td>
+<td>Never fixed — checked fresh on every use</td>
+</tr>
+<tr>
+<td>Can <code>a</code> later hold a <code>String</code>?</td>
+<td>No — compile error</td>
+<td>Yes — <code>a = "ten"</code> is legal</td>
+</tr>
+<tr>
+<td>Cost of inference at runtime</td>
+<td>Zero (already resolved)</td>
+<td>N/A — no inference, only per-use checking</td>
+</tr>
+</tbody>
+</table>
+<h3 id="worked-example-121-the-same-looking-line-two-different-outcomes">Worked Example 1.2.1 — the same-looking line, two different outcomes<a class="headerlink" href="#worked-example-121-the-same-looking-line-two-different-outcomes" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kd">let</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w">       </span><span class="c1">// compiler infers i32 here, at compile time -- permanent</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="kd">let</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">5.5</span><span class="p">;</span><span class="w">       </span><span class="c1">// compiler infers f64 here -- permanent</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="kd">let</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w">      </span><span class="c1">// compiler infers bool here -- permanent</span>
+</code></pre></div>
+<p>Compiled and run as <code>02_type_inference.rs</code> (the complete file appears further below):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>rustc<span class="w"> </span>-O<span class="w"> </span>02_type_inference.rs<span class="w"> </span>-o<span class="w"> </span>02_type_inference
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>./02_type_inference
+</code></pre></div>
+<p>Genuinely compiled and run:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>a=10 (size 4), b=5.5 (size 8), c=true (size 1)
+</code></pre></div>
+<p><code>size_of_val(&amp;a)</code> is <code>4</code> because the compiler resolved <code>a</code>'s type to <code>i32</code> at compile time, before this program ever ran — the same size a hand-written <code>let a: i32 = 10;</code> would report. <code>b</code> resolves to <code>f64</code>, Rust's default floating-point type (not <code>f32</code> — Rust's defaults for untyped integer and float literals are <code>i32</code> and <code>f64</code> respectively, chosen for range and precision, not speed). <code>c</code> is <code>bool</code>, and unlike C's <code>printf("%d", ...)</code>, Rust's <code>{}</code> formatter knows <code>bool</code> is its own type and prints the word <code>true</code>, not <code>1</code> — <code>size_of_val(&amp;c)</code> is still <code>1</code> byte, the same single-byte representation C++'s <code>bool</code> uses.</p>
+<h2 id="13-ownership-the-type-systems-third-axis-foundational">1.3 Ownership: The Type System's Third Axis <code>[FOUNDATIONAL]</code><a class="headerlink" href="#13-ownership-the-type-systems-third-axis-foundational" title="Permanent link">&para;</a></h2>
+<h3 id="intuition_2">Intuition<a class="headerlink" href="#intuition_2" title="Permanent link">&para;</a></h3>
+<p>In C++, assigning one <code>std::string</code> to another (<code>std::string s2 = s1;</code>) copies the string's contents by default — both <code>s1</code> and <code>s2</code> end up as independent, fully-formed strings, and both destructors will eventually run. In Python, <code>s2 = s1</code> doesn't copy anything at all; it makes <code>s2</code> a second name for the <em>same</em> underlying string object, and Python's reference counter keeps track of how many names point at it so it knows when it's finally safe to free. Rust picks neither default. <code>let s2 = s1;</code> for a <code>String</code> <strong>moves</strong> the value: <code>s1</code>'s bytes on the heap now belong to <code>s2</code>, <code>s1</code> is left in a compiler-tracked "no longer valid" state, and the compiler will refuse to compile any later line that tries to use <code>s1</code> again. This is not a runtime check and not a convention — it's enforced the same way a type mismatch is enforced, at compile time, before the program ever runs.</p>
+<h3 id="background_2">Background<a class="headerlink" href="#background_2" title="Permanent link">&para;</a></h3>
+<p>Every value in Rust has exactly one owner at a time. When the owner goes out of scope, Rust automatically calls that value's <code>Drop</code> implementation (freeing heap memory, closing a file handle, releasing a <code>cudarc</code> buffer — whatever cleanup the type defines), with no garbage collector and no manual <code>free</code>/<code>delete</code> call required anywhere in the program. Assignment (<code>let s2 = s1;</code>), passing by value into a function, and returning a value all transfer ownership by default for types that manage a resource (like <code>String</code> or <code>Vec&lt;T&gt;</code>) — this is called a <strong>move</strong>. Simple, fixed-size types that are cheap to duplicate (<code>i32</code>, <code>f32</code>, <code>bool</code>, and other types marked <code>Copy</code>) are the one exception: assigning them duplicates the bits instead of moving, because there's no heap resource to worry about owning twice.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>C++ (<code>std::string s2 = s1;</code>)</th>
+<th>Python (<code>s2 = s1</code>)</th>
+<th>Rust (<code>let s2 = s1;</code>, <code>String</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What happens to the data</td>
+<td>Deep-copied by default</td>
+<td>Not copied — <code>s2</code> is a second reference</td>
+<td>Moved — ownership transfers to <code>s2</code></td>
+</tr>
+<tr>
+<td>Is <code>s1</code> still valid afterward?</td>
+<td>Yes, independent copy</td>
+<td>Yes, same object as <code>s2</code></td>
+<td><strong>No</strong> — compile error to use it</td>
+</tr>
+<tr>
+<td>Who frees the memory, and when</td>
+<td>Both <code>s1</code> and <code>s2</code>'s destructors, independently</td>
+<td>Reference count reaches zero (runtime-tracked)</td>
+<td><code>s2</code>'s single <code>Drop</code>, when <code>s2</code> goes out of scope</td>
+</tr>
+<tr>
+<td>When is this checked</td>
+<td>Not checked — it's just what assignment does</td>
+<td>Not checked — reference counting is automatic</td>
+<td><strong>Compile time</strong> — the borrow checker</td>
+</tr>
+</tbody>
+</table>
+<h3 id="worked-example-131-a-real-genuinely-captured-move-violation">Worked Example 1.3.1 — a real, genuinely captured move violation<a class="headerlink" href="#worked-example-131-a-real-genuinely-captured-move-violation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kd">let</span><span class="w"> </span><span class="n">s1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">String</span><span class="p">::</span><span class="n">from</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">);</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="kd">let</span><span class="w"> </span><span class="n">s2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">s1</span><span class="p">;</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;s1 = {}, s2 = {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">s1</span><span class="p">,</span><span class="w"> </span><span class="n">s2</span><span class="p">);</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>rustc<span class="w"> </span>03_move_error.rs
+</code></pre></div>
+<p>Genuinely compiled (the complete file, <code>03_move_error.rs</code>, is not included in this chapter's Complete Runnable Code section below, since it deliberately does not compile):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>error[E0382]: borrow of moved value: `s1`
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a> --&gt; 03_move_error.rs:4:34
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>  |
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>2 |     let s1 = String::from(&quot;hello&quot;);
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>  |         -- move occurs because `s1` has type `String`, which does not implement the `Copy` trait
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>3 |     let s2 = s1;
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>  |              -- value moved here
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>4 |     println!(&quot;s1 = {}, s2 = {}&quot;, s1, s2);
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>  |                                  ^^ value borrowed here after move
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>  |
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>help: consider cloning the value if the performance cost is acceptable
+<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a>  |
+<a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a>3 |     let s2 = s1.clone();
+<a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a>  |                ++++++++
+<a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a>
+<a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a>error: aborting due to 1 previous error
+<a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a>
+<a id="__codelineno-14-18" name="__codelineno-14-18" href="#__codelineno-14-18"></a>For more information about this error, try `rustc --explain E0382`.
+</code></pre></div>
+<p>This is not a warning and not a lint — <code>rustc</code> refuses to produce a binary at all. Note what the compiler is actually tracking: not the <em>value</em> <code>"hello"</code>, but the <em>binding</em> <code>s1</code> — after line 3, <code>s1</code> is a name the compiler considers dead, regardless of what bytes are still sitting in memory underneath it.</p>
+<h3 id="worked-example-132-the-fix-an-explicit-independent-copy">Worked Example 1.3.2 — the fix: an explicit, independent copy<a class="headerlink" href="#worked-example-132-the-fix-an-explicit-independent-copy" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="kd">let</span><span class="w"> </span><span class="n">s1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">String</span><span class="p">::</span><span class="n">from</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">);</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="kd">let</span><span class="w"> </span><span class="n">s2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">s1</span><span class="p">.</span><span class="n">clone</span><span class="p">();</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;s1 = {}, s2 = {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">s1</span><span class="p">,</span><span class="w"> </span><span class="n">s2</span><span class="p">);</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>rustc<span class="w"> </span>-O<span class="w"> </span>03b_move_fixed.rs<span class="w"> </span>-o<span class="w"> </span>03b_move_fixed
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>./03b_move_fixed
+</code></pre></div>
+<p>Genuinely compiled and run — <code>03b_move_fixed.rs</code> further below:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>s1 = hello, s2 = hello
+</code></pre></div>
+<p><code>.clone()</code> is the explicit, visible opt-in to what C++ does <em>implicitly</em> on every <code>std::string</code> assignment: a real heap allocation and a real byte-for-byte copy, so that <code>s1</code> and <code>s2</code> become two fully independent owners. The compiler's own suggested fix in Worked Example 1.3.1's error message is exactly this line — Rust doesn't hide the cost of a deep copy behind ordinary-looking assignment syntax the way C++ does; if you want the copy, you write the word that means "copy."</p>
+<h2 id="14-ownership-at-a-function-call-boundary-move-vs-borrow-foundational">1.4 Ownership at a Function Call Boundary: Move vs. Borrow <code>[FOUNDATIONAL]</code><a class="headerlink" href="#14-ownership-at-a-function-call-boundary-move-vs-borrow-foundational" title="Permanent link">&para;</a></h2>
+<h3 id="intuition_3">Intuition<a class="headerlink" href="#intuition_3" title="Permanent link">&para;</a></h3>
+<p>Handing a physical package to a courier and handing them a photograph of it are different transactions with different consequences. Hand over the package itself, and it's the courier's now — you can't go retrieve it from your own shelf afterward, because it isn't there anymore. Hand over a photograph, and you both still have full use of the original; the courier can look at it, but the package never left your possession. Passing a value into a Rust function by its type (<code>fn f(s: String)</code>) is the first transaction — it's a move, exactly like Worked Example 1.3.1's assignment, just across a function call instead of a <code>let</code>. Passing a reference (<code>fn f(s: &amp;String)</code>) is the second — the function can read (or, with <code>&amp;mut String</code>, modify) the value, but ownership never leaves the caller.</p>
+<h3 id="background_3">Background<a class="headerlink" href="#background_3" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Owned parameter (<code>s: String</code>)</th>
+<th>Shared reference (<code>s: &amp;String</code>)</th>
+<th>Exclusive reference (<code>s: &amp;mut String</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ownership transfers to the function?</td>
+<td>Yes — a move</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Caller can still use the original after the call?</td>
+<td>No</td>
+<td>Yes</td>
+<td>Only after the borrow ends</td>
+</tr>
+<tr>
+<td>Can the function modify the value?</td>
+<td>Yes, it owns it now</td>
+<td>No (compile error to try)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>How many of these can exist on the same value at once</td>
+<td>N/A (ownership is exclusive by definition)</td>
+<td>Any number, simultaneously</td>
+<td>Exactly one, and no shared references at the same time</td>
+</tr>
+</tbody>
+</table>
+<p>The last row is the rule the Rust community calls "aliasing XOR mutability," and it's enforced by the same compiler pass — the <strong>borrow checker</strong> — that caught Worked Example 1.3.1's use-after-move. It isn't a separate feature bolted on top of ownership; a <code>&amp;mut</code> reference is really a temporary, exclusive loan of the value's single ownership slot, checked with the same rigor.</p>
+<h3 id="worked-example-141-a-real-genuinely-captured-call-boundary-violation">Worked Example 1.4.1 — a real, genuinely captured call-boundary violation<a class="headerlink" href="#worked-example-141-a-real-genuinely-captured-call-boundary-violation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="k">fn</span><span class="w"> </span><span class="nf">takes_ownership</span><span class="p">(</span><span class="n">s</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;takes_ownership got: {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">);</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="p">}</span>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="k">fn</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">String</span><span class="p">::</span><span class="n">from</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">);</span>
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="w">    </span><span class="n">takes_ownership</span><span class="p">(</span><span class="n">s</span><span class="p">);</span>
+<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;s = {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">);</span>
+<a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>rustc<span class="w"> </span>04b_use_after_move.rs
+</code></pre></div>
+<p>Genuinely compiled (this file is not included in the Complete Runnable Code section below, since it deliberately does not compile):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>error[E0382]: borrow of moved value: `s`
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a> --&gt; 04b_use_after_move.rs:8:24
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>  |
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>6 |     let s = String::from(&quot;hello&quot;);
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>  |         - move occurs because `s` has type `String`, which does not implement the `Copy` trait
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>7 |     takes_ownership(s);
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>  |                     - value moved here
+<a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a>8 |     println!(&quot;s = {}&quot;, s);
+<a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a>  |                        ^ value borrowed here after move
+<a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a>  |
+<a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a>note: consider changing this parameter type in function `takes_ownership` to borrow instead if owning the value isn&#39;t necessary
+<a id="__codelineno-20-12" name="__codelineno-20-12" href="#__codelineno-20-12"></a> --&gt; 04b_use_after_move.rs:1:23
+<a id="__codelineno-20-13" name="__codelineno-20-13" href="#__codelineno-20-13"></a>  |
+<a id="__codelineno-20-14" name="__codelineno-20-14" href="#__codelineno-20-14"></a>1 | fn takes_ownership(s: String) {
+<a id="__codelineno-20-15" name="__codelineno-20-15" href="#__codelineno-20-15"></a>  |    ---------------    ^^^^^^ this parameter takes ownership of the value
+<a id="__codelineno-20-16" name="__codelineno-20-16" href="#__codelineno-20-16"></a>  |    |
+<a id="__codelineno-20-17" name="__codelineno-20-17" href="#__codelineno-20-17"></a>  |    in this function
+<a id="__codelineno-20-18" name="__codelineno-20-18" href="#__codelineno-20-18"></a>help: consider cloning the value if the performance cost is acceptable
+<a id="__codelineno-20-19" name="__codelineno-20-19" href="#__codelineno-20-19"></a>  |
+<a id="__codelineno-20-20" name="__codelineno-20-20" href="#__codelineno-20-20"></a>7 |     takes_ownership(s.clone());
+<a id="__codelineno-20-21" name="__codelineno-20-21" href="#__codelineno-20-21"></a>  |                      ++++++++
+<a id="__codelineno-20-22" name="__codelineno-20-22" href="#__codelineno-20-22"></a>
+<a id="__codelineno-20-23" name="__codelineno-20-23" href="#__codelineno-20-23"></a>error: aborting due to 1 previous error
+<a id="__codelineno-20-24" name="__codelineno-20-24" href="#__codelineno-20-24"></a>
+<a id="__codelineno-20-25" name="__codelineno-20-25" href="#__codelineno-20-25"></a>For more information about this error, try `rustc --explain E0382`.
+</code></pre></div>
+<p>This is caught during the same compilation pass that resolves ordinary type-checking, exactly as Worked Example 1.3.1's error was — <code>takes_ownership(s)</code> genuinely consumes <code>s</code>, and the compiler's own suggested fix (a note pointing at the function signature, distinct from the <code>.clone()</code> <code>help</code>) shows it understands <em>why</em>: change the parameter to borrow instead, if ownership was never actually needed.</p>
+<h3 id="worked-example-142-the-fix-borrow-first-move-last">Worked Example 1.4.2 — the fix: borrow first, move last<a class="headerlink" href="#worked-example-142-the-fix-borrow-first-move-last" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="k">fn</span><span class="w"> </span><span class="nf">takes_ownership</span><span class="p">(</span><span class="n">s</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;takes_ownership got: {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">);</span>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="p">}</span>
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="k">fn</span><span class="w"> </span><span class="nf">borrows</span><span class="p">(</span><span class="n">s</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nb">String</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;borrows got: {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">);</span>
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a><span class="p">}</span>
+<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>
+<a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a><span class="k">fn</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">String</span><span class="p">::</span><span class="n">from</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">);</span>
+<a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a><span class="w">    </span><span class="n">borrows</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s</span><span class="p">);</span>
+<a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;still valid after borrow: {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">);</span>
+<a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a><span class="w">    </span><span class="n">takes_ownership</span><span class="p">(</span><span class="n">s</span><span class="p">);</span>
+<a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;s moved into takes_ownership; still usable here&quot;</span><span class="p">);</span>
+<a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>rustc<span class="w"> </span>-O<span class="w"> </span>04_ownership_functions.rs<span class="w"> </span>-o<span class="w"> </span>04_ownership_functions
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>./04_ownership_functions
+</code></pre></div>
+<p>Genuinely compiled and run — <code>04_ownership_functions.rs</code> further below:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>borrows got: hello
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>still valid after borrow: hello
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>takes_ownership got: hello
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>s moved into takes_ownership; still usable here
+</code></pre></div>
+<p><code>borrows(&amp;s)</code> takes a reference, so <code>s</code> is still valid on the next line — genuinely printed as <code>"still valid after borrow: hello"</code>. Only the final <code>takes_ownership(s)</code> actually moves <code>s</code>, and by that point in the function nothing needs <code>s</code> afterward, so the compiler has nothing to object to. The rule from Worked Example 1.4.1 hasn't changed; this version simply never violates it.</p>
+<blockquote>
+<p><code>[COMMON TRAP]</code> In C++, growing a <code>std::vector</code> that has a live pointer or iterator into it — say, by calling <code>.push_back()</code> after taking <code>&amp;v[0]</code> — compiles without complaint and is <strong>undefined behavior</strong> if the vector happens to reallocate its backing storage, since the old pointer now dangles into freed memory. Rust's borrow checker rejects this pattern categorically, at compile time, every time, regardless of whether that particular <code>push</code> would have actually triggered a reallocation:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">];</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="kd">let</span><span class="w"> </span><span class="n">first</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="n">v</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;first = {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">first</span><span class="p">);</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>rustc<span class="w"> </span>07_borrow_conflict.rs
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>error[E0502]: cannot borrow `v` as mutable because it is also borrowed as immutable
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a> --&gt; 07_borrow_conflict.rs:4:5
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>  |
+<a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a>3 |     let first = &amp;v[0];
+<a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a>  |                  - immutable borrow occurs here
+<a id="__codelineno-26-6" name="__codelineno-26-6" href="#__codelineno-26-6"></a>4 |     v.push(4);
+<a id="__codelineno-26-7" name="__codelineno-26-7" href="#__codelineno-26-7"></a>  |     ^^^^^^^^^ mutable borrow occurs here
+<a id="__codelineno-26-8" name="__codelineno-26-8" href="#__codelineno-26-8"></a>5 |     println!(&quot;first = {}&quot;, first);
+<a id="__codelineno-26-9" name="__codelineno-26-9" href="#__codelineno-26-9"></a>  |                            ----- immutable borrow later used here
+<a id="__codelineno-26-10" name="__codelineno-26-10" href="#__codelineno-26-10"></a>
+<a id="__codelineno-26-11" name="__codelineno-26-11" href="#__codelineno-26-11"></a>error: aborting due to 1 previous error
+<a id="__codelineno-26-12" name="__codelineno-26-12" href="#__codelineno-26-12"></a>
+<a id="__codelineno-26-13" name="__codelineno-26-13" href="#__codelineno-26-13"></a>For more information about this error, try `rustc --explain E0502`.
+</code></pre></div>
+<p><code>v.push(4)</code> needs <code>&amp;mut v</code> (it might reallocate, which touches every element), and <code>first</code> is a live <code>&amp;v[0]</code> at that point — the exact "one mutable reference, XOR any number of shared references" rule from this section's Background table, caught here for a <code>Vec</code> instead of a <code>String</code>. This entire bug class — a reference silently outliving the reallocation that invalidated it — is a real, well-known category of memory-safety bug in C++; Rust doesn't detect it at runtime, it makes the program that could produce it fail to compile in the first place.</p>
+</blockquote>
+<h2 id="15-fixed-size-arrays-and-compiler-enforced-alignment">1.5 Fixed-Size Arrays and Compiler-Enforced Alignment<a class="headerlink" href="#15-fixed-size-arrays-and-compiler-enforced-alignment" title="Permanent link">&para;</a></h2>
+<h3 id="intuition_4">Intuition<a class="headerlink" href="#intuition_4" title="Permanent link">&para;</a></h3>
+<p>A Rust <code>[f32; 4]</code> is, like CUDA's <code>float4</code>, one type the compiler knows the exact size of — 16 bytes, four <code>f32</code>s laid out contiguously, with a genuine <code>size_of</code>/<code>align_of</code> the compiler will report on request. Where it <em>doesn't</em> match <code>float4</code> is alignment: CUDA's built-in vector types carry a compiler-enforced 16-byte alignment specifically so hardware can fetch all four floats in one aligned memory transaction. A plain Rust array gets no such upgrade automatically — its alignment defaults to its element type's alignment, 4 bytes for <code>f32</code>, whether the array holds one element or a hundred. Getting <code>float4</code>'s actual alignment guarantee in Rust means asking for it explicitly, with <code>#[repr(align(16))]</code> on a wrapper type.</p>
+<h3 id="background_4">Background<a class="headerlink" href="#background_4" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th><code>size_of</code></th>
+<th><code>align_of</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>f32</code></td>
+<td>4</td>
+<td>4</td>
+</tr>
+<tr>
+<td><code>[f32; 2]</code></td>
+<td>8</td>
+<td>4</td>
+</tr>
+<tr>
+<td><code>[f32; 4]</code></td>
+<td>16</td>
+<td><strong>4</strong> — not automatically upgraded</td>
+</tr>
+<tr>
+<td><code>#[repr(C, align(16))] struct F32x4 { x: f32, y: f32, z: f32, w: f32 }</code></td>
+<td>16</td>
+<td><strong>16</strong> — genuinely 16, once asked for explicitly</td>
+</tr>
+</tbody>
+</table>
+<h3 id="worked-example-151-genuinely-measured-not-assumed">Worked Example 1.5.1 — genuinely measured, not assumed<a class="headerlink" href="#worked-example-151-genuinely-measured-not-assumed" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="cp">#[repr(C, align(16))]</span>
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="k">struct</span><span class="w"> </span><span class="nc">F32x4</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">x</span><span class="p">:</span><span class="w"> </span><span class="kt">f32</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">:</span><span class="w"> </span><span class="kt">f32</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">:</span><span class="w"> </span><span class="kt">f32</span><span class="p">,</span><span class="w"> </span><span class="n">w</span><span class="p">:</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a>
+<a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a><span class="k">fn</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;size_of::&lt;f32&gt;()  = {}, align_of::&lt;f32&gt;()  = {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">mem</span><span class="p">::</span><span class="n">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="kt">f32</span><span class="o">&gt;</span><span class="p">(),</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">mem</span><span class="p">::</span><span class="n">align_of</span><span class="p">::</span><span class="o">&lt;</span><span class="kt">f32</span><span class="o">&gt;</span><span class="p">());</span>
+<a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;size_of::&lt;[f32;4]&gt;() = {}, align_of::&lt;[f32;4]&gt;() = {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">mem</span><span class="p">::</span><span class="n">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="p">[</span><span class="kt">f32</span><span class="p">;</span><span class="mi">4</span><span class="p">]</span><span class="o">&gt;</span><span class="p">(),</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">mem</span><span class="p">::</span><span class="n">align_of</span><span class="p">::</span><span class="o">&lt;</span><span class="p">[</span><span class="kt">f32</span><span class="p">;</span><span class="mi">4</span><span class="p">]</span><span class="o">&gt;</span><span class="p">());</span>
+<a id="__codelineno-27-7" name="__codelineno-27-7" href="#__codelineno-27-7"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;size_of::&lt;F32x4&gt;() = {}, align_of::&lt;F32x4&gt;() = {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">mem</span><span class="p">::</span><span class="n">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="n">F32x4</span><span class="o">&gt;</span><span class="p">(),</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">mem</span><span class="p">::</span><span class="n">align_of</span><span class="p">::</span><span class="o">&lt;</span><span class="n">F32x4</span><span class="o">&gt;</span><span class="p">());</span>
+<a id="__codelineno-27-8" name="__codelineno-27-8" href="#__codelineno-27-8"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">v4</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">F32x4</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">x</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">:</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">:</span><span class="w"> </span><span class="mf">3.0</span><span class="p">,</span><span class="w"> </span><span class="n">w</span><span class="p">:</span><span class="w"> </span><span class="mf">4.0</span><span class="w"> </span><span class="p">};</span>
+<a id="__codelineno-27-9" name="__codelineno-27-9" href="#__codelineno-27-9"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;F32x4 fields: x={} y={} z={} w={}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">v4</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">v4</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">v4</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="n">v4</span><span class="p">.</span><span class="n">w</span><span class="p">);</span>
+<a id="__codelineno-27-10" name="__codelineno-27-10" href="#__codelineno-27-10"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>rustc<span class="w"> </span>-O<span class="w"> </span>05_layout_types.rs<span class="w"> </span>-o<span class="w"> </span>05_layout_types
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>./05_layout_types
+</code></pre></div>
+<p>Genuinely compiled and run — <code>05_layout_types.rs</code> further below:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>size_of::&lt;f32&gt;()  = 4, align_of::&lt;f32&gt;()  = 4
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a>size_of::&lt;[f32;2]&gt;() = 8, align_of::&lt;[f32;2]&gt;() = 4
+<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a>size_of::&lt;[f32;4]&gt;() = 16, align_of::&lt;[f32;4]&gt;() = 4
+<a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a>size_of::&lt;F32x2&gt;() = 8, align_of::&lt;F32x2&gt;() = 4
+<a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a>size_of::&lt;F32x4&gt;() = 16, align_of::&lt;F32x4&gt;() = 16
+<a id="__codelineno-29-6" name="__codelineno-29-6" href="#__codelineno-29-6"></a>plain array: [1.0, 2.0, 3.0, 4.0]
+<a id="__codelineno-29-7" name="__codelineno-29-7" href="#__codelineno-29-7"></a>F32x4 fields: x=1 y=2 z=3 w=4
+</code></pre></div>
+<p><code>align_of::&lt;[f32;4]&gt;()</code> is genuinely <code>4</code>, not <code>16</code> — the same result you'd get from a bare <code>f32</code>, because a plain array's alignment is always its element type's alignment, with no size-based upgrade. <code>F32x4</code>, with <code>#[repr(align(16))]</code> spelled out explicitly, genuinely reports <code>16</code>. This isn't a cosmetic difference: Part 0 Chapter 5's SIMD intrinsics and, much later, Part 1's <code>Tensor</code> buffers both need a real 16-byte (or wider) alignment guarantee to issue aligned vector loads — and in Rust, unlike CUDA, that guarantee is something you ask for by name, not something a <code>[f32; 4]</code> gives you for free.</p>
+<h2 id="complete-runnable-code">Complete Runnable Code<a class="headerlink" href="#complete-runnable-code" title="Permanent link">&para;</a></h2>
+<h3 id="file-01_stack_typesrs">File: <code>01_stack_types.rs</code><a class="headerlink" href="#file-01_stack_typesrs" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="k">fn</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">x</span><span class="p">:</span><span class="w"> </span><span class="kt">i32</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">42</span><span class="p">;</span>
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">y</span><span class="p">:</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">3.14159</span><span class="p">;</span>
+<a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">z</span><span class="p">:</span><span class="w"> </span><span class="kt">f64</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">2.71828</span><span class="p">;</span>
+<a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;x={} y={} z={}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">);</span>
+<a id="__codelineno-30-6" name="__codelineno-30-6" href="#__codelineno-30-6"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span>
+<a id="__codelineno-30-7" name="__codelineno-30-7" href="#__codelineno-30-7"></a><span class="w">        </span><span class="s">&quot;size_of(i32)={} size_of(f32)={} size_of(f64)={}&quot;</span><span class="p">,</span>
+<a id="__codelineno-30-8" name="__codelineno-30-8" href="#__codelineno-30-8"></a><span class="w">        </span><span class="n">std</span><span class="p">::</span><span class="n">mem</span><span class="p">::</span><span class="n">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="kt">i32</span><span class="o">&gt;</span><span class="p">(),</span>
+<a id="__codelineno-30-9" name="__codelineno-30-9" href="#__codelineno-30-9"></a><span class="w">        </span><span class="n">std</span><span class="p">::</span><span class="n">mem</span><span class="p">::</span><span class="n">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="kt">f32</span><span class="o">&gt;</span><span class="p">(),</span>
+<a id="__codelineno-30-10" name="__codelineno-30-10" href="#__codelineno-30-10"></a><span class="w">        </span><span class="n">std</span><span class="p">::</span><span class="n">mem</span><span class="p">::</span><span class="n">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="kt">f64</span><span class="o">&gt;</span><span class="p">()</span>
+<a id="__codelineno-30-11" name="__codelineno-30-11" href="#__codelineno-30-11"></a><span class="w">    </span><span class="p">);</span>
+<a id="__codelineno-30-12" name="__codelineno-30-12" href="#__codelineno-30-12"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;x bits (two&#39;s complement, 32-bit): {:032b}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">);</span>
+<a id="__codelineno-30-13" name="__codelineno-30-13" href="#__codelineno-30-13"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;y bits (IEEE-754 binary32):        {:032b}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">.</span><span class="n">to_bits</span><span class="p">());</span>
+<a id="__codelineno-30-14" name="__codelineno-30-14" href="#__codelineno-30-14"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;z bits (IEEE-754 binary64):        {:064b}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">.</span><span class="n">to_bits</span><span class="p">());</span>
+<a id="__codelineno-30-15" name="__codelineno-30-15" href="#__codelineno-30-15"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>rustc<span class="w"> </span>-O<span class="w"> </span>01_stack_types.rs<span class="w"> </span>-o<span class="w"> </span>01_stack_types
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a>./01_stack_types
+</code></pre></div>
+<h3 id="file-02_type_inferencers">File: <code>02_type_inference.rs</code><a class="headerlink" href="#file-02_type_inferencers" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="k">fn</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span>
+<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">5.5</span><span class="p">;</span>
+<a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span>
+<a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a><span class="w">        </span><span class="s">&quot;a={} (size {}), b={} (size {}), c={} (size {})&quot;</span><span class="p">,</span>
+<a id="__codelineno-32-7" name="__codelineno-32-7" href="#__codelineno-32-7"></a><span class="w">        </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">mem</span><span class="p">::</span><span class="n">size_of_val</span><span class="p">(</span><span class="o">&amp;</span><span class="n">a</span><span class="p">),</span>
+<a id="__codelineno-32-8" name="__codelineno-32-8" href="#__codelineno-32-8"></a><span class="w">        </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">mem</span><span class="p">::</span><span class="n">size_of_val</span><span class="p">(</span><span class="o">&amp;</span><span class="n">b</span><span class="p">),</span>
+<a id="__codelineno-32-9" name="__codelineno-32-9" href="#__codelineno-32-9"></a><span class="w">        </span><span class="n">c</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">mem</span><span class="p">::</span><span class="n">size_of_val</span><span class="p">(</span><span class="o">&amp;</span><span class="n">c</span><span class="p">)</span>
+<a id="__codelineno-32-10" name="__codelineno-32-10" href="#__codelineno-32-10"></a><span class="w">    </span><span class="p">);</span>
+<a id="__codelineno-32-11" name="__codelineno-32-11" href="#__codelineno-32-11"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>rustc<span class="w"> </span>-O<span class="w"> </span>02_type_inference.rs<span class="w"> </span>-o<span class="w"> </span>02_type_inference
+<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a>./02_type_inference
+</code></pre></div>
+<h3 id="file-03b_move_fixedrs">File: <code>03b_move_fixed.rs</code><a class="headerlink" href="#file-03b_move_fixedrs" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="k">fn</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">s1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">String</span><span class="p">::</span><span class="n">from</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">);</span>
+<a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">s2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">s1</span><span class="p">.</span><span class="n">clone</span><span class="p">();</span>
+<a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;s1 = {}, s2 = {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">s1</span><span class="p">,</span><span class="w"> </span><span class="n">s2</span><span class="p">);</span>
+<a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>rustc<span class="w"> </span>-O<span class="w"> </span>03b_move_fixed.rs<span class="w"> </span>-o<span class="w"> </span>03b_move_fixed
+<a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a>./03b_move_fixed
+</code></pre></div>
+<h3 id="file-04_ownership_functionsrs">File: <code>04_ownership_functions.rs</code><a class="headerlink" href="#file-04_ownership_functionsrs" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="k">fn</span><span class="w"> </span><span class="nf">takes_ownership</span><span class="p">(</span><span class="n">s</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;takes_ownership got: {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">);</span>
+<a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a><span class="p">}</span>
+<a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a>
+<a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a><span class="k">fn</span><span class="w"> </span><span class="nf">borrows</span><span class="p">(</span><span class="n">s</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nb">String</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-36-6" name="__codelineno-36-6" href="#__codelineno-36-6"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;borrows got: {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">);</span>
+<a id="__codelineno-36-7" name="__codelineno-36-7" href="#__codelineno-36-7"></a><span class="p">}</span>
+<a id="__codelineno-36-8" name="__codelineno-36-8" href="#__codelineno-36-8"></a>
+<a id="__codelineno-36-9" name="__codelineno-36-9" href="#__codelineno-36-9"></a><span class="k">fn</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-36-10" name="__codelineno-36-10" href="#__codelineno-36-10"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">String</span><span class="p">::</span><span class="n">from</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">);</span>
+<a id="__codelineno-36-11" name="__codelineno-36-11" href="#__codelineno-36-11"></a><span class="w">    </span><span class="n">borrows</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s</span><span class="p">);</span>
+<a id="__codelineno-36-12" name="__codelineno-36-12" href="#__codelineno-36-12"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;still valid after borrow: {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">);</span>
+<a id="__codelineno-36-13" name="__codelineno-36-13" href="#__codelineno-36-13"></a><span class="w">    </span><span class="n">takes_ownership</span><span class="p">(</span><span class="n">s</span><span class="p">);</span>
+<a id="__codelineno-36-14" name="__codelineno-36-14" href="#__codelineno-36-14"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;s moved into takes_ownership; still usable here&quot;</span><span class="p">);</span>
+<a id="__codelineno-36-15" name="__codelineno-36-15" href="#__codelineno-36-15"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>rustc<span class="w"> </span>-O<span class="w"> </span>04_ownership_functions.rs<span class="w"> </span>-o<span class="w"> </span>04_ownership_functions
+<a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a>./04_ownership_functions
+</code></pre></div>
+<h3 id="file-05_layout_typesrs">File: <code>05_layout_types.rs</code><a class="headerlink" href="#file-05_layout_typesrs" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a><span class="cp">#[repr(C)]</span>
+<a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a><span class="k">struct</span><span class="w"> </span><span class="nc">F32x2</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">x</span><span class="p">:</span><span class="w"> </span><span class="kt">f32</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">:</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a>
+<a id="__codelineno-38-4" name="__codelineno-38-4" href="#__codelineno-38-4"></a><span class="cp">#[repr(C, align(16))]</span>
+<a id="__codelineno-38-5" name="__codelineno-38-5" href="#__codelineno-38-5"></a><span class="k">struct</span><span class="w"> </span><span class="nc">F32x4</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">x</span><span class="p">:</span><span class="w"> </span><span class="kt">f32</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">:</span><span class="w"> </span><span class="kt">f32</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">:</span><span class="w"> </span><span class="kt">f32</span><span class="p">,</span><span class="w"> </span><span class="n">w</span><span class="p">:</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-38-6" name="__codelineno-38-6" href="#__codelineno-38-6"></a>
+<a id="__codelineno-38-7" name="__codelineno-38-7" href="#__codelineno-38-7"></a><span class="k">fn</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-38-8" name="__codelineno-38-8" href="#__codelineno-38-8"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;size_of::&lt;f32&gt;()  = {}, align_of::&lt;f32&gt;()  = {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">mem</span><span class="p">::</span><span class="n">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="kt">f32</span><span class="o">&gt;</span><span class="p">(),</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">mem</span><span class="p">::</span><span class="n">align_of</span><span class="p">::</span><span class="o">&lt;</span><span class="kt">f32</span><span class="o">&gt;</span><span class="p">());</span>
+<a id="__codelineno-38-9" name="__codelineno-38-9" href="#__codelineno-38-9"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;size_of::&lt;[f32;2]&gt;() = {}, align_of::&lt;[f32;2]&gt;() = {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">mem</span><span class="p">::</span><span class="n">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="p">[</span><span class="kt">f32</span><span class="p">;</span><span class="mi">2</span><span class="p">]</span><span class="o">&gt;</span><span class="p">(),</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">mem</span><span class="p">::</span><span class="n">align_of</span><span class="p">::</span><span class="o">&lt;</span><span class="p">[</span><span class="kt">f32</span><span class="p">;</span><span class="mi">2</span><span class="p">]</span><span class="o">&gt;</span><span class="p">());</span>
+<a id="__codelineno-38-10" name="__codelineno-38-10" href="#__codelineno-38-10"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;size_of::&lt;[f32;4]&gt;() = {}, align_of::&lt;[f32;4]&gt;() = {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">mem</span><span class="p">::</span><span class="n">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="p">[</span><span class="kt">f32</span><span class="p">;</span><span class="mi">4</span><span class="p">]</span><span class="o">&gt;</span><span class="p">(),</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">mem</span><span class="p">::</span><span class="n">align_of</span><span class="p">::</span><span class="o">&lt;</span><span class="p">[</span><span class="kt">f32</span><span class="p">;</span><span class="mi">4</span><span class="p">]</span><span class="o">&gt;</span><span class="p">());</span>
+<a id="__codelineno-38-11" name="__codelineno-38-11" href="#__codelineno-38-11"></a>
+<a id="__codelineno-38-12" name="__codelineno-38-12" href="#__codelineno-38-12"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;size_of::&lt;F32x2&gt;() = {}, align_of::&lt;F32x2&gt;() = {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">mem</span><span class="p">::</span><span class="n">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="n">F32x2</span><span class="o">&gt;</span><span class="p">(),</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">mem</span><span class="p">::</span><span class="n">align_of</span><span class="p">::</span><span class="o">&lt;</span><span class="n">F32x2</span><span class="o">&gt;</span><span class="p">());</span>
+<a id="__codelineno-38-13" name="__codelineno-38-13" href="#__codelineno-38-13"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;size_of::&lt;F32x4&gt;() = {}, align_of::&lt;F32x4&gt;() = {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">mem</span><span class="p">::</span><span class="n">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="n">F32x4</span><span class="o">&gt;</span><span class="p">(),</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">mem</span><span class="p">::</span><span class="n">align_of</span><span class="p">::</span><span class="o">&lt;</span><span class="n">F32x4</span><span class="o">&gt;</span><span class="p">());</span>
+<a id="__codelineno-38-14" name="__codelineno-38-14" href="#__codelineno-38-14"></a>
+<a id="__codelineno-38-15" name="__codelineno-38-15" href="#__codelineno-38-15"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">v</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="kt">f32</span><span class="p">;</span><span class="w"> </span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">3.0</span><span class="p">,</span><span class="w"> </span><span class="mf">4.0</span><span class="p">];</span>
+<a id="__codelineno-38-16" name="__codelineno-38-16" href="#__codelineno-38-16"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;plain array: {:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+<a id="__codelineno-38-17" name="__codelineno-38-17" href="#__codelineno-38-17"></a>
+<a id="__codelineno-38-18" name="__codelineno-38-18" href="#__codelineno-38-18"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">v4</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">F32x4</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">x</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">:</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">:</span><span class="w"> </span><span class="mf">3.0</span><span class="p">,</span><span class="w"> </span><span class="n">w</span><span class="p">:</span><span class="w"> </span><span class="mf">4.0</span><span class="w"> </span><span class="p">};</span>
+<a id="__codelineno-38-19" name="__codelineno-38-19" href="#__codelineno-38-19"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;F32x4 fields: x={} y={} z={} w={}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">v4</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">v4</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">v4</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="n">v4</span><span class="p">.</span><span class="n">w</span><span class="p">);</span>
+<a id="__codelineno-38-20" name="__codelineno-38-20" href="#__codelineno-38-20"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a>rustc<span class="w"> </span>-O<span class="w"> </span>05_layout_types.rs<span class="w"> </span>-o<span class="w"> </span>05_layout_types
+<a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a>./05_layout_types
+</code></pre></div>
+<h3 id="file-06_explicit_castrs">File: <code>06_explicit_cast.rs</code><a class="headerlink" href="#file-06_explicit_castrs" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a><span class="k">fn</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">precise</span><span class="p">:</span><span class="w"> </span><span class="kt">f64</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">3.14159265358979</span><span class="p">;</span>
+<a id="__codelineno-40-3" name="__codelineno-40-3" href="#__codelineno-40-3"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">narrowed</span><span class="p">:</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">precise</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">;</span>
+<a id="__codelineno-40-4" name="__codelineno-40-4" href="#__codelineno-40-4"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;precise={} narrowed={}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">precise</span><span class="p">,</span><span class="w"> </span><span class="n">narrowed</span><span class="p">);</span>
+<a id="__codelineno-40-5" name="__codelineno-40-5" href="#__codelineno-40-5"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a>rustc<span class="w"> </span>-O<span class="w"> </span>06_explicit_cast.rs<span class="w"> </span>-o<span class="w"> </span>06_explicit_cast
+<a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a>./06_explicit_cast
+</code></pre></div>
+<h3 id="file-07_borrow_conflictrs">File: <code>07_borrow_conflict.rs</code><a class="headerlink" href="#file-07_borrow_conflictrs" title="Permanent link">&para;</a></h3>
+<p>This file is intentionally not included here in runnable form — it exists only to demonstrate a compile-time rejection, and is shown in full inside this chapter's <code>[COMMON TRAP]</code> callout in Section 1.4.</p>
+<h2 id="chapter-summary">Chapter Summary<a class="headerlink" href="#chapter-summary" title="Permanent link">&para;</a></h2>
+<p>A type in Rust is exactly the compile-time promise it is in any statically typed language — <code>let x: i32 = 42;</code> reserves 4 bytes and fixes their meaning before the program runs, whether you write the type explicitly or let Rust's inference deduce it from the initializer, in sharp contrast to Python, where a name has no type of its own and simply points at whichever object it was last assigned. What Rust adds on top of ordinary static typing, with no equivalent in C++ or Python, is a second compile-time-enforced axis: <strong>ownership</strong>. Every value has exactly one owner; assigning, passing by value, or returning a non-<code>Copy</code> value moves ownership rather than copying it, and the compiler — not a runtime check, not a convention — refuses to compile any later use of a binding whose value has moved away, the same rigor it applies to an ordinary type mismatch. Passing <code>&amp;T</code> or <code>&amp;mut T</code> instead of <code>T</code> borrows a value without transferring ownership, governed by a single rule enforced everywhere in the language at once: any number of shared (<code>&amp;</code>) borrows, or exactly one exclusive (<code>&amp;mut</code>) borrow, never both at the same time — the rule that turns C++'s classic "pointer outlived a reallocation" bug class into a compile error instead of undefined behavior. Fixed-size arrays like <code>[f32; 4]</code> are, like CUDA's <code>float4</code>, single types with a compiler-known size — but unlike <code>float4</code>, their alignment is <em>not</em> automatically upgraded for SIMD-friendly access; that guarantee has to be requested explicitly with <code>#[repr(align(16))]</code>, genuinely confirmed here with <code>size_of</code>/<code>align_of</code> rather than assumed.</p>
+<h2 id="self-check-questions">Self-Check Questions<a class="headerlink" href="#self-check-questions" title="Permanent link">&para;</a></h2>
+<ol>
+<li><code>let a = 10;</code> in Rust and <code>a = 10</code> in Python both omit an explicit type annotation. What question distinguishes the two cases, and why does that question have a different answer for each?</li>
+<li><code>let s2 = s1;</code> for a <code>String</code> behaves differently in Rust than the equivalent-looking assignment does in C++ or Python. Describe what happens to <code>s1</code>'s data in all three languages, and specifically what happens to the <em>name</em> <code>s1</code> in each.</li>
+<li>Why does <code>takes_ownership(s)</code> followed by <code>println!("{}", s)</code> fail to compile, while <code>borrows(&amp;s)</code> followed by the same <code>println!("{}", s)</code> compiles cleanly — even though both function calls look similar from the call site?</li>
+<li>In C++, taking a pointer to a <code>std::vector</code>'s first element and then calling <code>.push_back()</code> on the same vector compiles without any error and is undefined behavior if the vector reallocates. What does the equivalent Rust pattern do instead, and at what point does it fail?</li>
+<li><code>align_of::&lt;[f32; 4]&gt;()</code> reports <code>4</code>, not <code>16</code>, even though <code>size_of::&lt;[f32; 4]&gt;()</code> is <code>16</code>. Explain, in one or two sentences, why Rust doesn't upgrade a plain array's alignment automatically the way CUDA's <code>float4</code> does, and what has to be written to get that guarantee explicitly.</li>
+</ol>
+<h2 id="where-we-go-next">Where We Go Next<a class="headerlink" href="#where-we-go-next" title="Permanent link">&para;</a></h2>
+<p>Every type this chapter introduced — <code>i32</code>, <code>f32</code>, <code>[f32; 4]</code> — was a primitive or a fixed-size aggregate of primitives, whose ownership and layout the compiler already knows how to handle by default. Chapter 2 introduces designing your own Rust <code>struct</code>s and the traits that give them behavior, and traces exactly how ownership composes when a struct owns heap-allocated fields of its own — the foundation this book's <code>Tensor</code> type, starting in Part 1, is built directly on top of.</p>
+<h2 id="worked-solutions">Worked Solutions<a class="headerlink" href="#worked-solutions" title="Permanent link">&para;</a></h2>
+<p><strong>1.</strong> The distinguishing question is: <em>is the type fixed before the program runs, and can the same name later refer to a value of a different type?</em> For <code>let a = 10;</code>, the compiler examines the literal <code>10</code> during compilation, resolves <code>a</code>'s type to <code>i32</code>, and rejects any later attempt in the same scope to assign a non-<code>i32</code> value to <code>a</code> — fixed permanently, at compile time. For <code>a = 10</code> in Python, there is no compile-time type-fixing step; <code>a</code> is a name bound to whatever object it was last assigned, and <code>a = "ten"</code> on the next line is completely legal, because the type lives on the object, not the name.</p>
+<p><strong>2.</strong> In C++, <code>std::string s2 = s1;</code> performs a full deep copy — <code>s1</code> and <code>s2</code> become two independent strings, and both remain valid, each freed by its own destructor when it goes out of scope. In Python, <code>s2 = s1</code> copies nothing; <code>s2</code> becomes a second name for the exact same string object, and both names remain valid — the object is only freed once its reference count drops to zero. In Rust, <code>let s2 = s1;</code> moves the value: the underlying heap data now belongs solely to <code>s2</code>, and the name <code>s1</code> is marked by the compiler as no longer valid — not because the data was destroyed, but because the compiler will not permit two live names claiming ownership of the same resource at once, and any attempt to use <code>s1</code> afterward is a compile error, not a runtime condition.</p>
+<p><strong>3.</strong> <code>takes_ownership(s: String)</code> takes its parameter by value, which moves <code>s</code> into the function — after that call, the compiler considers the caller's <code>s</code> binding dead, exactly as Section 1.3's <code>let s2 = s1;</code> killed <code>s1</code>, so the later <code>println!</code> referencing <code>s</code> is a use of a moved value and fails to compile. <code>borrows(s: &amp;String)</code> takes a reference instead: ownership of <code>s</code> never leaves the caller, the function only receives temporary read access, and the caller's <code>s</code> binding remains fully valid for the <code>println!</code> that follows.</p>
+<p><strong>4.</strong> Rust's borrow checker rejects the pattern at compile time, categorically, regardless of whether that specific <code>push</code> call would have actually triggered a reallocation. <code>&amp;v[0]</code> creates a shared (<code>&amp;</code>) borrow of <code>v</code>; <code>v.push(4)</code> requires an exclusive (<code>&amp;mut</code>) borrow, because a push might reallocate the entire backing buffer, which would invalidate every existing reference into it. Rust's "any number of shared borrows, or exactly one exclusive borrow, never both" rule makes holding <code>first</code> across the <code>push</code> call a compile error — <code>error[E0502]: cannot borrow v as mutable because it is also borrowed as immutable</code> — rather than allowing the program to compile and potentially dereference a dangling pointer at runtime, which is exactly what C++'s equivalent pattern risks.</p>
+<p><strong>5.</strong> A plain array's alignment in Rust is defined as its element type's alignment, with no automatic upgrade based on the array's total size — <code>[f32; 4]</code> is 16 bytes of data, but the compiler only guarantees it starts on a 4-byte boundary, the same guarantee a lone <code>f32</code> gets. CUDA's <code>float4</code> is a distinct built-in type whose 16-byte alignment is part of its own definition, baked in by NVIDIA's headers, not derived from <code>float</code>'s alignment. Getting the equivalent guarantee in Rust means defining a wrapper type and asking for it explicitly with <code>#[repr(align(16))]</code>, as <code>F32x4</code> does in Worked Example 1.5.1 — after which <code>align_of</code> genuinely reports <code>16</code>, confirmed rather than assumed.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../../getting-started/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Getting Started">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Getting Started
+              </div>
+            </div>
+          </a>
+        
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 Oluwaseyi Awoga
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/maximumbeings" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
