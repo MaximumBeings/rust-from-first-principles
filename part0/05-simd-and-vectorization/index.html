@@ -1,0 +1,1896 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Building a GPU-Native Tensor and Autodiff Framework in Rust, One Layer at a Time">
+      
+      
+        <meta name="author" content="Oluwaseyi Awoga">
+      
+      
+      
+        <link rel="prev" href="../04-gpu-programming-introduction/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>5. SIMD and Vectorization - Rust From First Principles — Under Development</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#chapter-5-simd-and-vectorization-stdarch-and-the-wide-crate-on-stable-rust" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Rust From First Principles — Under Development" class="md-header__button md-logo" aria-label="Rust From First Principles — Under Development" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="m508.5 249.8-21.8-13.5c-.2-2-.3-3.9-.5-5.9l18.7-17.5c.9-.9 1.6-1.9 2-3.1s.5-2.5.2-3.7-.8-2.4-1.6-3.3-1.8-1.7-3-2.1l-24-9c-.5-1.9-1.1-3.8-1.7-5.6l15-20.8c.7-1 1.2-2.2 1.3-3.4s0-2.5-.5-3.7-1.2-2.2-2.2-2.9-2.1-1.3-3.4-1.5l-25.4-4.2c-.9-1.7-1.8-3.4-2.7-5.2l10.7-23.4c.5-1.1.7-2.4.6-3.6s-.5-2.4-1.2-3.5-1.6-1.9-2.8-2.5-2.4-.8-3.6-.8l-25.8.9c-1.2-1.5-2.4-2.9-3.6-4.4l5.8-25.3c.3-1.2.3-2.5-.1-3.7s-1-2.3-1.9-3.2-2-1.5-3.2-1.9-2.5-.4-3.7-.1l-25.1 6c-1.4-1.2-2.9-2.4-4.4-3.6l.9-25.8c.1-1.3-.2-2.5-.8-3.6s-1.4-2.1-2.5-2.8-2.2-1.1-3.5-1.2-2.5.1-3.7.6l-23.3 10.7-5.1-2.7-4.2-25.4c-.2-1.2-.7-2.4-1.5-3.4s-1.8-1.7-2.9-2.2-2.4-.7-3.7-.5-2.4.6-3.4 1.3l-20.9 15c-1.9-.6-3.8-1.1-5.6-1.7l-9-24c-.4-1.2-1.2-2.2-2.1-3S307.2 5.2 306 5s-2.5-.2-3.7.2-2.3 1.1-3.1 2l-17.6 18.7c-2-.2-3.9-.4-5.9-.5L262.3 3.5c-.7-1.1-1.6-1.9-2.7-2.6S257.3 0 256 0s-2.5.3-3.6.9-2 1.5-2.7 2.6l-13.5 21.8c-2 .2-3.9.3-5.9.6L212.9 7.1c-.9-.9-1.9-1.6-3.1-2s-2.5-.5-3.7-.2-2.4.8-3.3 1.6-1.7 1.8-2.1 3l-9 24c-1.9.6-3.8 1.1-5.7 1.7l-20.8-15c-1-.7-2.2-1.2-3.4-1.3s-2.5 0-3.7.5-2.2 1.2-2.9 2.2-1.3 2.1-1.5 3.4l-4.2 25.4c-1.7.9-3.4 1.8-5.2 2.7l-23.4-10.5c-1.1-.5-2.4-.7-3.7-.6s-2.5.5-3.5 1.2-1.9 1.7-2.5 2.8-.8 2.4-.8 3.6l.9 25.8c-1.5 1.2-3 2.4-4.4 3.6l-25.1-6c-1.2-.3-2.5-.3-3.7.1s-2.3 1-3.2 1.9-1.5 2-1.9 3.2-.4 2.5-.1 3.7l6 25.1c-1.2 1.4-2.4 2.9-3.6 4.4l-25.8-.9c-1.3 0-2.5.2-3.6.8s-2.1 1.4-2.8 2.4-1.1 2.2-1.2 3.5.1 2.5.6 3.6l10.7 23.4c-.9 1.7-1.8 3.4-2.7 5.2l-25.4 4.1c-1.2.2-2.4.7-3.4 1.5s-1.7 1.8-2.2 2.9-.7 2.4-.5 3.7.6 2.4 1.3 3.4l15 20.8c-.6 1.9-1.1 3.8-1.7 5.7l-24 9c-1.2.4-2.2 1.2-3 2.1s-1.4 2.1-1.6 3.3-.2 2.5.2 3.7 1.1 2.3 2 3.1l18.7 17.5c-.2 2-.4 3.9-.6 5.9L3.5 249.8c-1.1.7-1.9 1.6-2.6 2.7s-.9 2.3-.9 3.6.3 2.5.9 3.6 1.5 2 2.6 2.7l21.8 13.5c.2 2 .3 3.9.6 5.9L7.1 299.1c-.9.9-1.6 1.9-2 3.1s-.5 2.5-.2 3.7.8 2.4 1.6 3.3 1.8 1.7 3 2.1l24 9c.6 1.9 1.1 3.8 1.7 5.6l-15 20.8c-.7 1-1.2 2.2-1.3 3.4s0 2.5.5 3.7 1.2 2.2 2.2 2.9 2.1 1.3 3.4 1.5l25.4 4.2 2.7 5.1-10.5 23.6c-.5 1.1-.7 2.4-.6 3.6s.5 2.5 1.2 3.5c.7 1.1 1.6 1.9 2.7 2.5s2.4.8 3.6.8l25.8-.9c1.2 1.5 2.4 2.9 3.6 4.4L73 430.2c-.3 1.2-.3 2.5.1 3.7s1 2.3 1.9 3.2 2 1.5 3.2 1.9 2.5.4 3.7.1l25.2-5.9c1.5 1.2 2.9 2.4 4.4 3.6l-.9 25.8c0 1.3.2 2.5.8 3.6s1.4 2.1 2.5 2.8 2.2 1.1 3.5 1.2 2.5-.1 3.6-.6l23.4-10.7 5.1 2.7 4.2 25.4c.2 1.2.7 2.4 1.5 3.4s1.8 1.8 2.9 2.2 2.4.7 3.7.5 2.4-.6 3.4-1.3l20.8-15c1.9.6 3.8 1.1 5.6 1.7l9 24c.4 1.2 1.2 2.2 2.1 3s2.1 1.4 3.3 1.6 2.5.2 3.7-.2 2.3-1.1 3.1-2l17.5-18.7c2 .2 3.9.4 5.9.6l13.5 21.8c.7 1.1 1.6 1.9 2.7 2.6s2.3.9 3.6.9 2.5-.3 3.6-.9 2-1.5 2.7-2.6l13.5-21.8c2-.2 3.9-.3 5.9-.6l17.5 18.7c.9.9 1.9 1.6 3.1 2s2.5.5 3.7.2 2.4-.8 3.3-1.6 1.7-1.8 2.1-3l9-24c1.9-.6 3.8-1.1 5.6-1.7l20.8 15c1 .7 2.2 1.2 3.4 1.3s2.5 0 3.7-.5 2.2-1.2 2.9-2.2 1.3-2.1 1.5-3.4l4.2-25.4 5.1-2.7 23.4 10.7c1.1.5 2.4.7 3.6.6s2.4-.5 3.5-1.2 1.9-1.6 2.5-2.8.8-2.4.8-3.6l-.9-25.8c1.5-1.2 2.9-2.4 4.4-3.6l25.2 5.9c1.2.3 2.5.3 3.7-.1s2.3-1 3.2-1.9 1.5-2 1.9-3.2.4-2.5.1-3.7l-5.9-25.2c1.2-1.4 2.4-2.9 3.6-4.4l25.8.9c1.3.1 2.5-.2 3.6-.8s2.1-1.4 2.8-2.5c.7-1 1.1-2.2 1.2-3.5s-.1-2.5-.6-3.6l-10.7-23.4 2.7-5.1 25.4-4.2c1.2-.2 2.4-.7 3.4-1.5s1.8-1.8 2.2-2.9.7-2.4.5-3.7-.6-2.4-1.3-3.4l-15-20.8c.6-1.9 1.1-3.8 1.7-5.6l24-9c1.2-.4 2.2-1.2 3-2.1s1.4-2.1 1.6-3.3.2-2.5-.2-3.7-1.1-2.3-2-3.1l-18.7-17.5c.2-1.9.4-3.9.6-5.9l21.8-13.5c1.1-.7 1.9-1.6 2.6-2.7s.9-2.3.9-3.6-.3-2.5-.9-3.6-1.5-2-2.6-2.7m-151 129.1c-3.6-.8-7.4-.1-10.5 1.9s-5.3 5.2-6 8.8l-7.6 35.7c-24.6 11.1-51.3 16.8-78.3 16.7s-53.6-6.1-78.1-17.4l-7.6-35.7c-.4-1.8-1.1-3.5-2.1-5s-2.4-2.8-3.9-3.8-3.2-1.7-5-2-3.6-.3-5.4.1l-31.5 6.8c-5.8-6-11.3-12.5-16.3-19.2h153.2c1.7 0 2.9-.3 2.9-1.9v-54.2c0-1.6-1.2-1.9-2.9-1.9h-44.8v-34.4h48.5c4.4 0 23.7 1.3 29.8 25.9 1.9 7.5 6.2 32.1 9.1 40 2.9 8.8 14.6 26.5 27.1 26.5h79c-5.3 7.1-11.1 13.8-17.3 20.1l-32.1-6.9zm25.8 34.5c0 3-.9 6-2.6 8.5s-4 4.5-6.8 5.6-5.8 1.5-8.8.9-5.7-2-7.8-4.2-3.6-4.8-4.2-7.8-.3-6 .8-8.8 3.1-5.2 5.6-6.9 5.4-2.6 8.5-2.6h.4c4 .1 7.7 1.8 10.5 4.6s4.3 6.7 4.3 10.6h.1zm-225.6-.7c0 3-.9 6-2.6 8.5s-4.1 4.5-6.8 5.6-5.8 1.5-8.8.9-5.7-2-7.8-4.2-3.6-4.8-4.2-7.8-.3-6 .9-8.8 3.1-5.2 5.6-6.8 5.4-2.6 8.5-2.6h.5c4 .1 7.7 1.8 10.5 4.6s4.3 6.7 4.3 10.6h.1zM69.6 234.2l32.8-14.6c1.7-.7 3.2-1.8 4.4-3.1s2.2-2.9 2.9-4.6 1-3.5.9-5.3-.5-3.6-1.2-5.3l-6.8-15.2h26.6v119.7H75.6c-6.6-23.2-8.7-47.6-6.1-71.6zm-11.3-36.1c0-2 .4-4 1.2-5.8s1.9-3.5 3.3-4.9 3.1-2.5 4.9-3.3 3.8-1.2 5.8-1.2h.5c3 .1 5.9 1 8.3 2.8s4.3 4.1 5.4 6.9 1.3 5.8.7 8.8-2.1 5.6-4.3 7.7-4.9 3.5-7.8 4.1-6 .2-8.7-.9-5.1-3.1-6.8-5.6-2.5-5.4-2.5-8.4zm155.2 24.5v-35.3h63.3c3.3 0 23.1 3.8 23.1 18.6 0 12.3-15.2 16.7-27.7 16.7zM399 306.7c-9.8 1.1-20.6-4.1-22-10.1-5.8-32.5-15.4-39.4-30.6-51.4 18.9-12 38.5-29.6 38.5-53.3 0-25.5-17.5-41.6-29.4-49.5-16.8-11-35.3-13.2-40.3-13.2H116.3c27.5-30.7 64.4-51.5 104.9-59.2l23.5 24.6c1.3 1.3 2.8 2.4 4.4 3.1s3.5 1.1 5.3 1.2 3.6-.3 5.3-.9 3.2-1.7 4.6-2.9l26.3-25c26.8 5 52.1 15.8 74.3 31.6s40.6 36.2 54.1 59.9l-18 40.6c-1.5 3.4-1.5 7.2-.2 10.6s3.9 6.2 7.3 7.7l34.6 15.3c1.1 10.8 1.2 21.7.4 32.5h-19.3c-1.9 0-2.7 1.3-2.7 3.1v8.8c0 20.8-11.7 25.3-22 26.5zM240 60.2c0-4 1.6-7.9 4.5-10.7s6.7-4.5 10.7-4.5h.4c3 .1 5.9 1 8.4 2.8s4.3 4.1 5.4 6.9 1.3 5.8.7 8.8-2.1 5.6-4.3 7.7-4.9 3.5-7.8 4-6 .2-8.7-.9-5.1-3.1-6.8-5.6-2.5-5.4-2.5-8.4zM436.8 214c-2 0-4-.4-5.8-1.2s-3.5-1.9-4.9-3.3-2.5-3.1-3.3-4.9-1.2-3.8-1.2-5.8.4-4 1.2-5.8 1.9-3.5 3.3-4.9 3.1-2.5 4.9-3.3 3.8-1.2 5.8-1.2h.4c4 .1 7.9 1.7 10.7 4.6s4.4 6.8 4.3 10.8-1.7 7.9-4.6 10.7-6.8 4.4-10.8 4.3"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Rust From First Principles — Under Development
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              5. SIMD and Vectorization
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-orange" data-md-color-accent="deep-orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Rust From First Principles — Under Development" class="md-nav__button md-logo" aria-label="Rust From First Principles — Under Development" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="m508.5 249.8-21.8-13.5c-.2-2-.3-3.9-.5-5.9l18.7-17.5c.9-.9 1.6-1.9 2-3.1s.5-2.5.2-3.7-.8-2.4-1.6-3.3-1.8-1.7-3-2.1l-24-9c-.5-1.9-1.1-3.8-1.7-5.6l15-20.8c.7-1 1.2-2.2 1.3-3.4s0-2.5-.5-3.7-1.2-2.2-2.2-2.9-2.1-1.3-3.4-1.5l-25.4-4.2c-.9-1.7-1.8-3.4-2.7-5.2l10.7-23.4c.5-1.1.7-2.4.6-3.6s-.5-2.4-1.2-3.5-1.6-1.9-2.8-2.5-2.4-.8-3.6-.8l-25.8.9c-1.2-1.5-2.4-2.9-3.6-4.4l5.8-25.3c.3-1.2.3-2.5-.1-3.7s-1-2.3-1.9-3.2-2-1.5-3.2-1.9-2.5-.4-3.7-.1l-25.1 6c-1.4-1.2-2.9-2.4-4.4-3.6l.9-25.8c.1-1.3-.2-2.5-.8-3.6s-1.4-2.1-2.5-2.8-2.2-1.1-3.5-1.2-2.5.1-3.7.6l-23.3 10.7-5.1-2.7-4.2-25.4c-.2-1.2-.7-2.4-1.5-3.4s-1.8-1.7-2.9-2.2-2.4-.7-3.7-.5-2.4.6-3.4 1.3l-20.9 15c-1.9-.6-3.8-1.1-5.6-1.7l-9-24c-.4-1.2-1.2-2.2-2.1-3S307.2 5.2 306 5s-2.5-.2-3.7.2-2.3 1.1-3.1 2l-17.6 18.7c-2-.2-3.9-.4-5.9-.5L262.3 3.5c-.7-1.1-1.6-1.9-2.7-2.6S257.3 0 256 0s-2.5.3-3.6.9-2 1.5-2.7 2.6l-13.5 21.8c-2 .2-3.9.3-5.9.6L212.9 7.1c-.9-.9-1.9-1.6-3.1-2s-2.5-.5-3.7-.2-2.4.8-3.3 1.6-1.7 1.8-2.1 3l-9 24c-1.9.6-3.8 1.1-5.7 1.7l-20.8-15c-1-.7-2.2-1.2-3.4-1.3s-2.5 0-3.7.5-2.2 1.2-2.9 2.2-1.3 2.1-1.5 3.4l-4.2 25.4c-1.7.9-3.4 1.8-5.2 2.7l-23.4-10.5c-1.1-.5-2.4-.7-3.7-.6s-2.5.5-3.5 1.2-1.9 1.7-2.5 2.8-.8 2.4-.8 3.6l.9 25.8c-1.5 1.2-3 2.4-4.4 3.6l-25.1-6c-1.2-.3-2.5-.3-3.7.1s-2.3 1-3.2 1.9-1.5 2-1.9 3.2-.4 2.5-.1 3.7l6 25.1c-1.2 1.4-2.4 2.9-3.6 4.4l-25.8-.9c-1.3 0-2.5.2-3.6.8s-2.1 1.4-2.8 2.4-1.1 2.2-1.2 3.5.1 2.5.6 3.6l10.7 23.4c-.9 1.7-1.8 3.4-2.7 5.2l-25.4 4.1c-1.2.2-2.4.7-3.4 1.5s-1.7 1.8-2.2 2.9-.7 2.4-.5 3.7.6 2.4 1.3 3.4l15 20.8c-.6 1.9-1.1 3.8-1.7 5.7l-24 9c-1.2.4-2.2 1.2-3 2.1s-1.4 2.1-1.6 3.3-.2 2.5.2 3.7 1.1 2.3 2 3.1l18.7 17.5c-.2 2-.4 3.9-.6 5.9L3.5 249.8c-1.1.7-1.9 1.6-2.6 2.7s-.9 2.3-.9 3.6.3 2.5.9 3.6 1.5 2 2.6 2.7l21.8 13.5c.2 2 .3 3.9.6 5.9L7.1 299.1c-.9.9-1.6 1.9-2 3.1s-.5 2.5-.2 3.7.8 2.4 1.6 3.3 1.8 1.7 3 2.1l24 9c.6 1.9 1.1 3.8 1.7 5.6l-15 20.8c-.7 1-1.2 2.2-1.3 3.4s0 2.5.5 3.7 1.2 2.2 2.2 2.9 2.1 1.3 3.4 1.5l25.4 4.2 2.7 5.1-10.5 23.6c-.5 1.1-.7 2.4-.6 3.6s.5 2.5 1.2 3.5c.7 1.1 1.6 1.9 2.7 2.5s2.4.8 3.6.8l25.8-.9c1.2 1.5 2.4 2.9 3.6 4.4L73 430.2c-.3 1.2-.3 2.5.1 3.7s1 2.3 1.9 3.2 2 1.5 3.2 1.9 2.5.4 3.7.1l25.2-5.9c1.5 1.2 2.9 2.4 4.4 3.6l-.9 25.8c0 1.3.2 2.5.8 3.6s1.4 2.1 2.5 2.8 2.2 1.1 3.5 1.2 2.5-.1 3.6-.6l23.4-10.7 5.1 2.7 4.2 25.4c.2 1.2.7 2.4 1.5 3.4s1.8 1.8 2.9 2.2 2.4.7 3.7.5 2.4-.6 3.4-1.3l20.8-15c1.9.6 3.8 1.1 5.6 1.7l9 24c.4 1.2 1.2 2.2 2.1 3s2.1 1.4 3.3 1.6 2.5.2 3.7-.2 2.3-1.1 3.1-2l17.5-18.7c2 .2 3.9.4 5.9.6l13.5 21.8c.7 1.1 1.6 1.9 2.7 2.6s2.3.9 3.6.9 2.5-.3 3.6-.9 2-1.5 2.7-2.6l13.5-21.8c2-.2 3.9-.3 5.9-.6l17.5 18.7c.9.9 1.9 1.6 3.1 2s2.5.5 3.7.2 2.4-.8 3.3-1.6 1.7-1.8 2.1-3l9-24c1.9-.6 3.8-1.1 5.6-1.7l20.8 15c1 .7 2.2 1.2 3.4 1.3s2.5 0 3.7-.5 2.2-1.2 2.9-2.2 1.3-2.1 1.5-3.4l4.2-25.4 5.1-2.7 23.4 10.7c1.1.5 2.4.7 3.6.6s2.4-.5 3.5-1.2 1.9-1.6 2.5-2.8.8-2.4.8-3.6l-.9-25.8c1.5-1.2 2.9-2.4 4.4-3.6l25.2 5.9c1.2.3 2.5.3 3.7-.1s2.3-1 3.2-1.9 1.5-2 1.9-3.2.4-2.5.1-3.7l-5.9-25.2c1.2-1.4 2.4-2.9 3.6-4.4l25.8.9c1.3.1 2.5-.2 3.6-.8s2.1-1.4 2.8-2.5c.7-1 1.1-2.2 1.2-3.5s-.1-2.5-.6-3.6l-10.7-23.4 2.7-5.1 25.4-4.2c1.2-.2 2.4-.7 3.4-1.5s1.8-1.8 2.2-2.9.7-2.4.5-3.7-.6-2.4-1.3-3.4l-15-20.8c.6-1.9 1.1-3.8 1.7-5.6l24-9c1.2-.4 2.2-1.2 3-2.1s1.4-2.1 1.6-3.3.2-2.5-.2-3.7-1.1-2.3-2-3.1l-18.7-17.5c.2-1.9.4-3.9.6-5.9l21.8-13.5c1.1-.7 1.9-1.6 2.6-2.7s.9-2.3.9-3.6-.3-2.5-.9-3.6-1.5-2-2.6-2.7m-151 129.1c-3.6-.8-7.4-.1-10.5 1.9s-5.3 5.2-6 8.8l-7.6 35.7c-24.6 11.1-51.3 16.8-78.3 16.7s-53.6-6.1-78.1-17.4l-7.6-35.7c-.4-1.8-1.1-3.5-2.1-5s-2.4-2.8-3.9-3.8-3.2-1.7-5-2-3.6-.3-5.4.1l-31.5 6.8c-5.8-6-11.3-12.5-16.3-19.2h153.2c1.7 0 2.9-.3 2.9-1.9v-54.2c0-1.6-1.2-1.9-2.9-1.9h-44.8v-34.4h48.5c4.4 0 23.7 1.3 29.8 25.9 1.9 7.5 6.2 32.1 9.1 40 2.9 8.8 14.6 26.5 27.1 26.5h79c-5.3 7.1-11.1 13.8-17.3 20.1l-32.1-6.9zm25.8 34.5c0 3-.9 6-2.6 8.5s-4 4.5-6.8 5.6-5.8 1.5-8.8.9-5.7-2-7.8-4.2-3.6-4.8-4.2-7.8-.3-6 .8-8.8 3.1-5.2 5.6-6.9 5.4-2.6 8.5-2.6h.4c4 .1 7.7 1.8 10.5 4.6s4.3 6.7 4.3 10.6h.1zm-225.6-.7c0 3-.9 6-2.6 8.5s-4.1 4.5-6.8 5.6-5.8 1.5-8.8.9-5.7-2-7.8-4.2-3.6-4.8-4.2-7.8-.3-6 .9-8.8 3.1-5.2 5.6-6.8 5.4-2.6 8.5-2.6h.5c4 .1 7.7 1.8 10.5 4.6s4.3 6.7 4.3 10.6h.1zM69.6 234.2l32.8-14.6c1.7-.7 3.2-1.8 4.4-3.1s2.2-2.9 2.9-4.6 1-3.5.9-5.3-.5-3.6-1.2-5.3l-6.8-15.2h26.6v119.7H75.6c-6.6-23.2-8.7-47.6-6.1-71.6zm-11.3-36.1c0-2 .4-4 1.2-5.8s1.9-3.5 3.3-4.9 3.1-2.5 4.9-3.3 3.8-1.2 5.8-1.2h.5c3 .1 5.9 1 8.3 2.8s4.3 4.1 5.4 6.9 1.3 5.8.7 8.8-2.1 5.6-4.3 7.7-4.9 3.5-7.8 4.1-6 .2-8.7-.9-5.1-3.1-6.8-5.6-2.5-5.4-2.5-8.4zm155.2 24.5v-35.3h63.3c3.3 0 23.1 3.8 23.1 18.6 0 12.3-15.2 16.7-27.7 16.7zM399 306.7c-9.8 1.1-20.6-4.1-22-10.1-5.8-32.5-15.4-39.4-30.6-51.4 18.9-12 38.5-29.6 38.5-53.3 0-25.5-17.5-41.6-29.4-49.5-16.8-11-35.3-13.2-40.3-13.2H116.3c27.5-30.7 64.4-51.5 104.9-59.2l23.5 24.6c1.3 1.3 2.8 2.4 4.4 3.1s3.5 1.1 5.3 1.2 3.6-.3 5.3-.9 3.2-1.7 4.6-2.9l26.3-25c26.8 5 52.1 15.8 74.3 31.6s40.6 36.2 54.1 59.9l-18 40.6c-1.5 3.4-1.5 7.2-.2 10.6s3.9 6.2 7.3 7.7l34.6 15.3c1.1 10.8 1.2 21.7.4 32.5h-19.3c-1.9 0-2.7 1.3-2.7 3.1v8.8c0 20.8-11.7 25.3-22 26.5zM240 60.2c0-4 1.6-7.9 4.5-10.7s6.7-4.5 10.7-4.5h.4c3 .1 5.9 1 8.4 2.8s4.3 4.1 5.4 6.9 1.3 5.8.7 8.8-2.1 5.6-4.3 7.7-4.9 3.5-7.8 4-6 .2-8.7-.9-5.1-3.1-6.8-5.6-2.5-5.4-2.5-8.4zM436.8 214c-2 0-4-.4-5.8-1.2s-3.5-1.9-4.9-3.3-2.5-3.1-3.3-4.9-1.2-3.8-1.2-5.8.4-4 1.2-5.8 1.9-3.5 3.3-4.9 3.1-2.5 4.9-3.3 3.8-1.2 5.8-1.2h.4c4 .1 7.9 1.7 10.7 4.6s4.4 6.8 4.3 10.8-1.7 7.9-4.6 10.7-6.8 4.4-10.8 4.3"/></svg>
+
+    </a>
+    Rust From First Principles — Under Development
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 0 — Rust Foundations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 0 — Rust Foundations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-variables-ownership-types/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. Variables, Ownership, and Types
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-struct-design-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Struct Design Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-memory-layout-strategies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3. Memory Layout Strategies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-gpu-programming-introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    4. GPU Programming Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    5. SIMD and Vectorization
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    5. SIMD and Vectorization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#51-why-stdarch-and-wide-not-stdsimd-foundational" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Why std::arch and wide, Not std::simd [FOUNDATIONAL]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.1 Why std::arch and wide, Not std::simd [FOUNDATIONAL]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-511-confirming-wide-is-a-real-wrapper-around-real-intrinsics-not-a-reimplementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 5.1.1 — confirming wide is a real wrapper around real intrinsics, not a reimplementation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#52-simd-registers-lane-width-and-lane-wise-comparison-foundational" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 SIMD Registers, Lane Width, and Lane-Wise Comparison [FOUNDATIONAL]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.2 SIMD Registers, Lane Width, and Lane-Wise Comparison [FOUNDATIONAL]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-521-feature-detection-and-register-width-genuinely-queried" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 5.2.1 — feature detection and register width, genuinely queried
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-522-lane-wise-comparison-and-what-true-actually-looks-like" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 5.2.2 — lane-wise comparison, and what "true" actually looks like
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#53-the-vectorized-loop-shape-main-loop-plus-remainder-foundational" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 The Vectorized-Loop Shape: Main Loop Plus Remainder [FOUNDATIONAL]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.3 The Vectorized-Loop Shape: Main Loop Plus Remainder [FOUNDATIONAL]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-531-n-1003-width-8-a-real-remainder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 5.3.1 — n = 1003, width = 8, a real remainder
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#54-simd-reduction-accumulate-wide-reduce-narrow-foundational" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 SIMD Reduction: Accumulate Wide, Reduce Narrow [FOUNDATIONAL]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.4 SIMD Reduction: Accumulate Wide, Reduce Narrow [FOUNDATIONAL]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-541-the-first-two-chunks-and-a-closed-form-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 5.4.1 — the first two chunks, and a closed-form check
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-542-a-genuine-benchmark-and-an-accuracy-result-this-chapter-did-not-go-looking-for" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 5.4.2 — a genuine benchmark, and an accuracy result this chapter did not go looking for
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#55-why-this-chapter-depends-on-chapter-3s-soa-argument-foundational" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 Why This Chapter Depends on Chapter 3's SoA Argument [FOUNDATIONAL]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.5 Why This Chapter Depends on Chapter 3&#39;s SoA Argument [FOUNDATIONAL]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-runnable-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete Runnable Code
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Complete Runnable Code">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#file-01_lanes_and_intrinsicsrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: 01_lanes_and_intrinsics.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-02_vectorized_loop_shapers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: 02_vectorized_loop_shape.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-03_reduction_and_benchmarkrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: 03_reduction_and_benchmark.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chapter-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chapter Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#self-check-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self-Check Questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-we-go-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where We Go Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Solutions
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#51-why-stdarch-and-wide-not-stdsimd-foundational" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Why std::arch and wide, Not std::simd [FOUNDATIONAL]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.1 Why std::arch and wide, Not std::simd [FOUNDATIONAL]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-511-confirming-wide-is-a-real-wrapper-around-real-intrinsics-not-a-reimplementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 5.1.1 — confirming wide is a real wrapper around real intrinsics, not a reimplementation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#52-simd-registers-lane-width-and-lane-wise-comparison-foundational" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 SIMD Registers, Lane Width, and Lane-Wise Comparison [FOUNDATIONAL]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.2 SIMD Registers, Lane Width, and Lane-Wise Comparison [FOUNDATIONAL]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-521-feature-detection-and-register-width-genuinely-queried" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 5.2.1 — feature detection and register width, genuinely queried
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-522-lane-wise-comparison-and-what-true-actually-looks-like" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 5.2.2 — lane-wise comparison, and what "true" actually looks like
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#53-the-vectorized-loop-shape-main-loop-plus-remainder-foundational" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 The Vectorized-Loop Shape: Main Loop Plus Remainder [FOUNDATIONAL]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.3 The Vectorized-Loop Shape: Main Loop Plus Remainder [FOUNDATIONAL]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-531-n-1003-width-8-a-real-remainder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 5.3.1 — n = 1003, width = 8, a real remainder
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#54-simd-reduction-accumulate-wide-reduce-narrow-foundational" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 SIMD Reduction: Accumulate Wide, Reduce Narrow [FOUNDATIONAL]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.4 SIMD Reduction: Accumulate Wide, Reduce Narrow [FOUNDATIONAL]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-541-the-first-two-chunks-and-a-closed-form-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 5.4.1 — the first two chunks, and a closed-form check
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-542-a-genuine-benchmark-and-an-accuracy-result-this-chapter-did-not-go-looking-for" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 5.4.2 — a genuine benchmark, and an accuracy result this chapter did not go looking for
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#55-why-this-chapter-depends-on-chapter-3s-soa-argument-foundational" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 Why This Chapter Depends on Chapter 3's SoA Argument [FOUNDATIONAL]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.5 Why This Chapter Depends on Chapter 3&#39;s SoA Argument [FOUNDATIONAL]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-runnable-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete Runnable Code
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Complete Runnable Code">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#file-01_lanes_and_intrinsicsrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: 01_lanes_and_intrinsics.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-02_vectorized_loop_shapers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: 02_vectorized_loop_shape.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-03_reduction_and_benchmarkrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: 03_reduction_and_benchmark.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chapter-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chapter Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#self-check-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self-Check Questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-we-go-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where We Go Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Solutions
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="chapter-5-simd-and-vectorization-stdarch-and-the-wide-crate-on-stable-rust">Chapter 5: SIMD and Vectorization — <code>std::arch</code> and the <code>wide</code> Crate on Stable Rust<a class="headerlink" href="#chapter-5-simd-and-vectorization-stdarch-and-the-wide-crate-on-stable-rust" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>"A scalar loop asks the same question a million times, one element at a time. A SIMD loop asks the same question a million times too — it just asks it eight at a time, and only has to ask it a hundred and twenty-five thousand times to get through the same million answers."</p>
+</blockquote>
+<p><strong>What you will understand by the end of this chapter:</strong></p>
+<ul>
+<li>Why this book's SIMD code is built on <code>std::arch::x86_64</code> intrinsics and the <code>wide</code> crate rather than Rust's own <code>std::simd</code> — a real constraint of this sandbox, not a stylistic choice, and exactly what <code>wide</code> turns out to be once you look inside it</li>
+<li><strong>SIMD registers and lane width</strong>: genuine, runtime CPU feature detection: (<code>is_x86_feature_detected!</code>), <code>size_of</code>-confirmed register widths, and what a lane-wise comparison actually produces</li>
+<li>The canonical <strong>vectorized-loop shape</strong> — a main loop over full-width chunks plus a scalar remainder loop for whatever's left — computed by hand and cross-checked element-by-element against a plain scalar loop</li>
+<li><strong>SIMD reduction</strong>: accumulating into a width-wide vector and reducing it once, at the end, rather than after every chunk — and a genuine, reproducible finding this chapter did not go looking for: that reduction pattern isn't just faster, it's measurably <em>more numerically accurate</em> than naive scalar summation, independently confirmed against an <code>f64</code> reference</li>
+<li>Why Chapter 3's Struct-of-Arrays argument is a precondition for everything in this chapter, not a separate concern — contiguous SIMD loads need contiguous memory to load from, which is exactly what SoA was built to guarantee</li>
+</ul>
+<p><strong>What you need to know first:</strong></p>
+<ul>
+<li>Chapter 1 (fixed-size arrays, <code>[T; N]</code>) and Chapter 3 in full — this chapter's vectorized loads assume the same contiguous, SoA-style layout Chapter 3 built and measured</li>
+<li>Getting Started's toolchain note that <code>nvptx64-nvidia-cuda</code> and nightly Rust are both unreachable in this sandbox — the same network restriction is why <code>std::simd</code> (<code>#![feature(portable_simd)]</code>) is off-limits here too, and Section 5.1 confirms this directly rather than assuming it</li>
+<li>If you've read the CUDA or Mojo editions: both of those chapters are titled "SIMD and Vectorization," but they cover genuinely different hardware. CUDA's Chapter 5 is about the warp as <em>implicit</em> hardware SIMD — 32 threads the hardware groups together, never named as a type in source. Mojo's Chapter 5 is about <code>SIMD[DType, width]</code>, a first-class, compiler-native vector type. Rust's standard library has an equivalent to Mojo's type, <code>std::simd::Simd&lt;T, N&gt;</code> — but it's nightly-only, and nightly is unreachable in this sandbox, so this chapter follows Mojo's <em>loop shape</em> (main loop plus remainder, wide-then-narrow reduction) using the closest thing stable Rust actually offers.</li>
+</ul>
+<h2 id="51-why-stdarch-and-wide-not-stdsimd-foundational">5.1 Why <code>std::arch</code> and <code>wide</code>, Not <code>std::simd</code> <code>[FOUNDATIONAL]</code><a class="headerlink" href="#51-why-stdarch-and-wide-not-stdsimd-foundational" title="Permanent link">&para;</a></h2>
+<h3 id="intuition">Intuition<a class="headerlink" href="#intuition" title="Permanent link">&para;</a></h3>
+<p>Rust has a first-class portable SIMD type, <code>std::simd::Simd&lt;T, N&gt;</code>, that looks almost exactly like Mojo's <code>SIMD[DType, width]</code> — but it lives behind a nightly-only feature flag, <code>#![feature(portable_simd)]</code>, and this book's toolchain is stable-only, confirmed back in Getting Started. Two things fill the gap on stable Rust: <code>std::arch::x86_64</code>, raw, unsafe, hardware-specific intrinsics that compile directly to one CPU instruction each, and <code>wide</code>, a crate providing safe, portable vector types (<code>f32x4</code>, <code>f32x8</code>, ...) that are — this chapter confirms directly, not by assertion — thin wrappers around exactly those same intrinsics.</p>
+<h3 id="background">Background<a class="headerlink" href="#background" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>std::simd::Simd&lt;T, N&gt;</code></th>
+<th><code>std::arch::x86_64</code></th>
+<th><code>wide</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stability</td>
+<td>Nightly-only (<code>#![feature(portable_simd)]</code>)</td>
+<td>Stable</td>
+<td>Stable</td>
+</tr>
+<tr>
+<td>Safety</td>
+<td>Safe</td>
+<td><code>unsafe</code> — no bounds or feature checking</td>
+<td>Safe</td>
+</tr>
+<tr>
+<td>Portability</td>
+<td>Portable across architectures</td>
+<td>x86_64-specific, one function per instruction</td>
+<td>Portable — dispatches to the right intrinsics internally</td>
+</tr>
+<tr>
+<td>Available in this sandbox</td>
+<td>No (network-blocked <code>rust-src</code>, confirmed in Getting Started)</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="worked-example-511-confirming-wide-is-a-real-wrapper-around-real-intrinsics-not-a-reimplementation">Worked Example 5.1.1 — confirming <code>wide</code> is a real wrapper around real intrinsics, not a reimplementation<a class="headerlink" href="#worked-example-511-confirming-wide-is-a-real-wrapper-around-real-intrinsics-not-a-reimplementation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="cp">#[target_feature(enable = </span><span class="s">&quot;avx&quot;</span><span class="cp">)]</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">unsafe</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">add_via_raw_intrinsic</span><span class="p">(</span><span class="n">a</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="kt">f32</span><span class="p">;</span><span class="w"> </span><span class="mi">8</span><span class="p">],</span><span class="w"> </span><span class="n">b</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="kt">f32</span><span class="p">;</span><span class="w"> </span><span class="mi">8</span><span class="p">])</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="p">[</span><span class="kt">f32</span><span class="p">;</span><span class="w"> </span><span class="mi">8</span><span class="p">]</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="k">use</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">arch</span><span class="p">::</span><span class="n">x86_64</span><span class="p">::{</span><span class="n">_mm256_add_ps</span><span class="p">,</span><span class="w"> </span><span class="n">_mm256_loadu_ps</span><span class="p">,</span><span class="w"> </span><span class="n">_mm256_storeu_ps</span><span class="p">};</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">va</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_mm256_loadu_ps</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">as_ptr</span><span class="p">());</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">vb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_mm256_loadu_ps</span><span class="p">(</span><span class="n">b</span><span class="p">.</span><span class="n">as_ptr</span><span class="p">());</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">vc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_mm256_add_ps</span><span class="p">(</span><span class="n">va</span><span class="p">,</span><span class="w"> </span><span class="n">vb</span><span class="p">);</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">0.0</span><span class="k">f32</span><span class="p">;</span><span class="w"> </span><span class="mi">8</span><span class="p">];</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">        </span><span class="n">_mm256_storeu_ps</span><span class="p">(</span><span class="n">out</span><span class="p">.</span><span class="n">as_mut_ptr</span><span class="p">(),</span><span class="w"> </span><span class="n">vc</span><span class="p">);</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">        </span><span class="n">out</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="p">}</span>
+</code></pre></div>
+<p>Compiled and run as part of the complete <code>01_lanes_and_intrinsics.rs</code> further below:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>cargo<span class="w"> </span>run<span class="w"> </span>--release<span class="w"> </span>--bin<span class="w"> </span>01_lanes_and_intrinsics
+</code></pre></div>
+<p>Genuinely compiled and run, in this book's own sandbox:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>wide::f32x8 result:        [11.0, 22.0, 33.0, 44.0, 55.0, 66.0, 77.0, 88.0]
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>raw _mm256_add_ps result:  [11.0, 22.0, 33.0, 44.0, 55.0, 66.0, 77.0, 88.0]
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>identical? true
+</code></pre></div>
+<p><code>wide::f32x8</code>'s own <code>Add</code> implementation (its real, published source) reads, on a machine with the AVX target feature enabled: <code>Self { avx: add_m256(self.avx, rhs.avx) }</code>, and <code>add_m256</code>'s own real source is one line: <code>m256(unsafe { _mm256_add_ps(a.0, b.0) })</code> — the exact same intrinsic this chapter's own raw version calls directly. The two results above matching exactly isn't a coincidence this chapter is reporting on faith; it's the same CPU instruction executing twice, once reached through 40-some lines of <code>wide</code>'s safe API and once reached by hand.</p>
+<blockquote>
+<p><code>[COMMON TRAP]</code> It's tempting to read "safe wrapper around raw intrinsics" as "safe wrapper around raw intrinsics, so no <code>unsafe</code> needed anywhere in this chapter." That's true for <code>wide</code>'s own API, which this chapter uses for everything except this one confirming example — but Worked Example 5.1.1's raw version still needs <code>unsafe</code> twice over: once because <code>_mm256_add_ps</code> and friends are all individually <code>unsafe fn</code>s (nothing stops you from calling one on a CPU that doesn't support AVX and getting an illegal-instruction crash), and once because the function itself carries <code>#[target_feature(enable = "avx")]</code>, which requires the caller to have already confirmed AVX is actually present — exactly what <code>is_x86_feature_detected!("avx")</code> does below before this chapter ever calls it.</p>
+</blockquote>
+<h2 id="52-simd-registers-lane-width-and-lane-wise-comparison-foundational">5.2 SIMD Registers, Lane Width, and Lane-Wise Comparison <code>[FOUNDATIONAL]</code><a class="headerlink" href="#52-simd-registers-lane-width-and-lane-wise-comparison-foundational" title="Permanent link">&para;</a></h2>
+<h3 id="intuition_1">Intuition<a class="headerlink" href="#intuition_1" title="Permanent link">&para;</a></h3>
+<p>A SIMD register is a fixed-width piece of hardware — 128 bits for SSE, 256 bits for AVX/AVX2 on this book's own test machine — split into equal-sized lanes. <code>wide::f32x4</code> claims 4 lanes of 32 bits (128 bits total); <code>wide::f32x8</code> claims 8 lanes of 32 bits (256 bits total). Neither claim needs to be taken on faith: <code>std::mem::size_of</code> reports a type's real size in bytes, genuinely computed by the compiler from the type's actual layout.</p>
+<h3 id="background_1">Background<a class="headerlink" href="#background_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Rust type</th>
+<th>Lanes</th>
+<th>Bits per lane</th>
+<th>Total register width</th>
+<th><code>size_of</code> (bytes)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>wide::f32x4</code></td>
+<td>4</td>
+<td>32</td>
+<td>128</td>
+<td>16</td>
+</tr>
+<tr>
+<td><code>wide::f32x8</code></td>
+<td>8</td>
+<td>32</td>
+<td>256</td>
+<td>32</td>
+</tr>
+</tbody>
+</table>
+<h3 id="worked-example-521-feature-detection-and-register-width-genuinely-queried">Worked Example 5.2.1 — feature detection and register width, genuinely queried<a class="headerlink" href="#worked-example-521-feature-detection-and-register-width-genuinely-queried" title="Permanent link">&para;</a></h3>
+<p>Compiled and run as part of <code>01_lanes_and_intrinsics.rs</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>CPU feature detection (genuinely queried at runtime):
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  sse2  = true
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  sse4.1= true
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>  avx   = true
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>  avx2  = true
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>  fma   = true
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>size_of::&lt;wide::f32x4&gt;() = 16 bytes (a 128-bit register)
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>size_of::&lt;wide::f32x8&gt;() = 32 bytes (a 256-bit register)
+</code></pre></div>
+<p><code>is_x86_feature_detected!</code> is a real <code>std</code> macro — it queries the CPU at runtime (via the <code>cpuid</code> instruction under the hood), not at compile time, so the same compiled binary correctly reports different results on different machines. This book's own sandbox genuinely has AVX2 and FMA available, which is why Worked Example 5.1.1's <code>#[target_feature(enable = "avx")]</code> function can run here at all.</p>
+<h3 id="worked-example-522-lane-wise-comparison-and-what-true-actually-looks-like">Worked Example 5.2.2 — lane-wise comparison, and what "true" actually looks like<a class="headerlink" href="#worked-example-522-lane-wise-comparison-and-what-true-actually-looks-like" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">let</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f32x8</span><span class="p">::</span><span class="n">new</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">3.0</span><span class="p">,</span><span class="w"> </span><span class="mf">4.0</span><span class="p">,</span><span class="w"> </span><span class="mf">5.0</span><span class="p">,</span><span class="w"> </span><span class="mf">6.0</span><span class="p">,</span><span class="w"> </span><span class="mf">7.0</span><span class="p">,</span><span class="w"> </span><span class="mf">8.0</span><span class="p">]);</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kd">let</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f32x8</span><span class="p">::</span><span class="n">new</span><span class="p">([</span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">5.0</span><span class="p">,</span><span class="w"> </span><span class="mf">5.0</span><span class="p">,</span><span class="w"> </span><span class="mf">3.0</span><span class="p">,</span><span class="w"> </span><span class="mf">9.0</span><span class="p">,</span><span class="w"> </span><span class="mf">8.0</span><span class="p">]);</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="kd">let</span><span class="w"> </span><span class="n">lt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">cmp_lt</span><span class="p">(</span><span class="n">b</span><span class="p">);</span>
+</code></pre></div>
+<p>Genuinely computed:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Lane-wise comparison, a &lt; b:
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  a      = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>  b      = [2.0, 2.0, 1.0, 5.0, 5.0, 3.0, 9.0, 8.0]
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>  a&lt;b raw lanes (bit pattern reinterpreted as f32) = [NaN, 0.0, 0.0, NaN, 0.0, 0.0, NaN, 0.0]
+</code></pre></div>
+<p>Hand-traced lane by lane: <code>1.0&lt;2.0</code> true, <code>2.0&lt;2.0</code> false, <code>3.0&lt;1.0</code> false, <code>4.0&lt;5.0</code> true, <code>5.0&lt;5.0</code> false, <code>6.0&lt;3.0</code> false, <code>7.0&lt;9.0</code> true, <code>8.0&lt;8.0</code> false — matching the <code>NaN</code>/<code>0.0</code> pattern above exactly once "true" and "false" are decoded correctly. <code>a.cmp_lt(b)</code> does not return one <code>bool</code>, or even eight <code>bool</code>s — it returns another <code>f32x8</code>, where SIMD hardware's actual boolean convention is "all bits set" for true and "all bits clear" for false. Reinterpreted as <code>f32</code> for printing, all-bits-set happens to be one of the bit patterns IEEE 754 defines as <code>NaN</code>, and all-bits-clear is exactly <code>0.0</code> — so <code>NaN</code> above means <em>true</em>, not "not a number gone wrong." <code>wide</code> provides a <code>.blend()</code> method (used correctly, lane-wise select) precisely so user code almost never needs to look at this bit pattern directly.</p>
+<blockquote>
+<p><code>[COMMON TRAP]</code> Seeing <code>NaN</code> in a comparison's output and assuming something went wrong is a completely reasonable first reaction — and precisely backwards here. This is SIMD hardware's real boolean representation leaking through <code>wide</code>'s otherwise safe API in the one place it's hard to fully hide: a lane-wise comparison has to return <em>something</em> of the same vector type it compared, and "all bits set" is what "true, in every bit" looks like once you commit to reusing the same 32-bit lane you'd otherwise store a float in.</p>
+</blockquote>
+<h2 id="53-the-vectorized-loop-shape-main-loop-plus-remainder-foundational">5.3 The Vectorized-Loop Shape: Main Loop Plus Remainder <code>[FOUNDATIONAL]</code><a class="headerlink" href="#53-the-vectorized-loop-shape-main-loop-plus-remainder-foundational" title="Permanent link">&para;</a></h2>
+<h3 id="intuition_2">Intuition<a class="headerlink" href="#intuition_2" title="Permanent link">&para;</a></h3>
+<p>A delivery truck that only accepts full pallets of 8 boxes at a time: the crew stacks as many complete pallets as the boxes allow, and whatever handful is left over — fewer than 8, by definition, or there'd be one more full pallet — gets carried on by hand, individually. The pallets are the fast, SIMD path; the leftover boxes are the unavoidable scalar path for whatever doesn't divide evenly by the register width.</p>
+<h3 id="background_2">Background<a class="headerlink" href="#background_2" title="Permanent link">&para;</a></h3>
+<p>Every vectorized loop this book writes from here forward is built from the same two pieces:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>simd_count = (n / width) * width     # how many elements the main loop covers
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>remainder  = n - simd_count          # always in [0, width - 1]
+</code></pre></div>
+<h3 id="worked-example-531-n-1003-width-8-a-real-remainder">Worked Example 5.3.1 — <code>n = 1003</code>, <code>width = 8</code>, a real remainder<a class="headerlink" href="#worked-example-531-n-1003-width-8-a-real-remainder" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">const</span><span class="w"> </span><span class="n">WIDTH</span><span class="p">:</span><span class="w"> </span><span class="kt">usize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">8</span><span class="p">;</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="k">fn</span><span class="w"> </span><span class="nf">vector_add_simd</span><span class="p">(</span><span class="n">a</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="p">[</span><span class="kt">f32</span><span class="p">],</span><span class="w"> </span><span class="n">b</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="p">[</span><span class="kt">f32</span><span class="p">])</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="kt">f32</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">len</span><span class="p">();</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span><span class="mf">0.0</span><span class="k">f32</span><span class="p">;</span><span class="w"> </span><span class="n">n</span><span class="p">];</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">simd_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">WIDTH</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">WIDTH</span><span class="p">;</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">simd_count</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">va</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f32x8</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="o">..</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">WIDTH</span><span class="p">].</span><span class="n">try_into</span><span class="p">().</span><span class="n">unwrap</span><span class="p">());</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">vb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f32x8</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="o">..</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">WIDTH</span><span class="p">].</span><span class="n">try_into</span><span class="p">().</span><span class="n">unwrap</span><span class="p">());</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="o">..</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">WIDTH</span><span class="p">].</span><span class="n">copy_from_slice</span><span class="p">(</span><span class="o">&amp;</span><span class="p">(</span><span class="n">va</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">vb</span><span class="p">).</span><span class="n">to_array</span><span class="p">());</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">        </span><span class="n">i</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">WIDTH</span><span class="p">;</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">];</span><span class="w">  </span><span class="c1">// remainder loop: whatever&#39;s left, scalar</span>
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="w">        </span><span class="n">i</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="w">    </span><span class="n">out</span>
+<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a><span class="p">}</span>
+</code></pre></div>
+<p>Compiled and run as the complete <code>02_vectorized_loop_shape.rs</code> further below:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>cargo<span class="w"> </span>run<span class="w"> </span>--release<span class="w"> </span>--bin<span class="w"> </span>02_vectorized_loop_shape
+</code></pre></div>
+<p>Genuinely compiled and run:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>n = 1003, width = 8
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>simd_count = (n / width) * width = 1000
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>remainder  = n - simd_count       = 3
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>elements checked: 1003, mismatches: 0
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>first main-loop chunk (i=0..8):
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>  a[0..8] = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>  b[0..8] = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4]
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>  simd_result[0..8]   = [0.0, 0.3, 0.6, 0.90000004, 1.2, 1.5, 1.8000001, 2.1]
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>  scalar_result[0..8] = [0.0, 0.3, 0.6, 0.90000004, 1.2, 1.5, 1.8000001, 2.1]
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>remainder tail (i=1000..1003):
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>  simd_result[1000..1003]   = [300.0, 300.3, 300.6]
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>  scalar_result[1000..1003] = [300.0, 300.3, 300.6]
+</code></pre></div>
+<p><code>1003 / 8 = 125</code> (integer division truncates), so <code>simd_count = 125*8 = 1000</code> and <code>remainder = 3</code> — the main loop covers indices <code>0</code> through <code>999</code> in 125 chunks of 8, and a 3-element scalar tail covers indices <code>1000</code>, <code>1001</code>, <code>1002</code>. All 1003 elements were compared, in full, between the SIMD path and an independent plain scalar loop, and <code>mismatches: 0</code> is a genuine count, not an assumption — including the first chunk's <code>0.90000004</code> and <code>1.8000001</code>, real <code>f32</code> rounding artifacts that both paths reproduce identically rather than one path "cleaning up."</p>
+<blockquote>
+<p><code>[COMMON TRAP]</code> It's tempting to test only with sizes that divide evenly by the width — everything passes, because the remainder loop's body never executes, exactly as Mojo's edition of this same trap warns. This chapter deliberately chose <code>n = 1003</code>, not a multiple of 8, specifically so the remainder loop's three real iterations show up in the verified output above rather than staying untested.</p>
+</blockquote>
+<h2 id="54-simd-reduction-accumulate-wide-reduce-narrow-foundational">5.4 SIMD Reduction: Accumulate Wide, Reduce Narrow <code>[FOUNDATIONAL]</code><a class="headerlink" href="#54-simd-reduction-accumulate-wide-reduce-narrow-foundational" title="Permanent link">&para;</a></h2>
+<h3 id="intuition_3">Intuition<a class="headerlink" href="#intuition_3" title="Permanent link">&para;</a></h3>
+<p>Eight cash registers ring up sales all day, completely independently, each keeping its own running subtotal. Only once, at closing time, does the manager walk to all eight registers and add their eight subtotals into one final total. The registers never coordinate during business hours — coordination happens exactly once, briefly, at the end.</p>
+<h3 id="background_3">Background<a class="headerlink" href="#background_3" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">fn</span><span class="w"> </span><span class="nf">sum_simd</span><span class="p">(</span><span class="n">data</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="p">[</span><span class="kt">f32</span><span class="p">])</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">acc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f32x8</span><span class="p">::</span><span class="n">ZERO</span><span class="p">;</span><span class="w">               </span><span class="c1">// 8 independent running subtotals</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">simd_count</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">        </span><span class="n">acc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">acc</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">f32x8</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">..</span><span class="n">i</span><span class="o">+</span><span class="mi">8</span><span class="p">].</span><span class="n">try_into</span><span class="p">().</span><span class="n">unwrap</span><span class="p">());</span><span class="w">  </span><span class="c1">// lane-wise, per chunk</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">        </span><span class="n">i</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">8</span><span class="p">;</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">acc</span><span class="p">.</span><span class="n">reduce_add</span><span class="p">();</span><span class="w">         </span><span class="c1">// ONE horizontal reduction, at the very end</span>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="w">    </span><span class="c1">// ... remainder loop ...</span>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="w">    </span><span class="n">total</span>
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="worked-example-541-the-first-two-chunks-and-a-closed-form-check">Worked Example 5.4.1 — the first two chunks, and a closed-form check<a class="headerlink" href="#worked-example-541-the-first-two-chunks-and-a-closed-form-check" title="Permanent link">&para;</a></h3>
+<p>With <code>data[i] = i+1</code> for <code>i</code> in <code>1..=16</code> and <code>width = 8</code>, compiled and run as part of <code>03_reduction_and_benchmark.rs</code> further below:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>chunk 0: data = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>  running vector_sum = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>chunk 1: data = [9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0]
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>  running vector_sum = [10.0, 12.0, 14.0, 16.0, 18.0, 20.0, 22.0, 24.0]
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>horizontal reduction of vector_sum = 136
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>closed-form sum 1..=16 (n(n+1)/2)   = 136
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>match? true
+</code></pre></div>
+<p>Lane 0 is quietly accumulating <code>1, 9</code> (sum <code>10</code>); lane 1, <code>2, 10</code> (sum <code>12</code>); and so on — eight separate partial sums, each covering a different residue class mod 8, computed simultaneously. <code>reduce_add()</code> folds those eight partial sums into one, <code>136</code>, matching the closed-form <code>n(n+1)/2 = 16×17/2 = 136</code> exactly.</p>
+<h3 id="worked-example-542-a-genuine-benchmark-and-an-accuracy-result-this-chapter-did-not-go-looking-for">Worked Example 5.4.2 — a genuine benchmark, and an accuracy result this chapter did not go looking for<a class="headerlink" href="#worked-example-542-a-genuine-benchmark-and-an-accuracy-result-this-chapter-did-not-go-looking-for" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>cargo<span class="w"> </span>run<span class="w"> </span>--release<span class="w"> </span>--bin<span class="w"> </span>03_reduction_and_benchmark
+</code></pre></div>
+<p>Genuinely compiled and run, on 20 million <code>f32</code> values, timing the best of 5 runs each, with an independent <code>f64</code>-accumulated reference computed for comparison (not timed — it exists purely to check correctness):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>n = 20000000 elements, best of 5 runs each
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>scalar sum:    0.0261 s, result = 452170620
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>SIMD sum:      0.0096 s, result = 479999420
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>f64 reference (not timed):  result = 479999420
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>scalar/SIMD time ratio: 2.71x
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>scalar result matches f64 reference? false
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>SIMD result matches f64 reference?   true
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>scalar error vs reference: 27828800 (5.7977%)
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>SIMD error vs reference:   0 (0.0000%)
+</code></pre></div>
+<p>This is worth stopping on, because it's not the result this chapter set out to demonstrate — it's a real numerical phenomenon this book's own benchmark surfaced, verified rather than smoothed over. The SIMD sum is genuinely <code>2.71×</code> faster (this book measured a <code>2.66×</code>–<code>2.97×</code> range across repeated runs), which is the expected story: 8 lanes doing the additions in parallel. But the <em>scalar</em> sum is also genuinely, measurably wrong — off from the <code>f64</code>-accumulated reference by nearly <code>5.8%</code>, while the SIMD sum matches that reference bit-for-bit. Neither number was hand-picked; both came directly out of the same benchmark run.</p>
+<p>The reason is <code>f32</code>'s limited precision (24 bits of mantissa, exact only up to <code>2^24 ≈ 16.78</code> million) meeting a 20-million-element sum head-on. A single scalar accumulator summing all 20 million values sequentially grows past <code>16.78</code> million well before the loop finishes, and every addition after that point is adding a small value (at most <code>48.0</code> here) to an accumulator too large for <code>f32</code> to represent the result exactly — the small addend is partially or entirely rounded away, over and over, for millions of iterations, compounding into a real, measurable error. The SIMD version's 8 lane-accumulators each only ever sum roughly <code>2.5</code> million values before the single, final <code>reduce_add()</code> combines them — each individual lane total stays much smaller for much longer, so each one loses far less precision before the eight are finally combined into one number at the very end.</p>
+<blockquote>
+<p><code>[COMMON TRAP]</code> It's tempting to treat "SIMD is faster" and "SIMD gave a more accurate answer" as two lucky, unrelated facts about the same benchmark. They're not unrelated — both come from the identical structural change, splitting one long sequential accumulation into eight shorter, independent ones. The 8-way split is what buys the speed (eight adds genuinely execute per instruction), and it's <em>also</em> what buys the accuracy (eight partial sums, each accumulating roughly an eighth as many terms, each staying numerically well-behaved roughly eight times longer before the one combining step at the end). Neither a plain scalar loop unrolled by hand nor a naive SIMD loop that reduces after every single chunk (rather than accumulating across all chunks first) would reproduce this same accuracy benefit — it specifically depends on keeping the reduction wide for as long as possible, exactly as this section's own "accumulate wide, reduce narrow" name says.</p>
+</blockquote>
+<h2 id="55-why-this-chapter-depends-on-chapter-3s-soa-argument-foundational">5.5 Why This Chapter Depends on Chapter 3's SoA Argument <code>[FOUNDATIONAL]</code><a class="headerlink" href="#55-why-this-chapter-depends-on-chapter-3s-soa-argument-foundational" title="Permanent link">&para;</a></h2>
+<h3 id="intuition_4">Intuition<a class="headerlink" href="#intuition_4" title="Permanent link">&para;</a></h3>
+<p>Every SIMD load this chapter wrote — <code>f32x8::new(data[i..i+8].try_into().unwrap())</code> — assumes eight contiguous, tightly-packed <code>f32</code> values sit at <code>data[i]</code> through <code>data[i+7]</code>, ready to be pulled into one register with a single instruction. That assumption isn't automatic; it's exactly the property Chapter 3 spent an entire chapter arguing for.</p>
+<h3 id="background_4">Background<a class="headerlink" href="#background_4" title="Permanent link">&para;</a></h3>
+<p>Chapter 3.1's <code>Particle</code> struct, under Array-of-Structs, packs <code>vx</code> between <code>y</code>/<code>z</code> and <code>vy</code>/<code>vz</code>/<code>mass</code> — a single field, <code>vx</code>, is never eight contiguous <code>f32</code>s anywhere in that layout; it's one <code>f32</code> every 28 bytes. A SIMD load of eight consecutive <code>vx</code> values from an AoS array would need eight separate, scattered loads — gather, not vectorized load — defeating the entire premise of this chapter's <code>f32x8::new(slice[i..i+8].try_into().unwrap())</code>. Struct-of-Arrays, by contrast, is precisely "every element of one field, contiguous" — which is precisely "exactly what a SIMD load needs, already true by construction."</p>
+<blockquote>
+<p><code>[COMMON TRAP]</code> It's tempting to read this chapter and Chapter 3 as covering unrelated topics — one about CPU vector instructions, one about struct layout. They're the same argument at two different levels: Chapter 3 established <em>why</em> SoA is the right layout for bulk numerical operations (bus utilization, cache-line usage); this chapter shows <em>one concrete mechanism</em> — a genuinely 2.7×–3.0× faster, and here, more accurate, vectorized sum — that SoA's contiguity directly enables and AoS directly forecloses. This book's <code>Tensor</code> type, SoA since Part 1 by Chapter 3's argument, is exactly what makes every reduction and elementwise kernel from Part 2 onward eligible for the loop shape this chapter just built.</p>
+</blockquote>
+<h2 id="complete-runnable-code">Complete Runnable Code<a class="headerlink" href="#complete-runnable-code" title="Permanent link">&para;</a></h2>
+<h3 id="file-01_lanes_and_intrinsicsrs">File: <code>01_lanes_and_intrinsics.rs</code><a class="headerlink" href="#file-01_lanes_and_intrinsicsrs" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">use</span><span class="w"> </span><span class="n">wide</span><span class="p">::{</span><span class="n">f32x8</span><span class="p">,</span><span class="w"> </span><span class="n">CmpLt</span><span class="p">};</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="cp">#[target_feature(enable = </span><span class="s">&quot;avx&quot;</span><span class="cp">)]</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="k">unsafe</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">add_via_raw_intrinsic</span><span class="p">(</span><span class="n">a</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="kt">f32</span><span class="p">;</span><span class="w"> </span><span class="mi">8</span><span class="p">],</span><span class="w"> </span><span class="n">b</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="kt">f32</span><span class="p">;</span><span class="w"> </span><span class="mi">8</span><span class="p">])</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="p">[</span><span class="kt">f32</span><span class="p">;</span><span class="w"> </span><span class="mi">8</span><span class="p">]</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="w">    </span><span class="k">use</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">arch</span><span class="p">::</span><span class="n">x86_64</span><span class="p">::{</span><span class="n">_mm256_add_ps</span><span class="p">,</span><span class="w"> </span><span class="n">_mm256_loadu_ps</span><span class="p">,</span><span class="w"> </span><span class="n">_mm256_storeu_ps</span><span class="p">};</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="w">    </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">va</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_mm256_loadu_ps</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">as_ptr</span><span class="p">());</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">vb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_mm256_loadu_ps</span><span class="p">(</span><span class="n">b</span><span class="p">.</span><span class="n">as_ptr</span><span class="p">());</span>
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">vc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_mm256_add_ps</span><span class="p">(</span><span class="n">va</span><span class="p">,</span><span class="w"> </span><span class="n">vb</span><span class="p">);</span>
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">0.0</span><span class="k">f32</span><span class="p">;</span><span class="w"> </span><span class="mi">8</span><span class="p">];</span>
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a><span class="w">        </span><span class="n">_mm256_storeu_ps</span><span class="p">(</span><span class="n">out</span><span class="p">.</span><span class="n">as_mut_ptr</span><span class="p">(),</span><span class="w"> </span><span class="n">vc</span><span class="p">);</span>
+<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a><span class="w">        </span><span class="n">out</span>
+<a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a><span class="p">}</span>
+<a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a>
+<a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a><span class="k">fn</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">1.0</span><span class="k">f32</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">3.0</span><span class="p">,</span><span class="w"> </span><span class="mf">4.0</span><span class="p">,</span><span class="w"> </span><span class="mf">5.0</span><span class="p">,</span><span class="w"> </span><span class="mf">6.0</span><span class="p">,</span><span class="w"> </span><span class="mf">7.0</span><span class="p">,</span><span class="w"> </span><span class="mf">8.0</span><span class="p">];</span>
+<a id="__codelineno-14-18" name="__codelineno-14-18" href="#__codelineno-14-18"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">10.0</span><span class="k">f32</span><span class="p">,</span><span class="w"> </span><span class="mf">20.0</span><span class="p">,</span><span class="w"> </span><span class="mf">30.0</span><span class="p">,</span><span class="w"> </span><span class="mf">40.0</span><span class="p">,</span><span class="w"> </span><span class="mf">50.0</span><span class="p">,</span><span class="w"> </span><span class="mf">60.0</span><span class="p">,</span><span class="w"> </span><span class="mf">70.0</span><span class="p">,</span><span class="w"> </span><span class="mf">80.0</span><span class="p">];</span>
+<a id="__codelineno-14-19" name="__codelineno-14-19" href="#__codelineno-14-19"></a>
+<a id="__codelineno-14-20" name="__codelineno-14-20" href="#__codelineno-14-20"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">wide_result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">f32x8</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">f32x8</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="n">b</span><span class="p">)).</span><span class="n">to_array</span><span class="p">();</span>
+<a id="__codelineno-14-21" name="__codelineno-14-21" href="#__codelineno-14-21"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">raw_result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="fm">is_x86_feature_detected!</span><span class="p">(</span><span class="s">&quot;avx&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-14-22" name="__codelineno-14-22" href="#__codelineno-14-22"></a><span class="w">        </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">add_via_raw_intrinsic</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-14-23" name="__codelineno-14-23" href="#__codelineno-14-23"></a><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-14-24" name="__codelineno-14-24" href="#__codelineno-14-24"></a><span class="w">        </span><span class="p">[</span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="mi">8</span><span class="p">]</span>
+<a id="__codelineno-14-25" name="__codelineno-14-25" href="#__codelineno-14-25"></a><span class="w">    </span><span class="p">};</span>
+<a id="__codelineno-14-26" name="__codelineno-14-26" href="#__codelineno-14-26"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;wide::f32x8 result:        {:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">wide_result</span><span class="p">);</span>
+<a id="__codelineno-14-27" name="__codelineno-14-27" href="#__codelineno-14-27"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;raw _mm256_add_ps result:  {:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">raw_result</span><span class="p">);</span>
+<a id="__codelineno-14-28" name="__codelineno-14-28" href="#__codelineno-14-28"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;identical? {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">wide_result</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">raw_result</span><span class="p">);</span>
+<a id="__codelineno-14-29" name="__codelineno-14-29" href="#__codelineno-14-29"></a>
+<a id="__codelineno-14-30" name="__codelineno-14-30" href="#__codelineno-14-30"></a><span class="w">    </span><span class="fm">println!</span><span class="p">();</span>
+<a id="__codelineno-14-31" name="__codelineno-14-31" href="#__codelineno-14-31"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;CPU feature detection (genuinely queried at runtime):&quot;</span><span class="p">);</span>
+<a id="__codelineno-14-32" name="__codelineno-14-32" href="#__codelineno-14-32"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  sse2  = {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="fm">is_x86_feature_detected!</span><span class="p">(</span><span class="s">&quot;sse2&quot;</span><span class="p">));</span>
+<a id="__codelineno-14-33" name="__codelineno-14-33" href="#__codelineno-14-33"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  sse4.1= {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="fm">is_x86_feature_detected!</span><span class="p">(</span><span class="s">&quot;sse4.1&quot;</span><span class="p">));</span>
+<a id="__codelineno-14-34" name="__codelineno-14-34" href="#__codelineno-14-34"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  avx   = {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="fm">is_x86_feature_detected!</span><span class="p">(</span><span class="s">&quot;avx&quot;</span><span class="p">));</span>
+<a id="__codelineno-14-35" name="__codelineno-14-35" href="#__codelineno-14-35"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  avx2  = {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="fm">is_x86_feature_detected!</span><span class="p">(</span><span class="s">&quot;avx2&quot;</span><span class="p">));</span>
+<a id="__codelineno-14-36" name="__codelineno-14-36" href="#__codelineno-14-36"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  fma   = {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="fm">is_x86_feature_detected!</span><span class="p">(</span><span class="s">&quot;fma&quot;</span><span class="p">));</span>
+<a id="__codelineno-14-37" name="__codelineno-14-37" href="#__codelineno-14-37"></a><span class="w">    </span><span class="fm">println!</span><span class="p">();</span>
+<a id="__codelineno-14-38" name="__codelineno-14-38" href="#__codelineno-14-38"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;size_of::&lt;wide::f32x4&gt;() = {} bytes (a 128-bit register)&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">mem</span><span class="p">::</span><span class="n">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="n">wide</span><span class="p">::</span><span class="n">f32x4</span><span class="o">&gt;</span><span class="p">());</span>
+<a id="__codelineno-14-39" name="__codelineno-14-39" href="#__codelineno-14-39"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;size_of::&lt;wide::f32x8&gt;() = {} bytes (a 256-bit register)&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">mem</span><span class="p">::</span><span class="n">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="n">wide</span><span class="p">::</span><span class="n">f32x8</span><span class="o">&gt;</span><span class="p">());</span>
+<a id="__codelineno-14-40" name="__codelineno-14-40" href="#__codelineno-14-40"></a>
+<a id="__codelineno-14-41" name="__codelineno-14-41" href="#__codelineno-14-41"></a><span class="w">    </span><span class="fm">println!</span><span class="p">();</span>
+<a id="__codelineno-14-42" name="__codelineno-14-42" href="#__codelineno-14-42"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;Lane-wise comparison, a &lt; b:&quot;</span><span class="p">);</span>
+<a id="__codelineno-14-43" name="__codelineno-14-43" href="#__codelineno-14-43"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">cmp_a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f32x8</span><span class="p">::</span><span class="n">new</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">3.0</span><span class="p">,</span><span class="w"> </span><span class="mf">4.0</span><span class="p">,</span><span class="w"> </span><span class="mf">5.0</span><span class="p">,</span><span class="w"> </span><span class="mf">6.0</span><span class="p">,</span><span class="w"> </span><span class="mf">7.0</span><span class="p">,</span><span class="w"> </span><span class="mf">8.0</span><span class="p">]);</span>
+<a id="__codelineno-14-44" name="__codelineno-14-44" href="#__codelineno-14-44"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">cmp_b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f32x8</span><span class="p">::</span><span class="n">new</span><span class="p">([</span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">5.0</span><span class="p">,</span><span class="w"> </span><span class="mf">5.0</span><span class="p">,</span><span class="w"> </span><span class="mf">3.0</span><span class="p">,</span><span class="w"> </span><span class="mf">9.0</span><span class="p">,</span><span class="w"> </span><span class="mf">8.0</span><span class="p">]);</span>
+<a id="__codelineno-14-45" name="__codelineno-14-45" href="#__codelineno-14-45"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">lt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cmp_a</span><span class="p">.</span><span class="n">cmp_lt</span><span class="p">(</span><span class="n">cmp_b</span><span class="p">);</span>
+<a id="__codelineno-14-46" name="__codelineno-14-46" href="#__codelineno-14-46"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  a      = {:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">cmp_a</span><span class="p">.</span><span class="n">to_array</span><span class="p">());</span>
+<a id="__codelineno-14-47" name="__codelineno-14-47" href="#__codelineno-14-47"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  b      = {:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">cmp_b</span><span class="p">.</span><span class="n">to_array</span><span class="p">());</span>
+<a id="__codelineno-14-48" name="__codelineno-14-48" href="#__codelineno-14-48"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  a&lt;b raw lanes (bit pattern reinterpreted as f32) = {:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lt</span><span class="p">.</span><span class="n">to_array</span><span class="p">());</span>
+<a id="__codelineno-14-49" name="__codelineno-14-49" href="#__codelineno-14-49"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>cargo<span class="w"> </span>run<span class="w"> </span>--release<span class="w"> </span>--bin<span class="w"> </span>01_lanes_and_intrinsics
+</code></pre></div>
+<h3 id="file-02_vectorized_loop_shapers">File: <code>02_vectorized_loop_shape.rs</code><a class="headerlink" href="#file-02_vectorized_loop_shapers" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="k">use</span><span class="w"> </span><span class="n">wide</span><span class="p">::</span><span class="n">f32x8</span><span class="p">;</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="k">const</span><span class="w"> </span><span class="n">WIDTH</span><span class="p">:</span><span class="w"> </span><span class="kt">usize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">8</span><span class="p">;</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="k">fn</span><span class="w"> </span><span class="nf">vector_add_simd</span><span class="p">(</span><span class="n">a</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="p">[</span><span class="kt">f32</span><span class="p">],</span><span class="w"> </span><span class="n">b</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="p">[</span><span class="kt">f32</span><span class="p">])</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="kt">f32</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">len</span><span class="p">();</span>
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="w">    </span><span class="fm">assert_eq!</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">len</span><span class="p">());</span>
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span><span class="mf">0.0</span><span class="k">f32</span><span class="p">;</span><span class="w"> </span><span class="n">n</span><span class="p">];</span>
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>
+<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">simd_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">WIDTH</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">WIDTH</span><span class="p">;</span>
+<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a><span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">simd_count</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">va</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f32x8</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="o">..</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">WIDTH</span><span class="p">].</span><span class="n">try_into</span><span class="p">().</span><span class="n">unwrap</span><span class="p">());</span>
+<a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">vb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f32x8</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="o">..</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">WIDTH</span><span class="p">].</span><span class="n">try_into</span><span class="p">().</span><span class="n">unwrap</span><span class="p">());</span>
+<a id="__codelineno-16-15" name="__codelineno-16-15" href="#__codelineno-16-15"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">vc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">va</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">vb</span><span class="p">;</span>
+<a id="__codelineno-16-16" name="__codelineno-16-16" href="#__codelineno-16-16"></a><span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="o">..</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">WIDTH</span><span class="p">].</span><span class="n">copy_from_slice</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vc</span><span class="p">.</span><span class="n">to_array</span><span class="p">());</span>
+<a id="__codelineno-16-17" name="__codelineno-16-17" href="#__codelineno-16-17"></a><span class="w">        </span><span class="n">i</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">WIDTH</span><span class="p">;</span>
+<a id="__codelineno-16-18" name="__codelineno-16-18" href="#__codelineno-16-18"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-16-19" name="__codelineno-16-19" href="#__codelineno-16-19"></a><span class="w">    </span><span class="c1">// remainder loop: whatever&#39;s left, scalar</span>
+<a id="__codelineno-16-20" name="__codelineno-16-20" href="#__codelineno-16-20"></a><span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-16-21" name="__codelineno-16-21" href="#__codelineno-16-21"></a><span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<a id="__codelineno-16-22" name="__codelineno-16-22" href="#__codelineno-16-22"></a><span class="w">        </span><span class="n">i</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<a id="__codelineno-16-23" name="__codelineno-16-23" href="#__codelineno-16-23"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-16-24" name="__codelineno-16-24" href="#__codelineno-16-24"></a><span class="w">    </span><span class="n">out</span>
+<a id="__codelineno-16-25" name="__codelineno-16-25" href="#__codelineno-16-25"></a><span class="p">}</span>
+<a id="__codelineno-16-26" name="__codelineno-16-26" href="#__codelineno-16-26"></a>
+<a id="__codelineno-16-27" name="__codelineno-16-27" href="#__codelineno-16-27"></a><span class="k">fn</span><span class="w"> </span><span class="nf">vector_add_scalar</span><span class="p">(</span><span class="n">a</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="p">[</span><span class="kt">f32</span><span class="p">],</span><span class="w"> </span><span class="n">b</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="p">[</span><span class="kt">f32</span><span class="p">])</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="kt">f32</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-16-28" name="__codelineno-16-28" href="#__codelineno-16-28"></a><span class="w">    </span><span class="n">a</span><span class="p">.</span><span class="n">iter</span><span class="p">().</span><span class="n">zip</span><span class="p">(</span><span class="n">b</span><span class="p">.</span><span class="n">iter</span><span class="p">()).</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="o">|</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">y</span><span class="p">).</span><span class="n">collect</span><span class="p">()</span>
+<a id="__codelineno-16-29" name="__codelineno-16-29" href="#__codelineno-16-29"></a><span class="p">}</span>
+<a id="__codelineno-16-30" name="__codelineno-16-30" href="#__codelineno-16-30"></a>
+<a id="__codelineno-16-31" name="__codelineno-16-31" href="#__codelineno-16-31"></a><span class="k">fn</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-16-32" name="__codelineno-16-32" href="#__codelineno-16-32"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">n</span><span class="p">:</span><span class="w"> </span><span class="kt">usize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1003</span><span class="p">;</span><span class="w"> </span><span class="c1">// deliberately NOT a multiple of 8</span>
+<a id="__codelineno-16-33" name="__codelineno-16-33" href="#__codelineno-16-33"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">simd_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">WIDTH</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">WIDTH</span><span class="p">;</span>
+<a id="__codelineno-16-34" name="__codelineno-16-34" href="#__codelineno-16-34"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">remainder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">simd_count</span><span class="p">;</span>
+<a id="__codelineno-16-35" name="__codelineno-16-35" href="#__codelineno-16-35"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;n = {n}, width = {WIDTH}&quot;</span><span class="p">);</span>
+<a id="__codelineno-16-36" name="__codelineno-16-36" href="#__codelineno-16-36"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;simd_count = (n / width) * width = {simd_count}&quot;</span><span class="p">);</span>
+<a id="__codelineno-16-37" name="__codelineno-16-37" href="#__codelineno-16-37"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;remainder  = n - simd_count       = {remainder}&quot;</span><span class="p">);</span>
+<a id="__codelineno-16-38" name="__codelineno-16-38" href="#__codelineno-16-38"></a>
+<a id="__codelineno-16-39" name="__codelineno-16-39" href="#__codelineno-16-39"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">a</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="kt">f32</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="o">..</span><span class="n">n</span><span class="p">).</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">i</span><span class="o">|</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.1</span><span class="p">).</span><span class="n">collect</span><span class="p">();</span>
+<a id="__codelineno-16-40" name="__codelineno-16-40" href="#__codelineno-16-40"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">b</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="kt">f32</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="o">..</span><span class="n">n</span><span class="p">).</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">i</span><span class="o">|</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.2</span><span class="p">).</span><span class="n">collect</span><span class="p">();</span>
+<a id="__codelineno-16-41" name="__codelineno-16-41" href="#__codelineno-16-41"></a>
+<a id="__codelineno-16-42" name="__codelineno-16-42" href="#__codelineno-16-42"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">simd_result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vector_add_simd</span><span class="p">(</span><span class="o">&amp;</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">b</span><span class="p">);</span>
+<a id="__codelineno-16-43" name="__codelineno-16-43" href="#__codelineno-16-43"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">scalar_result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vector_add_scalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">b</span><span class="p">);</span>
+<a id="__codelineno-16-44" name="__codelineno-16-44" href="#__codelineno-16-44"></a>
+<a id="__codelineno-16-45" name="__codelineno-16-45" href="#__codelineno-16-45"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">mismatches</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-16-46" name="__codelineno-16-46" href="#__codelineno-16-46"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="o">..</span><span class="n">n</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-16-47" name="__codelineno-16-47" href="#__codelineno-16-47"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">simd_result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">scalar_result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-16-48" name="__codelineno-16-48" href="#__codelineno-16-48"></a><span class="w">            </span><span class="n">mismatches</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<a id="__codelineno-16-49" name="__codelineno-16-49" href="#__codelineno-16-49"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-16-50" name="__codelineno-16-50" href="#__codelineno-16-50"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-16-51" name="__codelineno-16-51" href="#__codelineno-16-51"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;elements checked: {n}, mismatches: {mismatches}&quot;</span><span class="p">);</span>
+<a id="__codelineno-16-52" name="__codelineno-16-52" href="#__codelineno-16-52"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;first main-loop chunk (i=0..8):&quot;</span><span class="p">);</span>
+<a id="__codelineno-16-53" name="__codelineno-16-53" href="#__codelineno-16-53"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  a[0..8] = {:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="o">..</span><span class="mi">8</span><span class="p">]);</span>
+<a id="__codelineno-16-54" name="__codelineno-16-54" href="#__codelineno-16-54"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  b[0..8] = {:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="o">..</span><span class="mi">8</span><span class="p">]);</span>
+<a id="__codelineno-16-55" name="__codelineno-16-55" href="#__codelineno-16-55"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  simd_result[0..8]   = {:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">simd_result</span><span class="p">[</span><span class="mi">0</span><span class="o">..</span><span class="mi">8</span><span class="p">]);</span>
+<a id="__codelineno-16-56" name="__codelineno-16-56" href="#__codelineno-16-56"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  scalar_result[0..8] = {:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">scalar_result</span><span class="p">[</span><span class="mi">0</span><span class="o">..</span><span class="mi">8</span><span class="p">]);</span>
+<a id="__codelineno-16-57" name="__codelineno-16-57" href="#__codelineno-16-57"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;remainder tail (i=1000..1003):&quot;</span><span class="p">);</span>
+<a id="__codelineno-16-58" name="__codelineno-16-58" href="#__codelineno-16-58"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  simd_result[1000..1003]   = {:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">simd_result</span><span class="p">[</span><span class="mi">1000</span><span class="o">..</span><span class="mi">1003</span><span class="p">]);</span>
+<a id="__codelineno-16-59" name="__codelineno-16-59" href="#__codelineno-16-59"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  scalar_result[1000..1003] = {:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">scalar_result</span><span class="p">[</span><span class="mi">1000</span><span class="o">..</span><span class="mi">1003</span><span class="p">]);</span>
+<a id="__codelineno-16-60" name="__codelineno-16-60" href="#__codelineno-16-60"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>cargo<span class="w"> </span>run<span class="w"> </span>--release<span class="w"> </span>--bin<span class="w"> </span>02_vectorized_loop_shape
+</code></pre></div>
+<h3 id="file-03_reduction_and_benchmarkrs">File: <code>03_reduction_and_benchmark.rs</code><a class="headerlink" href="#file-03_reduction_and_benchmarkrs" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="k">use</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">hint</span><span class="p">::</span><span class="n">black_box</span><span class="p">;</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="k">use</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">time</span><span class="p">::</span><span class="n">Instant</span><span class="p">;</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="k">use</span><span class="w"> </span><span class="n">wide</span><span class="p">::</span><span class="n">f32x8</span><span class="p">;</span>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="k">const</span><span class="w"> </span><span class="n">WIDTH</span><span class="p">:</span><span class="w"> </span><span class="kt">usize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">8</span><span class="p">;</span>
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="k">fn</span><span class="w"> </span><span class="nf">sum_simd</span><span class="p">(</span><span class="n">data</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="p">[</span><span class="kt">f32</span><span class="p">])</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">len</span><span class="p">();</span>
+<a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">simd_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">WIDTH</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">WIDTH</span><span class="p">;</span>
+<a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a>
+<a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">acc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f32x8</span><span class="p">::</span><span class="n">ZERO</span><span class="p">;</span><span class="w"> </span><span class="c1">// width-wide accumulator: 8 independent running subtotals</span>
+<a id="__codelineno-18-12" name="__codelineno-18-12" href="#__codelineno-18-12"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-18-13" name="__codelineno-18-13" href="#__codelineno-18-13"></a><span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">simd_count</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-14" name="__codelineno-18-14" href="#__codelineno-18-14"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f32x8</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">..</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">WIDTH</span><span class="p">].</span><span class="n">try_into</span><span class="p">().</span><span class="n">unwrap</span><span class="p">());</span>
+<a id="__codelineno-18-15" name="__codelineno-18-15" href="#__codelineno-18-15"></a><span class="w">        </span><span class="n">acc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">acc</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">v</span><span class="p">;</span><span class="w"> </span><span class="c1">// lane-wise add, once per chunk -- no reduction yet</span>
+<a id="__codelineno-18-16" name="__codelineno-18-16" href="#__codelineno-18-16"></a><span class="w">        </span><span class="n">i</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">WIDTH</span><span class="p">;</span>
+<a id="__codelineno-18-17" name="__codelineno-18-17" href="#__codelineno-18-17"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-18-18" name="__codelineno-18-18" href="#__codelineno-18-18"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">acc</span><span class="p">.</span><span class="n">reduce_add</span><span class="p">();</span><span class="w"> </span><span class="c1">// ONE horizontal reduction, at the very end</span>
+<a id="__codelineno-18-19" name="__codelineno-18-19" href="#__codelineno-18-19"></a><span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-20" name="__codelineno-18-20" href="#__codelineno-18-20"></a><span class="w">        </span><span class="n">total</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<a id="__codelineno-18-21" name="__codelineno-18-21" href="#__codelineno-18-21"></a><span class="w">        </span><span class="n">i</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<a id="__codelineno-18-22" name="__codelineno-18-22" href="#__codelineno-18-22"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-18-23" name="__codelineno-18-23" href="#__codelineno-18-23"></a><span class="w">    </span><span class="n">total</span>
+<a id="__codelineno-18-24" name="__codelineno-18-24" href="#__codelineno-18-24"></a><span class="p">}</span>
+<a id="__codelineno-18-25" name="__codelineno-18-25" href="#__codelineno-18-25"></a>
+<a id="__codelineno-18-26" name="__codelineno-18-26" href="#__codelineno-18-26"></a><span class="k">fn</span><span class="w"> </span><span class="nf">sum_scalar</span><span class="p">(</span><span class="n">data</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="p">[</span><span class="kt">f32</span><span class="p">])</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-27" name="__codelineno-18-27" href="#__codelineno-18-27"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="k">f32</span><span class="p">;</span>
+<a id="__codelineno-18-28" name="__codelineno-18-28" href="#__codelineno-18-28"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-29" name="__codelineno-18-29" href="#__codelineno-18-29"></a><span class="w">        </span><span class="n">total</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">v</span><span class="p">;</span>
+<a id="__codelineno-18-30" name="__codelineno-18-30" href="#__codelineno-18-30"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-18-31" name="__codelineno-18-31" href="#__codelineno-18-31"></a><span class="w">    </span><span class="n">total</span>
+<a id="__codelineno-18-32" name="__codelineno-18-32" href="#__codelineno-18-32"></a><span class="p">}</span>
+<a id="__codelineno-18-33" name="__codelineno-18-33" href="#__codelineno-18-33"></a>
+<a id="__codelineno-18-34" name="__codelineno-18-34" href="#__codelineno-18-34"></a><span class="sd">/// A high-precision reference sum, accumulated in f64 and rounded back to f32 only at</span>
+<a id="__codelineno-18-35" name="__codelineno-18-35" href="#__codelineno-18-35"></a><span class="sd">/// the very end. Used purely to check which of the two f32 sums above is closer to correct.</span>
+<a id="__codelineno-18-36" name="__codelineno-18-36" href="#__codelineno-18-36"></a><span class="k">fn</span><span class="w"> </span><span class="nf">sum_f64_reference</span><span class="p">(</span><span class="n">data</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="p">[</span><span class="kt">f32</span><span class="p">])</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-37" name="__codelineno-18-37" href="#__codelineno-18-37"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="k">f64</span><span class="p">;</span>
+<a id="__codelineno-18-38" name="__codelineno-18-38" href="#__codelineno-18-38"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-39" name="__codelineno-18-39" href="#__codelineno-18-39"></a><span class="w">        </span><span class="n">total</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f64</span><span class="p">;</span>
+<a id="__codelineno-18-40" name="__codelineno-18-40" href="#__codelineno-18-40"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-18-41" name="__codelineno-18-41" href="#__codelineno-18-41"></a><span class="w">    </span><span class="n">total</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span>
+<a id="__codelineno-18-42" name="__codelineno-18-42" href="#__codelineno-18-42"></a><span class="p">}</span>
+<a id="__codelineno-18-43" name="__codelineno-18-43" href="#__codelineno-18-43"></a>
+<a id="__codelineno-18-44" name="__codelineno-18-44" href="#__codelineno-18-44"></a><span class="k">fn</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-45" name="__codelineno-18-45" href="#__codelineno-18-45"></a><span class="w">    </span><span class="c1">// Worked Example: first two chunks of a real sum, data[i] = i+1, width=8</span>
+<a id="__codelineno-18-46" name="__codelineno-18-46" href="#__codelineno-18-46"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">small</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="kt">f32</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="o">..=</span><span class="mi">16</span><span class="p">).</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">i</span><span class="o">|</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">).</span><span class="n">collect</span><span class="p">();</span>
+<a id="__codelineno-18-47" name="__codelineno-18-47" href="#__codelineno-18-47"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">acc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f32x8</span><span class="p">::</span><span class="n">ZERO</span><span class="p">;</span>
+<a id="__codelineno-18-48" name="__codelineno-18-48" href="#__codelineno-18-48"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">chunk_idx</span><span class="p">,</span><span class="w"> </span><span class="n">chunk</span><span class="p">)</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">small</span><span class="p">.</span><span class="n">chunks</span><span class="p">(</span><span class="n">WIDTH</span><span class="p">).</span><span class="n">enumerate</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-49" name="__codelineno-18-49" href="#__codelineno-18-49"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f32x8</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="n">chunk</span><span class="p">.</span><span class="n">try_into</span><span class="p">().</span><span class="n">unwrap</span><span class="p">());</span>
+<a id="__codelineno-18-50" name="__codelineno-18-50" href="#__codelineno-18-50"></a><span class="w">        </span><span class="n">acc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">acc</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">v</span><span class="p">;</span>
+<a id="__codelineno-18-51" name="__codelineno-18-51" href="#__codelineno-18-51"></a><span class="w">        </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;chunk {chunk_idx}: data = {:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">chunk</span><span class="p">);</span>
+<a id="__codelineno-18-52" name="__codelineno-18-52" href="#__codelineno-18-52"></a><span class="w">        </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  running vector_sum = {:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">acc</span><span class="p">.</span><span class="n">to_array</span><span class="p">());</span>
+<a id="__codelineno-18-53" name="__codelineno-18-53" href="#__codelineno-18-53"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-18-54" name="__codelineno-18-54" href="#__codelineno-18-54"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">reduced</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">acc</span><span class="p">.</span><span class="n">reduce_add</span><span class="p">();</span>
+<a id="__codelineno-18-55" name="__codelineno-18-55" href="#__codelineno-18-55"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">closed_form</span><span class="p">:</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="o">..=</span><span class="mi">16</span><span class="p">).</span><span class="n">sum</span><span class="p">::</span><span class="o">&lt;</span><span class="kt">i32</span><span class="o">&gt;</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">;</span><span class="w"> </span><span class="c1">// n(n+1)/2 = 16*17/2 = 136</span>
+<a id="__codelineno-18-56" name="__codelineno-18-56" href="#__codelineno-18-56"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;horizontal reduction of vector_sum = {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">reduced</span><span class="p">);</span>
+<a id="__codelineno-18-57" name="__codelineno-18-57" href="#__codelineno-18-57"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;closed-form sum 1..=16 (n(n+1)/2)   = {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">closed_form</span><span class="p">);</span>
+<a id="__codelineno-18-58" name="__codelineno-18-58" href="#__codelineno-18-58"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;match? {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">reduced</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">closed_form</span><span class="p">);</span>
+<a id="__codelineno-18-59" name="__codelineno-18-59" href="#__codelineno-18-59"></a>
+<a id="__codelineno-18-60" name="__codelineno-18-60" href="#__codelineno-18-60"></a><span class="w">    </span><span class="fm">println!</span><span class="p">();</span>
+<a id="__codelineno-18-61" name="__codelineno-18-61" href="#__codelineno-18-61"></a><span class="w">    </span><span class="c1">// Genuine benchmark: scalar vs SIMD sum, large array, best of 5 runs each</span>
+<a id="__codelineno-18-62" name="__codelineno-18-62" href="#__codelineno-18-62"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">n</span><span class="p">:</span><span class="w"> </span><span class="kt">usize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">20_000_000</span><span class="p">;</span>
+<a id="__codelineno-18-63" name="__codelineno-18-63" href="#__codelineno-18-63"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">data</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="kt">f32</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="o">..</span><span class="n">n</span><span class="p">).</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">i</span><span class="o">|</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">97</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.5</span><span class="p">).</span><span class="n">collect</span><span class="p">();</span>
+<a id="__codelineno-18-64" name="__codelineno-18-64" href="#__codelineno-18-64"></a>
+<a id="__codelineno-18-65" name="__codelineno-18-65" href="#__codelineno-18-65"></a><span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">RUNS</span><span class="p">:</span><span class="w"> </span><span class="kt">u32</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span>
+<a id="__codelineno-18-66" name="__codelineno-18-66" href="#__codelineno-18-66"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">scalar_best</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">f64</span><span class="p">::</span><span class="n">MAX</span><span class="p">;</span>
+<a id="__codelineno-18-67" name="__codelineno-18-67" href="#__codelineno-18-67"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">scalar_result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="k">f32</span><span class="p">;</span>
+<a id="__codelineno-18-68" name="__codelineno-18-68" href="#__codelineno-18-68"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="o">..</span><span class="n">RUNS</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-69" name="__codelineno-18-69" href="#__codelineno-18-69"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Instant</span><span class="p">::</span><span class="n">now</span><span class="p">();</span>
+<a id="__codelineno-18-70" name="__codelineno-18-70" href="#__codelineno-18-70"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sum_scalar</span><span class="p">(</span><span class="n">black_box</span><span class="p">(</span><span class="o">&amp;</span><span class="n">data</span><span class="p">));</span>
+<a id="__codelineno-18-71" name="__codelineno-18-71" href="#__codelineno-18-71"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">elapsed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">start</span><span class="p">.</span><span class="n">elapsed</span><span class="p">().</span><span class="n">as_secs_f64</span><span class="p">();</span>
+<a id="__codelineno-18-72" name="__codelineno-18-72" href="#__codelineno-18-72"></a><span class="w">        </span><span class="n">black_box</span><span class="p">(</span><span class="n">r</span><span class="p">);</span>
+<a id="__codelineno-18-73" name="__codelineno-18-73" href="#__codelineno-18-73"></a><span class="w">        </span><span class="n">scalar_result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">r</span><span class="p">;</span>
+<a id="__codelineno-18-74" name="__codelineno-18-74" href="#__codelineno-18-74"></a><span class="w">        </span><span class="n">scalar_best</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">scalar_best</span><span class="p">.</span><span class="n">min</span><span class="p">(</span><span class="n">elapsed</span><span class="p">);</span>
+<a id="__codelineno-18-75" name="__codelineno-18-75" href="#__codelineno-18-75"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-18-76" name="__codelineno-18-76" href="#__codelineno-18-76"></a>
+<a id="__codelineno-18-77" name="__codelineno-18-77" href="#__codelineno-18-77"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">simd_best</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">f64</span><span class="p">::</span><span class="n">MAX</span><span class="p">;</span>
+<a id="__codelineno-18-78" name="__codelineno-18-78" href="#__codelineno-18-78"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">simd_result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="k">f32</span><span class="p">;</span>
+<a id="__codelineno-18-79" name="__codelineno-18-79" href="#__codelineno-18-79"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="o">..</span><span class="n">RUNS</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-80" name="__codelineno-18-80" href="#__codelineno-18-80"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Instant</span><span class="p">::</span><span class="n">now</span><span class="p">();</span>
+<a id="__codelineno-18-81" name="__codelineno-18-81" href="#__codelineno-18-81"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sum_simd</span><span class="p">(</span><span class="n">black_box</span><span class="p">(</span><span class="o">&amp;</span><span class="n">data</span><span class="p">));</span>
+<a id="__codelineno-18-82" name="__codelineno-18-82" href="#__codelineno-18-82"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">elapsed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">start</span><span class="p">.</span><span class="n">elapsed</span><span class="p">().</span><span class="n">as_secs_f64</span><span class="p">();</span>
+<a id="__codelineno-18-83" name="__codelineno-18-83" href="#__codelineno-18-83"></a><span class="w">        </span><span class="n">black_box</span><span class="p">(</span><span class="n">r</span><span class="p">);</span>
+<a id="__codelineno-18-84" name="__codelineno-18-84" href="#__codelineno-18-84"></a><span class="w">        </span><span class="n">simd_result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">r</span><span class="p">;</span>
+<a id="__codelineno-18-85" name="__codelineno-18-85" href="#__codelineno-18-85"></a><span class="w">        </span><span class="n">simd_best</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">simd_best</span><span class="p">.</span><span class="n">min</span><span class="p">(</span><span class="n">elapsed</span><span class="p">);</span>
+<a id="__codelineno-18-86" name="__codelineno-18-86" href="#__codelineno-18-86"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-18-87" name="__codelineno-18-87" href="#__codelineno-18-87"></a>
+<a id="__codelineno-18-88" name="__codelineno-18-88" href="#__codelineno-18-88"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">reference</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sum_f64_reference</span><span class="p">(</span><span class="o">&amp;</span><span class="n">data</span><span class="p">);</span>
+<a id="__codelineno-18-89" name="__codelineno-18-89" href="#__codelineno-18-89"></a>
+<a id="__codelineno-18-90" name="__codelineno-18-90" href="#__codelineno-18-90"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;n = {n} elements, best of {RUNS} runs each&quot;</span><span class="p">);</span>
+<a id="__codelineno-18-91" name="__codelineno-18-91" href="#__codelineno-18-91"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;scalar sum:    {:.4} s, result = {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">scalar_best</span><span class="p">,</span><span class="w"> </span><span class="n">scalar_result</span><span class="p">);</span>
+<a id="__codelineno-18-92" name="__codelineno-18-92" href="#__codelineno-18-92"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;SIMD sum:      {:.4} s, result = {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">simd_best</span><span class="p">,</span><span class="w"> </span><span class="n">simd_result</span><span class="p">);</span>
+<a id="__codelineno-18-93" name="__codelineno-18-93" href="#__codelineno-18-93"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;f64 reference (not timed):  result = {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">reference</span><span class="p">);</span>
+<a id="__codelineno-18-94" name="__codelineno-18-94" href="#__codelineno-18-94"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;scalar/SIMD time ratio: {:.2}x&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">scalar_best</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">simd_best</span><span class="p">);</span>
+<a id="__codelineno-18-95" name="__codelineno-18-95" href="#__codelineno-18-95"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;scalar result matches f64 reference? {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">scalar_result</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">reference</span><span class="p">);</span>
+<a id="__codelineno-18-96" name="__codelineno-18-96" href="#__codelineno-18-96"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;SIMD result matches f64 reference?   {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">simd_result</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">reference</span><span class="p">);</span>
+<a id="__codelineno-18-97" name="__codelineno-18-97" href="#__codelineno-18-97"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span>
+<a id="__codelineno-18-98" name="__codelineno-18-98" href="#__codelineno-18-98"></a><span class="w">        </span><span class="s">&quot;scalar error vs reference: {} ({:.4}%)&quot;</span><span class="p">,</span>
+<a id="__codelineno-18-99" name="__codelineno-18-99" href="#__codelineno-18-99"></a><span class="w">        </span><span class="n">reference</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">scalar_result</span><span class="p">,</span>
+<a id="__codelineno-18-100" name="__codelineno-18-100" href="#__codelineno-18-100"></a><span class="w">        </span><span class="mf">100.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">reference</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">scalar_result</span><span class="p">).</span><span class="n">abs</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f64</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">reference</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f64</span>
+<a id="__codelineno-18-101" name="__codelineno-18-101" href="#__codelineno-18-101"></a><span class="w">    </span><span class="p">);</span>
+<a id="__codelineno-18-102" name="__codelineno-18-102" href="#__codelineno-18-102"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span>
+<a id="__codelineno-18-103" name="__codelineno-18-103" href="#__codelineno-18-103"></a><span class="w">        </span><span class="s">&quot;SIMD error vs reference:   {} ({:.4}%)&quot;</span><span class="p">,</span>
+<a id="__codelineno-18-104" name="__codelineno-18-104" href="#__codelineno-18-104"></a><span class="w">        </span><span class="n">reference</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">simd_result</span><span class="p">,</span>
+<a id="__codelineno-18-105" name="__codelineno-18-105" href="#__codelineno-18-105"></a><span class="w">        </span><span class="mf">100.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">reference</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">simd_result</span><span class="p">).</span><span class="n">abs</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f64</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">reference</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f64</span>
+<a id="__codelineno-18-106" name="__codelineno-18-106" href="#__codelineno-18-106"></a><span class="w">    </span><span class="p">);</span>
+<a id="__codelineno-18-107" name="__codelineno-18-107" href="#__codelineno-18-107"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>cargo<span class="w"> </span>run<span class="w"> </span>--release<span class="w"> </span>--bin<span class="w"> </span>03_reduction_and_benchmark
+</code></pre></div>
+<p><code>Cargo.toml</code> for all three binaries:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="k">[package]</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;rust_ch5&quot;</span>
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="n">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;0.1.0&quot;</span>
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="n">edition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;2024&quot;</span>
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a><span class="k">[dependencies]</span>
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a><span class="n">wide</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;0.7&quot;</span>
+</code></pre></div>
+<h2 id="chapter-summary">Chapter Summary<a class="headerlink" href="#chapter-summary" title="Permanent link">&para;</a></h2>
+<p>Stable Rust has no first-class portable SIMD type — <code>std::simd</code> is nightly-only, unreachable in this sandbox exactly as <code>nvptx64-nvidia-cuda</code> was in Chapter 4 — so this book builds on <code>std::arch::x86_64</code>'s raw intrinsics and the <code>wide</code> crate's safe wrapper around them, confirmed identical on a real <code>_mm256_add_ps</code> call this chapter ran both ways. A SIMD register's width is a genuine, <code>size_of</code>-confirmed hardware fact — 16 bytes for <code>f32x4</code>, 32 for <code>f32x8</code> — and a lane-wise comparison returns another vector, not a scalar <code>bool</code>, its true/false lanes stored as SIMD hardware's real all-bits/no-bits convention, which prints as <code>NaN</code>/<code>0.0</code> when reinterpreted as <code>f32</code>. Every vectorized loop in this book follows the same shape: <code>simd_count = (n/width)*width</code> elements through a main SIMD loop, and a scalar remainder loop for whatever's left — verified here against <code>n=1003</code>, a size chosen deliberately to exercise a genuine 3-element remainder, with zero mismatches across all 1003 elements against an independently-written scalar version. SIMD reduction — accumulating into a wide vector and reducing once at the end — turned out to matter for more than speed alone: this chapter's own 20-million-element benchmark measured a genuine <code>2.71×</code> speedup, and, unplanned but independently confirmed against an <code>f64</code> reference, a naive scalar sum that was measurably wrong by nearly <code>5.8%</code> from <code>f32</code> precision loss, against a SIMD sum that matched the reference exactly. None of this chapter's vectorized loads work without Chapter 3's Struct-of-Arrays argument holding first — a contiguous <code>f32x8</code> load needs contiguous <code>f32</code>s to load, which is exactly what SoA guarantees and AoS forecloses.</p>
+<h2 id="self-check-questions">Self-Check Questions<a class="headerlink" href="#self-check-questions" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Why does this book use <code>std::arch::x86_64</code> and <code>wide</code> instead of <code>std::simd::Simd&lt;T, N&gt;</code>, and what specific, previously-confirmed sandbox limitation is this the same root cause as?</li>
+<li><code>is_x86_feature_detected!("avx")</code> genuinely returns <code>true</code> in this book's own sandbox. What would change about Worked Example 5.1.1's raw-intrinsic function if this book's sandbox lacked AVX, and why would simply removing the <code>if is_x86_feature_detected!(...)</code> check around it be unsafe rather than merely wrong?</li>
+<li><code>cmp_a.cmp_lt(cmp_b)</code> in Worked Example 5.2.2 returns an <code>f32x8</code>, not eight <code>bool</code>s. Explain what "true" and "false" actually look like as bit patterns in that returned value, and why printing them as <code>f32</code> shows <code>NaN</code> for true.</li>
+<li>For <code>n = 1003</code> and <code>width = 8</code>, compute <code>simd_count</code> and <code>remainder</code> by hand, and state which indices the main loop covers and which the remainder loop covers.</li>
+<li>This chapter's SIMD sum was both faster and more accurate than the scalar sum on the same 20-million-element input. Explain why those two outcomes share the same root cause rather than being two unrelated pieces of good luck.</li>
+</ol>
+<h2 id="where-we-go-next">Where We Go Next<a class="headerlink" href="#where-we-go-next" title="Permanent link">&para;</a></h2>
+<p>Part 0 has now built every foundational tool this book's <code>Tensor</code> type needs before it can exist as more than a struct: ownership and move semantics (Chapter 1), struct layout and dispatch (Chapter 2), the Array-of-Structs versus Struct-of-Arrays choice (Chapter 3) that Chapter 4's coalescing argument and this chapter's vectorized loads both depended on, <code>cudarc</code>'s host-side GPU driver model (Chapter 4), and now CPU-side SIMD (Chapter 5) — the two forms of "many lanes, one instruction" this book's <code>Tensor</code> operations will draw on, one on the CPU path, one on the GPU path, from Part 1 onward. Part 1 begins there: the <code>Tensor</code> struct itself, its SoA-backed <code>.data</code> buffer, and the first operations built on top of it.</p>
+<h2 id="worked-solutions">Worked Solutions<a class="headerlink" href="#worked-solutions" title="Permanent link">&para;</a></h2>
+<p><strong>1.</strong> <code>std::simd::Simd&lt;T, N&gt;</code> requires <code>#![feature(portable_simd)]</code>, a nightly-only feature. Getting Started already confirmed this sandbox's toolchain has no reachable nightly channel — <code>static.rust-lang.org</code>, where <code>rustup</code> would fetch nightly's <code>rust-std</code>/<code>rust-src</code> components, returns a blocked-network 403 — the exact same root cause Chapter 4's <code>nvptx64-nvidia-cuda</code> target compilation hit (that target's kernel ABI also requires nightly). Both are instances of one underlying constraint: this sandbox's stable-only toolchain, not a preference for <code>std::arch</code>/<code>wide</code> on their own merits.</p>
+<p><strong>2.</strong> Without AVX, <code>_mm256_add_ps</code> and the other <code>_mm256_*</code> intrinsics are simply not valid instructions for the CPU to execute — the function would need to be rewritten around <code>_mm_add_ps</code> (SSE, 128-bit, <code>f32x4</code>-sized) or a scalar fallback instead. Removing the <code>is_x86_feature_detected!("avx")</code> check would not just produce a wrong <em>answer</em> — Rust's <code>#[target_feature(enable = "avx")]</code> functions compile to code that assumes AVX instructions are legal on whatever CPU eventually runs them; calling one on a CPU that doesn't support AVX is undefined behavior (in practice, typically an illegal-instruction crash), which is exactly the class of problem runtime feature detection exists to prevent, as opposed to an ordinary logic bug that would merely compute the wrong number.</p>
+<p><strong>3.</strong> SIMD comparison instructions produce, per lane, either all bits set to <code>1</code> (true) or all bits set to <code>0</code> (false) — not a single bit, and not a separate "boolean lane type." When those all-<code>1</code> or all-<code>0</code> 32-bit patterns are read back as IEEE 754 <code>f32</code> values (which is what <code>to_array()</code> and <code>{:?}</code> do, since <code>f32x8</code>'s lanes are typed as <code>f32</code>), an all-<code>1</code>-bits pattern happens to fall inside the range of bit patterns IEEE 754 reserves for <code>NaN</code>, while all-<code>0</code>-bits is exactly the bit pattern for <code>0.0</code>. So <code>NaN</code> in this printed output means "true," and <code>0.0</code> means "false" — a fact about how the comparison's result bits happen to decode as floats, not a computation that produced an actual not-a-number value.</p>
+<p><strong>4.</strong> <code>simd_count = (1003 / 8) * 8</code>. Integer division truncates: <code>1003 / 8 = 125</code> (since <code>125 × 8 = 1000 ≤ 1003 &lt; 1008 = 126 × 8</code>), so <code>simd_count = 125 × 8 = 1000</code>. <code>remainder = 1003 - 1000 = 3</code>. The main SIMD loop covers indices <code>0</code> through <code>999</code> (125 chunks of 8 elements each), and the scalar remainder loop covers indices <code>1000</code>, <code>1001</code>, and <code>1002</code> — exactly the three indices this chapter's own verified run traced explicitly.</p>
+<p><strong>5.</strong> Both outcomes come from the same structural change: replacing one long sequential <code>f32</code> accumulation with eight shorter, independent ones that are only combined once, at the very end. The speed benefit follows because eight lane-additions genuinely execute per SIMD instruction rather than one addition per scalar instruction. The accuracy benefit follows from a different but related consequence of the same split: each of the eight lane-accumulators only ever sums roughly an eighth as many values (here, about 2.5 million rather than 20 million) before the single <code>reduce_add()</code> combines them, so each individual running total stays numerically well-behaved — well under the <code>2^24</code>-ish threshold where <code>f32</code> starts silently dropping small additions — for roughly eight times longer than the one scalar accumulator does. Splitting the work eight ways is simultaneously what makes it fast (parallel lanes) and what makes it accurate (each lane's own accumulator error grows more slowly), rather than being two independent properties of the same code.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../04-gpu-programming-introduction/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 4. GPU Programming Introduction">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                4. GPU Programming Introduction
+              </div>
+            </div>
+          </a>
+        
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 Oluwaseyi Awoga
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/maximumbeings" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
