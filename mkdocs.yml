@@ -63,6 +63,7 @@ nav:
       - "2. Struct Design Patterns": part0/02-struct-design-patterns.md
       - "3. Memory Layout Strategies": part0/03-memory-layout-strategies.md
       - "4. GPU Programming Introduction": part0/04-gpu-programming-introduction.md
+      - "5. SIMD and Vectorization": part0/05-simd-and-vectorization.md
 
 extra:
   social:
