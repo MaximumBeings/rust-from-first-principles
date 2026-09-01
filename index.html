@@ -245,6 +245,24 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="." class="md-nav__link md-nav__link--active">
         
   
@@ -261,6 +279,36 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-the-book-is-organized" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How the book is organized
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -375,6 +423,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="part0/02-struct-design-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Struct Design Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -402,6 +478,25 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-the-book-is-organized" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How the book is organized
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -418,9 +513,91 @@
 
 
 <h1 id="rust-from-first-principles-under-development">Rust From First Principles — Under Development<a class="headerlink" href="#rust-from-first-principles-under-development" title="Permanent link">&para;</a></h1>
-<p><strong>Scaffolding only — content pending.</strong></p>
-<p>This is the newest sibling project to <a href="https://maximumbeings.github.io/mojo-from-first-principles/"><em>Mojo From First Principles</em></a>, <a href="https://maximumbeings.github.io/triton-from-first-principles/"><em>Triton From First Principles</em></a>, and <a href="https://maximumbeings.github.io/cuda-from-first-principles/"><em>CUDA From First Principles</em></a>, built the same way: one chapter at a time, in page order, each one carrying real code and honestly labeled output.</p>
-<p>The book's scope, chapter outline, and this page's real introduction are still being defined — this stub exists only so the <code>mkdocs</code> site builds cleanly while that's worked out.</p>
+<p><strong>Building a GPU-Native Tensor and Autodiff Framework in Rust, One Layer at a Time</strong></p>
+<div class="admonition info">
+<p class="admonition-title">This book is just getting started</p>
+<p>This is the fourth sibling project to <a href="https://maximumbeings.github.io/mojo-from-first-principles/"><em>Mojo From First Principles</em></a>, <a href="https://maximumbeings.github.io/triton-from-first-principles/"><em>Triton From First Principles</em></a>, and <a href="https://maximumbeings.github.io/cuda-from-first-principles/"><em>CUDA From First Principles</em></a>, built the same way: one chapter at a time, in page order, each one carrying real code and honestly labeled output. This book's verification story has one more layer than its siblings': every CPU-side listing is genuinely compiled <em>and run</em> with <code>rustc</code>/<code>cargo</code> in this book's build environment — not just compiled, as the CUDA edition's kernels are. GPU chapters, built on the <code>cudarc</code> crate, are different: that same environment has no NVIDIA GPU, no <code>nvcc</code>, and no path to a Rust nightly toolchain, so host-side <code>cudarc</code> code (buffer management, launch configuration, driver calls) is genuinely compiled there, but kernel bodies and any runtime numbers from them carry an explicit <strong>UNVERIFIED — pending real-GPU test</strong> tag until independently confirmed on real hardware and folded back in. Every chapter says plainly which of its claims rest on which kind of evidence.</p>
+</div>
+<blockquote>
+<p>"A <code>Tensor</code> in the CUDA and Mojo editions of this book has to answer what shape, what dtype, what device. A <code>Tensor</code> in this one has to answer a fourth question neither of those languages asks at compile time: who owns it, and who is therefore responsible for freeing it. This book is about building that answer once, correctly, and then letting the compiler enforce it for the rest of the book."</p>
+</blockquote>
+<p>This is a practitioner's guide to Rust that follows the same arc as its Mojo and CUDA C++ siblings rather than its Triton one: instead of consuming an existing tensor library, it builds one — a small, real <code>Tensor</code> type with its own shape and stride bookkeeping, its own device abstraction, and its own memory management — and then builds a genuine reverse-mode automatic differentiation engine on top of it, node by node, the same way the Mojo and CUDA books do. Where it necessarily departs from both is where Rust itself is different: ownership and borrowing as a compiler-enforced second typing axis from the very first chapter, no garbage collector and no manual <code>free</code>/<code>cudaFree</code> calls anywhere in the book, and, from Part 0 Chapter 4 onward, the <code>cudarc</code> crate as the bridge to NVIDIA's driver API in place of <code>nvcc</code>'s built-in host/device split.</p>
+<p>The design principles carried through the whole book:</p>
+<ul>
+<li><strong>Build the tensor before you build anything on top of it.</strong> Shape, stride, dtype, and device ownership are modeled explicitly as a <code>Tensor</code> type in Part 1, the same way Mojo's <code>Tensor[dtype]</code> and CUDA's <code>Tensor</code> class are — not assumed from a framework, the way the Triton book assumes them from PyTorch.</li>
+<li><strong>Your own autodiff engine, not someone else's.</strong> Parts 3 and 4 build a real computational graph and a real backward traversal in Rust — no <code>candle</code>, <code>tch-rs</code>, or <code>burn</code> anywhere in this book's core chapters.</li>
+<li><strong>Ownership as a first-class citizen, not an afterthought.</strong> Every buffer this book allocates — CPU or GPU — is an ordinary owned Rust value, freed automatically through <code>Drop</code> when it goes out of scope. There is no equivalent chapter in either the CUDA or Mojo edition, because neither language tracks ownership at compile time the way Rust does.</li>
+<li><strong>Honest about verification on two different axes.</strong> CPU-side code is compiled <em>and run</em> for real, cross-checked by a second independently-implemented method wherever it makes a numeric claim. GPU-side host code is genuinely compiled; kernel bodies and their output are clearly tagged unverified until tested on real hardware — this book never presents a number it didn't actually measure, or blurs the line between what compiled and what ran.</li>
+<li><strong>Financial computing ready.</strong> The closing chapter validates these building blocks against the same Black-Scholes, rolling-volatility, and Monte Carlo option-pricing problems the Mojo, Triton, and CUDA books end on.</li>
+</ul>
+<div class="grid cards">
+<ul>
+<li>
+<p>:material-book-open-page-variant:{ .lg .middle } <strong>22 chapters</strong></p>
+<p>Part 0 through Part 7, from stack-level types to a Monte Carlo option pricer.</p>
+</li>
+<li>
+<p>:material-shield-check:{ .lg .middle } <strong>Ownership, compiler-enforced</strong></p>
+<p>Moves, borrows, and <code>Drop</code> — ownership as a real second typing axis, verified against genuine <code>rustc</code> errors.</p>
+</li>
+<li>
+<p>:material-chip:{ .lg .middle } <strong><code>cudarc</code>-driven GPU kernels</strong></p>
+<p>Host-side driver code, genuinely compiled; kernel bodies and their output honestly tagged until tested on real hardware.</p>
+</li>
+<li>
+<p>:material-finance:{ .lg .middle } <strong>Real financial models</strong></p>
+<p>Black-Scholes, rolling volatility, and Monte Carlo pricing, cross-checked by a second independent method.</p>
+</li>
+</ul>
+</div>
+<h2 id="how-the-book-is-organized">How the book is organized<a class="headerlink" href="#how-the-book-is-organized" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Focus</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Part 0 — Rust Foundations</strong></td>
+<td>Variables, ownership, and types; struct design patterns; memory layout strategies; a first look at <code>cudarc</code>'s driver model; SIMD via <code>std::arch</code> and the <code>wide</code> crate</td>
+</tr>
+<tr>
+<td><strong>Part 1 — Core Tensor Infrastructure</strong></td>
+<td>The <code>Tensor</code> type itself, memory layout design, creation functions, specialized (half-precision) tensor types, the device abstraction layer, the memory management system</td>
+</tr>
+<tr>
+<td><strong>Part 2 — Basic Tensor Operations</strong></td>
+<td>Element-wise operations, matrix operations, reduction operations</td>
+</tr>
+<tr>
+<td><strong>Part 3 — Computational Graph Foundation</strong></td>
+<td>A real graph-node architecture, built from scratch</td>
+</tr>
+<tr>
+<td><strong>Part 4 — Automatic Differentiation Engine</strong></td>
+<td>Backward function implementation, the gradient computation engine (topological traversal, fan-in accumulation)</td>
+</tr>
+<tr>
+<td><strong>Part 5 — GPU Acceleration and Performance</strong></td>
+<td>GPU kernel implementation via <code>cudarc</code>, performance optimization techniques (CPU cache/SIMD tuning, GPU occupancy concepts)</td>
+</tr>
+<tr>
+<td><strong>Part 6 — Neural Network Building Blocks</strong></td>
+<td>Neural network layers, advanced fused features (Flash-Attention-style fusion, MoE gating)</td>
+</tr>
+<tr>
+<td><strong>Part 7 — Financial Computing Applications</strong></td>
+<td>Black-Scholes, rolling volatility, and Monte Carlo option pricing</td>
+</tr>
+</tbody>
+</table>
+<p>Start with <a href="getting-started/">Getting Started</a> to stand up a Rust toolchain, or jump straight into <a href="part0/01-variables-ownership-types/">Part 0: Rust Foundations</a> if <code>rustc</code> and <code>cargo</code> are already installed.</p>
+<div class="admonition note">
+<p class="admonition-title">How this book relates to its siblings</p>
+<p>Mojo and CUDA C++ both build their own tensor type and their own autodiff engine because neither has anything else to lean on for this kind of from-scratch teaching arc. Triton deliberately does neither — it owns only the kernel and leans on PyTorch for the tensor, the device, and the autograd graph. Rust follows Mojo and CUDA's arc, not Triton's: it has no built-in tensor abstraction and no autograd engine of its own, so this book builds both. What's genuinely new here, with no equivalent in any of the three siblings, is ownership as a compile-time-enforced second typing axis from Chapter 1 onward, and a two-tier verification story that neither the CUDA book (compiled but never run) nor the Mojo or Triton books need: CPU code genuinely compiled and run in this book's own environment, GPU kernels genuinely compiled where possible but explicitly deferred to a real-hardware pass for anything that requires actually executing on a GPU.</p>
+</div>
 
 
 
