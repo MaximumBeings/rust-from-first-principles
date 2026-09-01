@@ -53,7 +53,7 @@ Hello from Rust From First Principles!
 7 + 35 = 42
 ```
 
-If you see that output, you're ready for Part 0: Rust Foundations (chapters land here once the outline is committed).
+If you see that output, you're ready for [Part 0: Rust Foundations](part0/01-variables-ownership-types.md).
 
 ## GPU toolchain (needed for Part 0 Chapter 4 onward, and the GPU appendices)
 

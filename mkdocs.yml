@@ -1,5 +1,5 @@
 site_name: Rust From First Principles — Under Development
-site_description: Building a Systems-Level Tensor and Autodiff Framework in Rust, One Layer at a Time
+site_description: Building a GPU-Native Tensor and Autodiff Framework in Rust, One Layer at a Time
 site_author: Oluwaseyi Awoga
 copyright: Copyright &copy; 2026 Oluwaseyi Awoga
 
@@ -58,6 +58,8 @@ plugins:
 nav:
   - Home: index.md
   - Getting Started: getting-started.md
+  - "Part 0 — Rust Foundations":
+      - "1. Variables, Ownership, and Types": part0/01-variables-ownership-types.md
 
 extra:
   social:
