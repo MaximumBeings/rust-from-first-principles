@@ -86,6 +86,8 @@ nav:
   - "Part 6 — Neural Network Building Blocks":
       - "20. Neural Network Layers": part6/01-neural-network-layers.md
       - "21. Advanced Features": part6/02-advanced-features.md
+  - "Part 7 — Financial Computing Applications":
+      - "22. Quantitative Finance Examples": part7/01-quantitative-finance-examples.md
 
 extra:
   social:
