@@ -79,6 +79,7 @@ nav:
       - "15. Graph Node Architecture": part3/01-graph-node-architecture.md
   - "Part 4 — Automatic Differentiation Engine":
       - "16. Backward Function Implementation": part4/01-backward-function-implementation.md
+      - "17. Gradient Computation Engine": part4/02-gradient-computation-engine.md
 
 extra:
   social:
