@@ -93,6 +93,7 @@ nav:
       - "B. CUDA Memory Architecture": appendix/cuda-memory-architecture.md
       - "C. The SM as a Pipeline and the Tiling Payoff": appendix/sm-pipeline-tiling.md
       - "D. Tensor Contractions (CPU)": appendix/tensor-contractions-cpu.md
+      - "E. Tensor Contractions (GPU)": appendix/tensor-contractions-gpu.md
 
 extra:
   social:
