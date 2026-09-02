@@ -90,6 +90,7 @@ nav:
       - "22. Quantitative Finance Examples": part7/01-quantitative-finance-examples.md
   - Appendix:
       - "A. Practice Quiz": appendix/practice-quiz.md
+      - "B. CUDA Memory Architecture": appendix/cuda-memory-architecture.md
 
 extra:
   social:
