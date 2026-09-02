@@ -70,6 +70,7 @@ nav:
       - "8. Tensor Creation Functions": part1/03-tensor-creation-functions.md
       - "9. Specialized Tensor Types": part1/04-specialized-tensor-types.md
       - "10. Device Abstraction Layer": part1/05-device-abstraction-layer.md
+      - "11. Memory Management System": part1/06-memory-management-system.md
 
 extra:
   social:
