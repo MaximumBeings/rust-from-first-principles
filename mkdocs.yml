@@ -77,6 +77,8 @@ nav:
       - "14. Reduction Operations": part2/03-reduction-operations.md
   - "Part 3 — Computational Graph Foundation":
       - "15. Graph Node Architecture": part3/01-graph-node-architecture.md
+  - "Part 4 — Automatic Differentiation Engine":
+      - "16. Backward Function Implementation": part4/01-backward-function-implementation.md
 
 extra:
   social:
