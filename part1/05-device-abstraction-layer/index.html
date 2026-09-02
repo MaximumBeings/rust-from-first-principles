@@ -1,0 +1,1810 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Building a GPU-Native Tensor and Autodiff Framework in Rust, One Layer at a Time">
+      
+      
+        <meta name="author" content="Oluwaseyi Awoga">
+      
+      
+      
+        <link rel="prev" href="../04-specialized-tensor-types/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>10. Device Abstraction Layer - Rust From First Principles — Under Development</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#chapter-10-device-abstraction-layer-discovery-and-memory-management-minimally" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Rust From First Principles — Under Development" class="md-header__button md-logo" aria-label="Rust From First Principles — Under Development" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="m508.5 249.8-21.8-13.5c-.2-2-.3-3.9-.5-5.9l18.7-17.5c.9-.9 1.6-1.9 2-3.1s.5-2.5.2-3.7-.8-2.4-1.6-3.3-1.8-1.7-3-2.1l-24-9c-.5-1.9-1.1-3.8-1.7-5.6l15-20.8c.7-1 1.2-2.2 1.3-3.4s0-2.5-.5-3.7-1.2-2.2-2.2-2.9-2.1-1.3-3.4-1.5l-25.4-4.2c-.9-1.7-1.8-3.4-2.7-5.2l10.7-23.4c.5-1.1.7-2.4.6-3.6s-.5-2.4-1.2-3.5-1.6-1.9-2.8-2.5-2.4-.8-3.6-.8l-25.8.9c-1.2-1.5-2.4-2.9-3.6-4.4l5.8-25.3c.3-1.2.3-2.5-.1-3.7s-1-2.3-1.9-3.2-2-1.5-3.2-1.9-2.5-.4-3.7-.1l-25.1 6c-1.4-1.2-2.9-2.4-4.4-3.6l.9-25.8c.1-1.3-.2-2.5-.8-3.6s-1.4-2.1-2.5-2.8-2.2-1.1-3.5-1.2-2.5.1-3.7.6l-23.3 10.7-5.1-2.7-4.2-25.4c-.2-1.2-.7-2.4-1.5-3.4s-1.8-1.7-2.9-2.2-2.4-.7-3.7-.5-2.4.6-3.4 1.3l-20.9 15c-1.9-.6-3.8-1.1-5.6-1.7l-9-24c-.4-1.2-1.2-2.2-2.1-3S307.2 5.2 306 5s-2.5-.2-3.7.2-2.3 1.1-3.1 2l-17.6 18.7c-2-.2-3.9-.4-5.9-.5L262.3 3.5c-.7-1.1-1.6-1.9-2.7-2.6S257.3 0 256 0s-2.5.3-3.6.9-2 1.5-2.7 2.6l-13.5 21.8c-2 .2-3.9.3-5.9.6L212.9 7.1c-.9-.9-1.9-1.6-3.1-2s-2.5-.5-3.7-.2-2.4.8-3.3 1.6-1.7 1.8-2.1 3l-9 24c-1.9.6-3.8 1.1-5.7 1.7l-20.8-15c-1-.7-2.2-1.2-3.4-1.3s-2.5 0-3.7.5-2.2 1.2-2.9 2.2-1.3 2.1-1.5 3.4l-4.2 25.4c-1.7.9-3.4 1.8-5.2 2.7l-23.4-10.5c-1.1-.5-2.4-.7-3.7-.6s-2.5.5-3.5 1.2-1.9 1.7-2.5 2.8-.8 2.4-.8 3.6l.9 25.8c-1.5 1.2-3 2.4-4.4 3.6l-25.1-6c-1.2-.3-2.5-.3-3.7.1s-2.3 1-3.2 1.9-1.5 2-1.9 3.2-.4 2.5-.1 3.7l6 25.1c-1.2 1.4-2.4 2.9-3.6 4.4l-25.8-.9c-1.3 0-2.5.2-3.6.8s-2.1 1.4-2.8 2.4-1.1 2.2-1.2 3.5.1 2.5.6 3.6l10.7 23.4c-.9 1.7-1.8 3.4-2.7 5.2l-25.4 4.1c-1.2.2-2.4.7-3.4 1.5s-1.7 1.8-2.2 2.9-.7 2.4-.5 3.7.6 2.4 1.3 3.4l15 20.8c-.6 1.9-1.1 3.8-1.7 5.7l-24 9c-1.2.4-2.2 1.2-3 2.1s-1.4 2.1-1.6 3.3-.2 2.5.2 3.7 1.1 2.3 2 3.1l18.7 17.5c-.2 2-.4 3.9-.6 5.9L3.5 249.8c-1.1.7-1.9 1.6-2.6 2.7s-.9 2.3-.9 3.6.3 2.5.9 3.6 1.5 2 2.6 2.7l21.8 13.5c.2 2 .3 3.9.6 5.9L7.1 299.1c-.9.9-1.6 1.9-2 3.1s-.5 2.5-.2 3.7.8 2.4 1.6 3.3 1.8 1.7 3 2.1l24 9c.6 1.9 1.1 3.8 1.7 5.6l-15 20.8c-.7 1-1.2 2.2-1.3 3.4s0 2.5.5 3.7 1.2 2.2 2.2 2.9 2.1 1.3 3.4 1.5l25.4 4.2 2.7 5.1-10.5 23.6c-.5 1.1-.7 2.4-.6 3.6s.5 2.5 1.2 3.5c.7 1.1 1.6 1.9 2.7 2.5s2.4.8 3.6.8l25.8-.9c1.2 1.5 2.4 2.9 3.6 4.4L73 430.2c-.3 1.2-.3 2.5.1 3.7s1 2.3 1.9 3.2 2 1.5 3.2 1.9 2.5.4 3.7.1l25.2-5.9c1.5 1.2 2.9 2.4 4.4 3.6l-.9 25.8c0 1.3.2 2.5.8 3.6s1.4 2.1 2.5 2.8 2.2 1.1 3.5 1.2 2.5-.1 3.6-.6l23.4-10.7 5.1 2.7 4.2 25.4c.2 1.2.7 2.4 1.5 3.4s1.8 1.8 2.9 2.2 2.4.7 3.7.5 2.4-.6 3.4-1.3l20.8-15c1.9.6 3.8 1.1 5.6 1.7l9 24c.4 1.2 1.2 2.2 2.1 3s2.1 1.4 3.3 1.6 2.5.2 3.7-.2 2.3-1.1 3.1-2l17.5-18.7c2 .2 3.9.4 5.9.6l13.5 21.8c.7 1.1 1.6 1.9 2.7 2.6s2.3.9 3.6.9 2.5-.3 3.6-.9 2-1.5 2.7-2.6l13.5-21.8c2-.2 3.9-.3 5.9-.6l17.5 18.7c.9.9 1.9 1.6 3.1 2s2.5.5 3.7.2 2.4-.8 3.3-1.6 1.7-1.8 2.1-3l9-24c1.9-.6 3.8-1.1 5.6-1.7l20.8 15c1 .7 2.2 1.2 3.4 1.3s2.5 0 3.7-.5 2.2-1.2 2.9-2.2 1.3-2.1 1.5-3.4l4.2-25.4 5.1-2.7 23.4 10.7c1.1.5 2.4.7 3.6.6s2.4-.5 3.5-1.2 1.9-1.6 2.5-2.8.8-2.4.8-3.6l-.9-25.8c1.5-1.2 2.9-2.4 4.4-3.6l25.2 5.9c1.2.3 2.5.3 3.7-.1s2.3-1 3.2-1.9 1.5-2 1.9-3.2.4-2.5.1-3.7l-5.9-25.2c1.2-1.4 2.4-2.9 3.6-4.4l25.8.9c1.3.1 2.5-.2 3.6-.8s2.1-1.4 2.8-2.5c.7-1 1.1-2.2 1.2-3.5s-.1-2.5-.6-3.6l-10.7-23.4 2.7-5.1 25.4-4.2c1.2-.2 2.4-.7 3.4-1.5s1.8-1.8 2.2-2.9.7-2.4.5-3.7-.6-2.4-1.3-3.4l-15-20.8c.6-1.9 1.1-3.8 1.7-5.6l24-9c1.2-.4 2.2-1.2 3-2.1s1.4-2.1 1.6-3.3.2-2.5-.2-3.7-1.1-2.3-2-3.1l-18.7-17.5c.2-1.9.4-3.9.6-5.9l21.8-13.5c1.1-.7 1.9-1.6 2.6-2.7s.9-2.3.9-3.6-.3-2.5-.9-3.6-1.5-2-2.6-2.7m-151 129.1c-3.6-.8-7.4-.1-10.5 1.9s-5.3 5.2-6 8.8l-7.6 35.7c-24.6 11.1-51.3 16.8-78.3 16.7s-53.6-6.1-78.1-17.4l-7.6-35.7c-.4-1.8-1.1-3.5-2.1-5s-2.4-2.8-3.9-3.8-3.2-1.7-5-2-3.6-.3-5.4.1l-31.5 6.8c-5.8-6-11.3-12.5-16.3-19.2h153.2c1.7 0 2.9-.3 2.9-1.9v-54.2c0-1.6-1.2-1.9-2.9-1.9h-44.8v-34.4h48.5c4.4 0 23.7 1.3 29.8 25.9 1.9 7.5 6.2 32.1 9.1 40 2.9 8.8 14.6 26.5 27.1 26.5h79c-5.3 7.1-11.1 13.8-17.3 20.1l-32.1-6.9zm25.8 34.5c0 3-.9 6-2.6 8.5s-4 4.5-6.8 5.6-5.8 1.5-8.8.9-5.7-2-7.8-4.2-3.6-4.8-4.2-7.8-.3-6 .8-8.8 3.1-5.2 5.6-6.9 5.4-2.6 8.5-2.6h.4c4 .1 7.7 1.8 10.5 4.6s4.3 6.7 4.3 10.6h.1zm-225.6-.7c0 3-.9 6-2.6 8.5s-4.1 4.5-6.8 5.6-5.8 1.5-8.8.9-5.7-2-7.8-4.2-3.6-4.8-4.2-7.8-.3-6 .9-8.8 3.1-5.2 5.6-6.8 5.4-2.6 8.5-2.6h.5c4 .1 7.7 1.8 10.5 4.6s4.3 6.7 4.3 10.6h.1zM69.6 234.2l32.8-14.6c1.7-.7 3.2-1.8 4.4-3.1s2.2-2.9 2.9-4.6 1-3.5.9-5.3-.5-3.6-1.2-5.3l-6.8-15.2h26.6v119.7H75.6c-6.6-23.2-8.7-47.6-6.1-71.6zm-11.3-36.1c0-2 .4-4 1.2-5.8s1.9-3.5 3.3-4.9 3.1-2.5 4.9-3.3 3.8-1.2 5.8-1.2h.5c3 .1 5.9 1 8.3 2.8s4.3 4.1 5.4 6.9 1.3 5.8.7 8.8-2.1 5.6-4.3 7.7-4.9 3.5-7.8 4.1-6 .2-8.7-.9-5.1-3.1-6.8-5.6-2.5-5.4-2.5-8.4zm155.2 24.5v-35.3h63.3c3.3 0 23.1 3.8 23.1 18.6 0 12.3-15.2 16.7-27.7 16.7zM399 306.7c-9.8 1.1-20.6-4.1-22-10.1-5.8-32.5-15.4-39.4-30.6-51.4 18.9-12 38.5-29.6 38.5-53.3 0-25.5-17.5-41.6-29.4-49.5-16.8-11-35.3-13.2-40.3-13.2H116.3c27.5-30.7 64.4-51.5 104.9-59.2l23.5 24.6c1.3 1.3 2.8 2.4 4.4 3.1s3.5 1.1 5.3 1.2 3.6-.3 5.3-.9 3.2-1.7 4.6-2.9l26.3-25c26.8 5 52.1 15.8 74.3 31.6s40.6 36.2 54.1 59.9l-18 40.6c-1.5 3.4-1.5 7.2-.2 10.6s3.9 6.2 7.3 7.7l34.6 15.3c1.1 10.8 1.2 21.7.4 32.5h-19.3c-1.9 0-2.7 1.3-2.7 3.1v8.8c0 20.8-11.7 25.3-22 26.5zM240 60.2c0-4 1.6-7.9 4.5-10.7s6.7-4.5 10.7-4.5h.4c3 .1 5.9 1 8.4 2.8s4.3 4.1 5.4 6.9 1.3 5.8.7 8.8-2.1 5.6-4.3 7.7-4.9 3.5-7.8 4-6 .2-8.7-.9-5.1-3.1-6.8-5.6-2.5-5.4-2.5-8.4zM436.8 214c-2 0-4-.4-5.8-1.2s-3.5-1.9-4.9-3.3-2.5-3.1-3.3-4.9-1.2-3.8-1.2-5.8.4-4 1.2-5.8 1.9-3.5 3.3-4.9 3.1-2.5 4.9-3.3 3.8-1.2 5.8-1.2h.4c4 .1 7.9 1.7 10.7 4.6s4.4 6.8 4.3 10.8-1.7 7.9-4.6 10.7-6.8 4.4-10.8 4.3"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Rust From First Principles — Under Development
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              10. Device Abstraction Layer
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-orange" data-md-color-accent="deep-orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Rust From First Principles — Under Development" class="md-nav__button md-logo" aria-label="Rust From First Principles — Under Development" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="m508.5 249.8-21.8-13.5c-.2-2-.3-3.9-.5-5.9l18.7-17.5c.9-.9 1.6-1.9 2-3.1s.5-2.5.2-3.7-.8-2.4-1.6-3.3-1.8-1.7-3-2.1l-24-9c-.5-1.9-1.1-3.8-1.7-5.6l15-20.8c.7-1 1.2-2.2 1.3-3.4s0-2.5-.5-3.7-1.2-2.2-2.2-2.9-2.1-1.3-3.4-1.5l-25.4-4.2c-.9-1.7-1.8-3.4-2.7-5.2l10.7-23.4c.5-1.1.7-2.4.6-3.6s-.5-2.4-1.2-3.5-1.6-1.9-2.8-2.5-2.4-.8-3.6-.8l-25.8.9c-1.2-1.5-2.4-2.9-3.6-4.4l5.8-25.3c.3-1.2.3-2.5-.1-3.7s-1-2.3-1.9-3.2-2-1.5-3.2-1.9-2.5-.4-3.7-.1l-25.1 6c-1.4-1.2-2.9-2.4-4.4-3.6l.9-25.8c.1-1.3-.2-2.5-.8-3.6s-1.4-2.1-2.5-2.8-2.2-1.1-3.5-1.2-2.5.1-3.7.6l-23.3 10.7-5.1-2.7-4.2-25.4c-.2-1.2-.7-2.4-1.5-3.4s-1.8-1.7-2.9-2.2-2.4-.7-3.7-.5-2.4.6-3.4 1.3l-20.9 15c-1.9-.6-3.8-1.1-5.6-1.7l-9-24c-.4-1.2-1.2-2.2-2.1-3S307.2 5.2 306 5s-2.5-.2-3.7.2-2.3 1.1-3.1 2l-17.6 18.7c-2-.2-3.9-.4-5.9-.5L262.3 3.5c-.7-1.1-1.6-1.9-2.7-2.6S257.3 0 256 0s-2.5.3-3.6.9-2 1.5-2.7 2.6l-13.5 21.8c-2 .2-3.9.3-5.9.6L212.9 7.1c-.9-.9-1.9-1.6-3.1-2s-2.5-.5-3.7-.2-2.4.8-3.3 1.6-1.7 1.8-2.1 3l-9 24c-1.9.6-3.8 1.1-5.7 1.7l-20.8-15c-1-.7-2.2-1.2-3.4-1.3s-2.5 0-3.7.5-2.2 1.2-2.9 2.2-1.3 2.1-1.5 3.4l-4.2 25.4c-1.7.9-3.4 1.8-5.2 2.7l-23.4-10.5c-1.1-.5-2.4-.7-3.7-.6s-2.5.5-3.5 1.2-1.9 1.7-2.5 2.8-.8 2.4-.8 3.6l.9 25.8c-1.5 1.2-3 2.4-4.4 3.6l-25.1-6c-1.2-.3-2.5-.3-3.7.1s-2.3 1-3.2 1.9-1.5 2-1.9 3.2-.4 2.5-.1 3.7l6 25.1c-1.2 1.4-2.4 2.9-3.6 4.4l-25.8-.9c-1.3 0-2.5.2-3.6.8s-2.1 1.4-2.8 2.4-1.1 2.2-1.2 3.5.1 2.5.6 3.6l10.7 23.4c-.9 1.7-1.8 3.4-2.7 5.2l-25.4 4.1c-1.2.2-2.4.7-3.4 1.5s-1.7 1.8-2.2 2.9-.7 2.4-.5 3.7.6 2.4 1.3 3.4l15 20.8c-.6 1.9-1.1 3.8-1.7 5.7l-24 9c-1.2.4-2.2 1.2-3 2.1s-1.4 2.1-1.6 3.3-.2 2.5.2 3.7 1.1 2.3 2 3.1l18.7 17.5c-.2 2-.4 3.9-.6 5.9L3.5 249.8c-1.1.7-1.9 1.6-2.6 2.7s-.9 2.3-.9 3.6.3 2.5.9 3.6 1.5 2 2.6 2.7l21.8 13.5c.2 2 .3 3.9.6 5.9L7.1 299.1c-.9.9-1.6 1.9-2 3.1s-.5 2.5-.2 3.7.8 2.4 1.6 3.3 1.8 1.7 3 2.1l24 9c.6 1.9 1.1 3.8 1.7 5.6l-15 20.8c-.7 1-1.2 2.2-1.3 3.4s0 2.5.5 3.7 1.2 2.2 2.2 2.9 2.1 1.3 3.4 1.5l25.4 4.2 2.7 5.1-10.5 23.6c-.5 1.1-.7 2.4-.6 3.6s.5 2.5 1.2 3.5c.7 1.1 1.6 1.9 2.7 2.5s2.4.8 3.6.8l25.8-.9c1.2 1.5 2.4 2.9 3.6 4.4L73 430.2c-.3 1.2-.3 2.5.1 3.7s1 2.3 1.9 3.2 2 1.5 3.2 1.9 2.5.4 3.7.1l25.2-5.9c1.5 1.2 2.9 2.4 4.4 3.6l-.9 25.8c0 1.3.2 2.5.8 3.6s1.4 2.1 2.5 2.8 2.2 1.1 3.5 1.2 2.5-.1 3.6-.6l23.4-10.7 5.1 2.7 4.2 25.4c.2 1.2.7 2.4 1.5 3.4s1.8 1.8 2.9 2.2 2.4.7 3.7.5 2.4-.6 3.4-1.3l20.8-15c1.9.6 3.8 1.1 5.6 1.7l9 24c.4 1.2 1.2 2.2 2.1 3s2.1 1.4 3.3 1.6 2.5.2 3.7-.2 2.3-1.1 3.1-2l17.5-18.7c2 .2 3.9.4 5.9.6l13.5 21.8c.7 1.1 1.6 1.9 2.7 2.6s2.3.9 3.6.9 2.5-.3 3.6-.9 2-1.5 2.7-2.6l13.5-21.8c2-.2 3.9-.3 5.9-.6l17.5 18.7c.9.9 1.9 1.6 3.1 2s2.5.5 3.7.2 2.4-.8 3.3-1.6 1.7-1.8 2.1-3l9-24c1.9-.6 3.8-1.1 5.6-1.7l20.8 15c1 .7 2.2 1.2 3.4 1.3s2.5 0 3.7-.5 2.2-1.2 2.9-2.2 1.3-2.1 1.5-3.4l4.2-25.4 5.1-2.7 23.4 10.7c1.1.5 2.4.7 3.6.6s2.4-.5 3.5-1.2 1.9-1.6 2.5-2.8.8-2.4.8-3.6l-.9-25.8c1.5-1.2 2.9-2.4 4.4-3.6l25.2 5.9c1.2.3 2.5.3 3.7-.1s2.3-1 3.2-1.9 1.5-2 1.9-3.2.4-2.5.1-3.7l-5.9-25.2c1.2-1.4 2.4-2.9 3.6-4.4l25.8.9c1.3.1 2.5-.2 3.6-.8s2.1-1.4 2.8-2.5c.7-1 1.1-2.2 1.2-3.5s-.1-2.5-.6-3.6l-10.7-23.4 2.7-5.1 25.4-4.2c1.2-.2 2.4-.7 3.4-1.5s1.8-1.8 2.2-2.9.7-2.4.5-3.7-.6-2.4-1.3-3.4l-15-20.8c.6-1.9 1.1-3.8 1.7-5.6l24-9c1.2-.4 2.2-1.2 3-2.1s1.4-2.1 1.6-3.3.2-2.5-.2-3.7-1.1-2.3-2-3.1l-18.7-17.5c.2-1.9.4-3.9.6-5.9l21.8-13.5c1.1-.7 1.9-1.6 2.6-2.7s.9-2.3.9-3.6-.3-2.5-.9-3.6-1.5-2-2.6-2.7m-151 129.1c-3.6-.8-7.4-.1-10.5 1.9s-5.3 5.2-6 8.8l-7.6 35.7c-24.6 11.1-51.3 16.8-78.3 16.7s-53.6-6.1-78.1-17.4l-7.6-35.7c-.4-1.8-1.1-3.5-2.1-5s-2.4-2.8-3.9-3.8-3.2-1.7-5-2-3.6-.3-5.4.1l-31.5 6.8c-5.8-6-11.3-12.5-16.3-19.2h153.2c1.7 0 2.9-.3 2.9-1.9v-54.2c0-1.6-1.2-1.9-2.9-1.9h-44.8v-34.4h48.5c4.4 0 23.7 1.3 29.8 25.9 1.9 7.5 6.2 32.1 9.1 40 2.9 8.8 14.6 26.5 27.1 26.5h79c-5.3 7.1-11.1 13.8-17.3 20.1l-32.1-6.9zm25.8 34.5c0 3-.9 6-2.6 8.5s-4 4.5-6.8 5.6-5.8 1.5-8.8.9-5.7-2-7.8-4.2-3.6-4.8-4.2-7.8-.3-6 .8-8.8 3.1-5.2 5.6-6.9 5.4-2.6 8.5-2.6h.4c4 .1 7.7 1.8 10.5 4.6s4.3 6.7 4.3 10.6h.1zm-225.6-.7c0 3-.9 6-2.6 8.5s-4.1 4.5-6.8 5.6-5.8 1.5-8.8.9-5.7-2-7.8-4.2-3.6-4.8-4.2-7.8-.3-6 .9-8.8 3.1-5.2 5.6-6.8 5.4-2.6 8.5-2.6h.5c4 .1 7.7 1.8 10.5 4.6s4.3 6.7 4.3 10.6h.1zM69.6 234.2l32.8-14.6c1.7-.7 3.2-1.8 4.4-3.1s2.2-2.9 2.9-4.6 1-3.5.9-5.3-.5-3.6-1.2-5.3l-6.8-15.2h26.6v119.7H75.6c-6.6-23.2-8.7-47.6-6.1-71.6zm-11.3-36.1c0-2 .4-4 1.2-5.8s1.9-3.5 3.3-4.9 3.1-2.5 4.9-3.3 3.8-1.2 5.8-1.2h.5c3 .1 5.9 1 8.3 2.8s4.3 4.1 5.4 6.9 1.3 5.8.7 8.8-2.1 5.6-4.3 7.7-4.9 3.5-7.8 4.1-6 .2-8.7-.9-5.1-3.1-6.8-5.6-2.5-5.4-2.5-8.4zm155.2 24.5v-35.3h63.3c3.3 0 23.1 3.8 23.1 18.6 0 12.3-15.2 16.7-27.7 16.7zM399 306.7c-9.8 1.1-20.6-4.1-22-10.1-5.8-32.5-15.4-39.4-30.6-51.4 18.9-12 38.5-29.6 38.5-53.3 0-25.5-17.5-41.6-29.4-49.5-16.8-11-35.3-13.2-40.3-13.2H116.3c27.5-30.7 64.4-51.5 104.9-59.2l23.5 24.6c1.3 1.3 2.8 2.4 4.4 3.1s3.5 1.1 5.3 1.2 3.6-.3 5.3-.9 3.2-1.7 4.6-2.9l26.3-25c26.8 5 52.1 15.8 74.3 31.6s40.6 36.2 54.1 59.9l-18 40.6c-1.5 3.4-1.5 7.2-.2 10.6s3.9 6.2 7.3 7.7l34.6 15.3c1.1 10.8 1.2 21.7.4 32.5h-19.3c-1.9 0-2.7 1.3-2.7 3.1v8.8c0 20.8-11.7 25.3-22 26.5zM240 60.2c0-4 1.6-7.9 4.5-10.7s6.7-4.5 10.7-4.5h.4c3 .1 5.9 1 8.4 2.8s4.3 4.1 5.4 6.9 1.3 5.8.7 8.8-2.1 5.6-4.3 7.7-4.9 3.5-7.8 4-6 .2-8.7-.9-5.1-3.1-6.8-5.6-2.5-5.4-2.5-8.4zM436.8 214c-2 0-4-.4-5.8-1.2s-3.5-1.9-4.9-3.3-2.5-3.1-3.3-4.9-1.2-3.8-1.2-5.8.4-4 1.2-5.8 1.9-3.5 3.3-4.9 3.1-2.5 4.9-3.3 3.8-1.2 5.8-1.2h.4c4 .1 7.9 1.7 10.7 4.6s4.4 6.8 4.3 10.8-1.7 7.9-4.6 10.7-6.8 4.4-10.8 4.3"/></svg>
+
+    </a>
+    Rust From First Principles — Under Development
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 0 — Rust Foundations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 0 — Rust Foundations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part0/01-variables-ownership-types/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. Variables, Ownership, and Types
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part0/02-struct-design-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Struct Design Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part0/03-memory-layout-strategies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3. Memory Layout Strategies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part0/04-gpu-programming-introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    4. GPU Programming Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part0/05-simd-and-vectorization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    5. SIMD and Vectorization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 1 — Core Tensor Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 1 — Core Tensor Infrastructure
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-core-tensor-structure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    6. The Tensor
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-memory-layout-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    7. Memory Layout Design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-tensor-creation-functions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    8. Tensor Creation Functions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-specialized-tensor-types/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    9. Specialized Tensor Types
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. Device Abstraction Layer
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. Device Abstraction Layer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#101-device-discovery-ask-once-trust-the-answer-foundational" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Device Discovery: Ask Once, Trust the Answer [FOUNDATIONAL]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.1 Device Discovery: Ask Once, Trust the Answer [FOUNDATIONAL]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-1011-discovery-in-two-layers-because-cudarcs-own-doesnt-return-one" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 10.1.1 — discovery in two layers, because cudarc's own doesn't return one
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-1012-bypassing-the-manager-and-what-that-costs-in-cudarc-specifically" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 10.1.2 — bypassing the manager, and what that costs in cudarc specifically
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#102-a-device-aware-allocator-foundational" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 A Device-Aware Allocator [FOUNDATIONAL]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.2 A Device-Aware Allocator [FOUNDATIONAL]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-1021-the-routing-condition-both-reachable-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 10.2.1 — the routing condition, both reachable cases
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-1022-the-alignment-guarantee-that-never-arrives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 10.2.2 — the alignment guarantee that never arrives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-1023-a-benchmark-that-comes-out-backwards-from-the-cuda-edition-for-a-real-reason" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 10.2.3 — a benchmark that comes out backwards from the CUDA edition, for a real reason
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#103-complete-runnable-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 Complete Runnable Code
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.3 Complete Runnable Code">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#file-01_device_discoveryrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: 01_device_discovery.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-bypass_crash_demors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: bypass_crash_demo.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-02_device_aware_allocatorrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: 02_device_aware_allocator.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chapter-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chapter Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#self-check-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self-Check Questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-we-go-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where We Go Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Solutions
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#101-device-discovery-ask-once-trust-the-answer-foundational" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Device Discovery: Ask Once, Trust the Answer [FOUNDATIONAL]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.1 Device Discovery: Ask Once, Trust the Answer [FOUNDATIONAL]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-1011-discovery-in-two-layers-because-cudarcs-own-doesnt-return-one" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 10.1.1 — discovery in two layers, because cudarc's own doesn't return one
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-1012-bypassing-the-manager-and-what-that-costs-in-cudarc-specifically" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 10.1.2 — bypassing the manager, and what that costs in cudarc specifically
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#102-a-device-aware-allocator-foundational" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 A Device-Aware Allocator [FOUNDATIONAL]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.2 A Device-Aware Allocator [FOUNDATIONAL]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-1021-the-routing-condition-both-reachable-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 10.2.1 — the routing condition, both reachable cases
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-1022-the-alignment-guarantee-that-never-arrives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 10.2.2 — the alignment guarantee that never arrives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-1023-a-benchmark-that-comes-out-backwards-from-the-cuda-edition-for-a-real-reason" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 10.2.3 — a benchmark that comes out backwards from the CUDA edition, for a real reason
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#103-complete-runnable-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 Complete Runnable Code
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.3 Complete Runnable Code">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#file-01_device_discoveryrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: 01_device_discovery.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-bypass_crash_demors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: bypass_crash_demo.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-02_device_aware_allocatorrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: 02_device_aware_allocator.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chapter-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chapter Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#self-check-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self-Check Questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-we-go-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where We Go Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Solutions
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="chapter-10-device-abstraction-layer-discovery-and-memory-management-minimally">Chapter 10: Device Abstraction Layer — Discovery and Memory Management, Minimally<a class="headerlink" href="#chapter-10-device-abstraction-layer-discovery-and-memory-management-minimally" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>"Every <code>cudarc</code> call this book has made so far has simply assumed a device might be there and asked anyway, catching the honest failure afterward. A real program shouldn't gamble that way on every single allocation — it should ask once, remember the answer, and let that answer decide the strategy. This chapter builds the small struct that asks, and discovers along the way that cudarc's own asking mechanism works nothing like CUDA's C API does — with real, measurable, and at one point genuinely surprising consequences."</p>
+</blockquote>
+<p><strong>What you will understand by the end of this chapter:</strong></p>
+<ul>
+<li><code>DeviceManager</code>: a struct that checks for CUDA's presence exactly once and caches the answer — but built on cudarc's actual two-layer discovery shape, since <code>cudarc::driver::CudaContext::device_count()</code> <em>panics</em> rather than returning an error the moment <code>libcuda.so</code> can't be found, unlike CUDA's own <code>cudaGetDeviceCount</code></li>
+<li>Why bypassing discovery and calling a device operation directly doesn't just fail with less context here — in cudarc specifically, it can take down the entire process, a genuinely stronger consequence than the CUDA edition's equivalent mistake</li>
+<li><code>DeviceAwareAllocator</code>: routing between a <code>cudarc</code> device context and a plain <code>Vec&lt;u8&gt;</code> fallback based on the manager's cached answer, plus a second, independent fallback for when discovery itself turns out to have been wrong</li>
+<li>A genuine, measured gap between what a device allocation path would guarantee about memory alignment and what its host fallback silently does not</li>
+<li>A real benchmark result that comes out the <em>opposite</em> direction from the CUDA edition's own chapter — and a genuine, verified mechanism (an <code>OnceLock</code> that never caches a panicking initializer) explaining exactly why</li>
+</ul>
+<p><strong>What you need to know first:</strong></p>
+<ul>
+<li>Chapter 4 (the honest <code>cudarc</code> panics this book has shown since its first device-touching call, and the <code>catch_unwind</code>-based <code>catch_it</code> helper this chapter reuses) — this chapter is the first one to build something that <em>uses</em> that knowledge to avoid the failure altogether, rather than just reporting it afterward</li>
+<li>Chapter 7.3 (alignment and padding) — Section 10.2's alignment gap is a direct, concrete instance of that chapter's general warning</li>
+<li>Chapter 9's <code>size_of</code>/behavioral differences from the CUDA edition — this chapter finds another one, in a benchmark result rather than a struct layout</li>
+<li>If you've read the CUDA or Mojo editions: this chapter follows their Chapter 10 section-for-section (device discovery, then a device-aware allocator), but the underlying mechanism diverges early and stays diverged — cudarc's dynamically-loaded FFI layer behaves nothing like CUDA's own C Runtime API once a library fails to load, and this chapter's structure exists specifically to work around that difference rather than translate past it.</li>
+</ul>
+<h2 id="101-device-discovery-ask-once-trust-the-answer-foundational">10.1 Device Discovery: Ask Once, Trust the Answer <code>[FOUNDATIONAL]</code><a class="headerlink" href="#101-device-discovery-ask-once-trust-the-answer-foundational" title="Permanent link">&para;</a></h2>
+<h3 id="intuition">Intuition<a class="headerlink" href="#intuition" title="Permanent link">&para;</a></h3>
+<p>CUDA's own <code>cudaGetDeviceCount</code> is a Runtime API call that always returns a <code>cudaError_t</code> — even when no driver, no library, and no device exist at all, it fails <em>cleanly</em>, as this book's very first chapters showed. cudarc's <code>CudaContext::device_count()</code> does something different: internally, it tries to <code>dlopen</code> <code>libcuda.so</code> through a lazily-initialized, process-wide cache, and if that load fails, the function <code>panic!</code>s outright rather than returning <code>Err</code>. A <code>DeviceManager</code> built for cudarc has to discover this fact in two layers, not one — a genuinely non-panicking presence check first, and only then, if that succeeds, the real device count.</p>
+<h3 id="background">Background<a class="headerlink" href="#background" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>CUDA's own <code>cudaGetDeviceCount</code></th>
+<th>cudarc's <code>CudaContext::device_count()</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Behavior when the driver library can't be found</td>
+<td>Returns <code>cudaErrorNoDevice</code> (a checked error code)</td>
+<td><strong>Panics</strong> — <code>cudarc::panic_no_lib_found</code>, deep inside the FFI thunk</td>
+</tr>
+<tr>
+<td>Safe to call speculatively?</td>
+<td>Yes — the whole point of the C Runtime API's design</td>
+<td>No — a caller must check something else <em>first</em></td>
+</tr>
+<tr>
+<td>The "something else" this chapter uses</td>
+<td>N/A</td>
+<td><code>cudarc::driver::sys::is_culib_present()</code> — attempts the same <code>dlopen</code>, but returns <code>bool</code> instead of panicking</td>
+</tr>
+</tbody>
+</table>
+<h3 id="worked-example-1011-discovery-in-two-layers-because-cudarcs-own-doesnt-return-one">Worked Example 10.1.1 — discovery in two layers, because cudarc's own doesn't return one<a class="headerlink" href="#worked-example-1011-discovery-in-two-layers-because-cudarcs-own-doesnt-return-one" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1">// A tiny, honest device manager -- but one built for cudarc&#39;s actual shape,</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="c1">// not a direct translation of CUDA&#39;s cudaGetDeviceCount. cudarc&#39;s device_count()</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1">// PANICS (not Result::Err) the moment libcuda.so can&#39;t be dlopen&#39;d, so discovery</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1">// has to happen in two layers: a genuinely non-panicking presence check first</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1">// (is_culib_present()), and only THEN, if that succeeds, the real device count.</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="k">struct</span><span class="w"> </span><span class="nc">DeviceManager</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="n">lib_present</span><span class="p">:</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="n">device_count</span><span class="p">:</span><span class="w"> </span><span class="kt">i32</span><span class="p">,</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="n">discovery_succeeded</span><span class="p">:</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="p">}</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="k">impl</span><span class="w"> </span><span class="n">DeviceManager</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">new</span><span class="p">()</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nc">Self</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">lib_present</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">cudarc</span><span class="p">::</span><span class="n">driver</span><span class="p">::</span><span class="n">sys</span><span class="p">::</span><span class="n">is_culib_present</span><span class="p">()</span><span class="w"> </span><span class="p">};</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="n">lib_present</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">DeviceManager</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">lib_present</span><span class="p">:</span><span class="w"> </span><span class="nc">false</span><span class="p">,</span><span class="w"> </span><span class="n">device_count</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">discovery_succeeded</span><span class="p">:</span><span class="w"> </span><span class="nc">false</span><span class="w"> </span><span class="p">};</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">        </span><span class="k">match</span><span class="w"> </span><span class="n">catch_it</span><span class="p">(</span><span class="o">||</span><span class="w"> </span><span class="n">cudarc</span><span class="p">::</span><span class="n">driver</span><span class="p">::</span><span class="n">CudaContext</span><span class="p">::</span><span class="n">device_count</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">            </span><span class="nb">Ok</span><span class="p">(</span><span class="nb">Ok</span><span class="p">(</span><span class="n">n</span><span class="p">))</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">DeviceManager</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">lib_present</span><span class="p">:</span><span class="w"> </span><span class="nc">true</span><span class="p">,</span><span class="w"> </span><span class="n">device_count</span><span class="p">:</span><span class="w"> </span><span class="nc">n</span><span class="p">,</span><span class="w"> </span><span class="n">discovery_succeeded</span><span class="p">:</span><span class="w"> </span><span class="nc">true</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">            </span><span class="nb">Ok</span><span class="p">(</span><span class="nb">Err</span><span class="p">(</span><span class="n">_</span><span class="p">))</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nb">Err</span><span class="p">(</span><span class="n">_</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">DeviceManager</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">lib_present</span><span class="p">:</span><span class="w"> </span><span class="nc">true</span><span class="p">,</span><span class="w"> </span><span class="n">device_count</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">discovery_succeeded</span><span class="p">:</span><span class="w"> </span><span class="nc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">has_device</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="kt">i32</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">        </span><span class="bp">self</span><span class="p">.</span><span class="n">discovery_succeeded</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">device_count</span>
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="p">}</span>
+</code></pre></div>
+<p>Compiled and run as part of the complete <code>01_device_discovery.rs</code> further below:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>cargo<span class="w"> </span>run<span class="w"> </span>--release<span class="w"> </span>--bin<span class="w"> </span>01_device_discovery
+</code></pre></div>
+<p>Genuinely compiled and run:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>DeviceManager::new():
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  is_culib_present() = false
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  discovery_succeeded=false, device_count=0
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>mgr.has_device(0) = false
+</code></pre></div>
+<p><code>is_culib_present()</code> genuinely attempts the identical library search <code>CudaContext::device_count()</code> would (the same candidate list of <code>libcuda.so</code>/<code>libnvcuda.so</code> names), but returns a plain <code>bool</code> rather than unwinding — <code>Library::new(choice).is_ok()</code>, checked directly, with no panic anywhere in its own implementation. <code>DeviceManager::new()</code> never even attempts <code>device_count()</code> once this first check fails, so the panic that call would otherwise raise never has a chance to happen — <code>discovery_succeeded</code> ends up <code>false</code> for exactly the same underlying reason CUDA's own edition reports <code>cudaErrorNoDevice</code>, just reached through a structurally different check.</p>
+<h3 id="worked-example-1012-bypassing-the-manager-and-what-that-costs-in-cudarc-specifically">Worked Example 10.1.2 — bypassing the manager, and what that costs in cudarc specifically<a class="headerlink" href="#worked-example-1012-bypassing-the-manager-and-what-that-costs-in-cudarc-specifically" title="Permanent link">&para;</a></h3>
+<p>Compiled and run as part of the complete <code>01_device_discovery.rs</code> further below:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>cargo<span class="w"> </span>run<span class="w"> </span>--release<span class="w"> </span>--bin<span class="w"> </span>01_device_discovery
+</code></pre></div>
+<p>Genuinely compiled and run:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>--- bypassing the layered manager: calling device_count() directly ---
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>code that skips is_culib_present() and calls CudaContext::device_count() directly:
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>  device_count() -&gt; PANICKED (caught here only for this demo -- see below):
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>  Unable to dynamically load the &quot;cuda&quot; shared library - searched for library names: [...]
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>  same underlying fact the manager already knew -- but reached through a
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>  panic rather than a checked return value, and only caught here because
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>  this specific call is wrapped; see bypass_crash_demo.rs for what happens
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>  when nothing catches it at all.
+</code></pre></div>
+<p>Calling <code>CudaContext::device_count()</code> directly, without ever checking <code>is_culib_present()</code> first, produces the exact same underlying fact the manager already knew — but reaches it through a <code>panic!</code> rather than a <code>Result</code>, and this call is only survivable at all because it happens to be wrapped in <code>catch_it</code> for this specific demonstration. CUDA's own equivalent mistake (Chapter 10.1.2 in that edition) merely surfaces the failure later and with less context, still through a checked return value the caller could have inspected. cudarc's version is a strictly stronger consequence: skip the check, and <em>nothing</em> protects the rest of the program unless a caller specifically remembers to wrap the call in <code>catch_unwind</code>, which is not a mistake anyone would expect to need to guard against from a function whose signature returns an ordinary <code>Result</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1">// Deliberately UNGUARDED: no is_culib_present() check, no catch_unwind.</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="c1">// Kept as its own binary, purely to demonstrate what genuinely happens when a</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="c1">// caller bypasses DeviceManager entirely. This program is EXPECTED to crash</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="c1">// the whole process -- that crash is the point.</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="k">fn</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;about to call CudaContext::device_count() with no guard at all...&quot;</span><span class="p">);</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cudarc</span><span class="p">::</span><span class="n">driver</span><span class="p">::</span><span class="n">CudaContext</span><span class="p">::</span><span class="n">device_count</span><span class="p">();</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;device_count() = {:?} (if you see this, a device was genuinely found)&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">);</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="p">}</span>
+</code></pre></div>
+<p>Genuinely compiled and run as its own binary, <code>bypass_crash_demo.rs</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>about to call CudaContext::device_count() with no guard at all...
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>thread &#39;main&#39; (1835) panicked at .../cudarc-0.19.9/src/lib.rs:200:5:
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>Unable to dynamically load the &quot;cuda&quot; shared library - searched for library names: [...]
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>stack backtrace:
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>   0: __rustc::rust_begin_unwind
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>   ...
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>   9: cudarc::driver::safe::core::CudaContext::device_count
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>  10: bypass_crash_demo::main
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+</code></pre></div>
+<p>The process exits with status <code>101</code> — Rust's standard uncaught-panic exit code — having printed exactly one line of its own intended output before the unguarded call ended everything. Unlike Chapter 6's and Chapter 7's deliberately-failing files, this one compiles perfectly cleanly; the mistake it demonstrates is a runtime one, not a compile-time one, which is exactly why <code>DeviceManager</code>'s two-layer discipline matters here in a way it never needed to for a use-after-move or a dangling lifetime — the compiler has no way to catch this category of mistake for you.</p>
+<h2 id="102-a-device-aware-allocator-foundational">10.2 A Device-Aware Allocator <code>[FOUNDATIONAL]</code><a class="headerlink" href="#102-a-device-aware-allocator-foundational" title="Permanent link">&para;</a></h2>
+<h3 id="intuition_1">Intuition<a class="headerlink" href="#intuition_1" title="Permanent link">&para;</a></h3>
+<p><code>DeviceManager</code> answers one question; <code>DeviceAwareAllocator</code> acts on it — routing an allocation request to a <code>cudarc</code> device context when a device is known to exist, and to a plain <code>Vec&lt;u8&gt;</code> otherwise, without ever attempting the device path when discovery has already ruled it out. This is the first allocator in this book that can genuinely <em>succeed</em> under this environment's no-GPU constraints, rather than honestly reporting a panic (or, for the CUDA edition, <code>cudaErrorNoDevice</code>) the way every device-touching call since Chapter 4 has.</p>
+<h3 id="background_1">Background<a class="headerlink" href="#background_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Device path</th>
+<th>Host fallback path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Taken when</td>
+<td><code>DeviceManager</code> reports a device <em>and</em> the allocation itself succeeds</td>
+<td>No device reported, or the device path panics anyway despite being reported</td>
+</tr>
+<tr>
+<td>Allocator call</td>
+<td><code>cudarc::driver::CudaContext::new(0)</code>, then (on real hardware) a stream allocation</td>
+<td><code>vec![0u8; bytes]</code></td>
+</tr>
+<tr>
+<td>Alignment guarantee</td>
+<td>Whatever the CUDA driver documents for device allocations (unverified here — no device to query)</td>
+<td>Whatever Rust's global allocator's default alignment for <code>u8</code> happens to be — not requested, not guaranteed</td>
+</tr>
+<tr>
+<td>Genuinely reachable in this no-GPU environment?</td>
+<td>No (would need a real device)</td>
+<td>Yes — both trigger conditions below are real</td>
+</tr>
+</tbody>
+</table>
+<h3 id="worked-example-1021-the-routing-condition-both-reachable-cases">Worked Example 10.2.1 — the routing condition, both reachable cases<a class="headerlink" href="#worked-example-1021-the-routing-condition-both-reachable-cases" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">struct</span><span class="w"> </span><span class="nc">DeviceAwareAllocator</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">    </span><span class="n">device_available</span><span class="p">:</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="p">}</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="k">impl</span><span class="w"> </span><span class="n">DeviceAwareAllocator</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">allocate</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">bytes</span><span class="p">:</span><span class="w"> </span><span class="kt">usize</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="p">(</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;&#39;</span><span class="nb">static</span><span class="w"> </span><span class="kt">str</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">device_available</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">            </span><span class="k">match</span><span class="w"> </span><span class="n">catch_it</span><span class="p">(</span><span class="o">||</span><span class="w"> </span><span class="n">cudarc</span><span class="p">::</span><span class="n">driver</span><span class="p">::</span><span class="n">CudaContext</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">                </span><span class="nb">Ok</span><span class="p">(</span><span class="nb">Ok</span><span class="p">(</span><span class="n">_ctx</span><span class="p">))</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">                    </span><span class="c1">// Real hardware would continue: ctx.default_stream().alloc_zeros(...).</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">                    </span><span class="c1">// UNVERIFIED -- pending real-GPU test; unreachable in this sandbox.</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">                    </span><span class="p">(</span><span class="fm">vec!</span><span class="p">[</span><span class="mi">0</span><span class="k">u8</span><span class="p">;</span><span class="w"> </span><span class="n">bytes</span><span class="p">],</span><span class="w"> </span><span class="s">&quot;cudarc CudaContext (device) [UNVERIFIED -- pending real-GPU test]&quot;</span><span class="p">)</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">                </span><span class="p">}</span>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="w">                </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">(</span><span class="fm">vec!</span><span class="p">[</span><span class="mi">0</span><span class="k">u8</span><span class="p">;</span><span class="w"> </span><span class="n">bytes</span><span class="p">],</span><span class="w"> </span><span class="s">&quot;Vec&lt;u8&gt; (host fallback -- CudaContext::new panicked despite device_available)&quot;</span><span class="p">),</span>
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="w">            </span><span class="p">}</span>
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">            </span><span class="p">(</span><span class="fm">vec!</span><span class="p">[</span><span class="mi">0</span><span class="k">u8</span><span class="p">;</span><span class="w"> </span><span class="n">bytes</span><span class="p">],</span><span class="w"> </span><span class="s">&quot;Vec&lt;u8&gt; (host fallback -- no device reported by discovery)&quot;</span><span class="p">)</span>
+<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a><span class="p">}</span>
+</code></pre></div>
+<p>Compiled and run as part of the complete <code>02_device_aware_allocator.rs</code> further below:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>cargo<span class="w"> </span>run<span class="w"> </span>--release<span class="w"> </span>--bin<span class="w"> </span>02_device_aware_allocator
+</code></pre></div>
+<p>Genuinely compiled and run:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Case 1 (device_available=false, the real, measured discovery result):
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>  strategy used: Vec&lt;u8&gt; (host fallback -- no device reported by discovery)
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>  allocation succeeded: true
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>Case 2 (device_available=true, FORCED, to test the failure-recovery path):
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>  strategy used: Vec&lt;u8&gt; (host fallback -- CudaContext::new panicked despite device_available)
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>  allocation succeeded: true
+</code></pre></div>
+<p>Case 1 is this environment's real, honestly-discovered situation: <code>DeviceManager</code> reports no device, <code>device_available</code> is genuinely <code>false</code>, and <code>allocate()</code> never even attempts <code>CudaContext::new</code> — it goes straight to <code>vec![0u8; bytes]</code>, which genuinely succeeds. Case 2 deliberately forces <code>device_available = true</code> (simulating discovery having been correct at startup but the device becoming unavailable, or simply wrong) specifically to exercise the <em>second</em> fallback: <code>allocate()</code> still tries the device path first, genuinely catches a panic via <code>catch_it</code>, and falls back to <code>Vec&lt;u8&gt;</code> anyway — succeeding through a different path than Case 1, for a different reason. Both are real, both are genuinely exercised, and both produce a working allocation in an environment where every device-touching call this book has made has honestly failed or panicked.</p>
+<h3 id="worked-example-1022-the-alignment-guarantee-that-never-arrives">Worked Example 10.2.2 — the alignment guarantee that never arrives<a class="headerlink" href="#worked-example-1022-the-alignment-guarantee-that-never-arrives" title="Permanent link">&para;</a></h3>
+<p>Compiled and run as part of the complete <code>02_device_aware_allocator.rs</code> further below:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>cargo<span class="w"> </span>run<span class="w"> </span>--release<span class="w"> </span>--bin<span class="w"> </span>02_device_aware_allocator
+</code></pre></div>
+<p>Genuinely compiled and run:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>checking whether the host-fallback path honors a 256-byte alignment request
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>it was never actually told about:
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>  5 of 5 Vec&lt;u8&gt; allocations were NOT 256-byte aligned
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>  std::alloc::alloc with Layout::from_size_align(_, 256), by contrast: aligned to 256 bytes? true
+</code></pre></div>
+<p><code>allocate()</code>'s signature never takes an alignment parameter at all — <code>vec![0u8; bytes]</code> allocates through Rust's global allocator using <code>u8</code>'s own natural alignment (<code>1</code> byte), and all 5 genuinely tested calls confirm it: none land on a 256-byte boundary. <code>std::alloc::alloc</code> called with an explicit <code>Layout::from_size_align(bytes, 256)</code>, by contrast, genuinely honors the request — Rust's allocator API takes the alignment as a first-class, explicit part of what's being asked for, rather than inferring it from a type the caller may not have chosen with alignment in mind at all. This is the same structural gap Chapter 7.3's <code>Vec&lt;f32&gt;</code> discussion already found from the other direction: a <code>Vec&lt;T&gt;</code>'s allocation is only ever as aligned as <code>T</code> requires, never more, unless something <em>else</em> — a <code>#[repr(align(N))]</code> wrapper type, or a raw <code>Layout</code> request like this one — asks for more explicitly.</p>
+<blockquote>
+<p><code>[COMMON TRAP]</code> A function whose parameter list doesn't mention alignment isn't necessarily a function that doesn't need to think about it — <code>DeviceAwareAllocator::allocate()</code>'s device path would, on real hardware, satisfy whatever alignment the CUDA driver documents for its own allocations, purely as a side effect of that API's own guarantee, while its <code>Vec&lt;u8&gt;</code> fallback satisfies nothing beyond <code>u8</code>'s trivial 1-byte requirement, for the identical reason: neither path was ever asked to guarantee anything about alignment beyond what its own underlying allocator happens to provide. The fix mirrors this worked example's own contrast — replace <code>vec![0u8; bytes]</code> with an explicit <code>Layout</code>-based allocation carrying the alignment the caller actually needs, so the guarantee survives the routing decision instead of depending on which branch happened to run.</p>
+</blockquote>
+<h3 id="worked-example-1023-a-benchmark-that-comes-out-backwards-from-the-cuda-edition-for-a-real-reason">Worked Example 10.2.3 — a benchmark that comes out backwards from the CUDA edition, for a real reason<a class="headerlink" href="#worked-example-1023-a-benchmark-that-comes-out-backwards-from-the-cuda-edition-for-a-real-reason" title="Permanent link">&para;</a></h3>
+<p>Compiled and run as part of the complete <code>02_device_aware_allocator.rs</code> further below:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>cargo<span class="w"> </span>run<span class="w"> </span>--release<span class="w"> </span>--bin<span class="w"> </span>02_device_aware_allocator
+</code></pre></div>
+<p>Genuinely compiled and run:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>100 catch_unwind(CudaContext::new) calls (all 100 panicked): 47.968 ms total, 0.47968 ms/call
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>100 Vec&lt;u8&gt; allocations (all succeeded): 0.001 ms total, 0.00001 ms/call
+</code></pre></div>
+<p>(Rerunning the same binary produces slightly different absolute figures each time, ranging from roughly <code>45</code> to <code>50</code> ms total across every rerun performed while writing this chapter — but the qualitative result, and its order of magnitude, held every time.)</p>
+<p>The CUDA edition's own version of this benchmark found the failing device call <em>faster</em> than the succeeding host allocation, because CUDA's runtime caches "no device is present" cheaply after the first failed call. This chapter's numbers say the opposite, by roughly three orders of magnitude — and the reason is a real, specific mechanism worth tracing all the way down, not just a difference to note and move past. <code>CudaContext::new</code>'s FFI thunk loads <code>libcuda.so</code> through a function-local <code>static LIB: OnceLock&lt;Library&gt;</code>, filled in by <code>LIB.get_or_init(|| { ...; panic_no_lib_found(...) })</code>. <code>OnceLock::get_or_init</code> only caches a value when its closure <em>returns</em> one — when the closure panics instead, the cell is left exactly as uninitialized as it started, by design (this is documented <code>OnceLock</code> behavior, not an oversight), so the library search runs again from scratch on every single subsequent call. A direct, isolated timing check confirms this: five successive, individually-timed calls to <code>catch_it(|| CudaContext::device_count())</code> each take essentially the same ~0.5 ms, with no speedup on later calls — genuine proof that nothing is being cached across the panics at all.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>call 0: 0.5828 ms
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>call 1: 0.5076 ms
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>call 2: 0.5349 ms
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>call 3: 0.5041 ms
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>call 4: 0.5683 ms
+</code></pre></div>
+<p>Read honestly, this chapter's benchmark isn't measuring "device allocation versus host allocation" any more than the CUDA edition's was — it's measuring "the cost of a library search that fails and is never cached" against "the cost of a real host allocation." But where the CUDA edition's honest reading was a caution about benchmark <em>interpretation</em>, this chapter's honest reading is a caution about <em>architecture</em>: any code that calls a panic-guarded cudarc function inside a loop or a hot path, expecting the underlying <code>OnceLock</code> to behave like a typical successful-initialization cache, will silently pay the full, uncached search cost on every single iteration. <code>DeviceManager</code>'s entire value proposition — ask once, cache the answer — has to be implemented explicitly, in the caller's own struct field, precisely because cudarc's internal caching does not survive the panic path the way CUDA's own runtime-level caching survives an ordinary error return.</p>
+<blockquote>
+<p><code>[COMMON TRAP]</code> It's tempting to assume any lazily-initialized, cached resource in Rust behaves the same way regardless of whether initialization succeeds or fails — <code>OnceLock</code>, <code>LazyLock</code>, and similar types all share this same property: a panicking initializer leaves the cell empty, ready to try again, rather than caching the failure the way a <code>Result</code>-returning cache (a <code>HashMap&lt;Key, Result&lt;Value, Error&gt;&gt;</code>, say) explicitly would. This is exactly the right behavior for a resource that might genuinely become available later (a library installed after the process starts, a device plugged in mid-run), but it means any code relying on "the first call pays the cost, later calls are free" needs to check specifically whether the thing being cached is a success value or an outcome that includes failure — the two are not interchangeable, and this chapter's own benchmark is the direct, measured consequence of assuming they were.</p>
+</blockquote>
+<h2 id="103-complete-runnable-code">10.3 Complete Runnable Code<a class="headerlink" href="#103-complete-runnable-code" title="Permanent link">&para;</a></h2>
+<h3 id="file-01_device_discoveryrs">File: <code>01_device_discovery.rs</code><a class="headerlink" href="#file-01_device_discoveryrs" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="k">use</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">panic</span><span class="p">;</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="k">fn</span><span class="w"> </span><span class="nf">catch_it</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span><span class="n">f</span><span class="p">:</span><span class="w"> </span><span class="nc">impl</span><span class="w"> </span><span class="nb">FnOnce</span><span class="p">()</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">panic</span><span class="p">::</span><span class="n">UnwindSafe</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Result</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="w"> </span><span class="nb">String</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">default_hook</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">panic</span><span class="p">::</span><span class="n">take_hook</span><span class="p">();</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">    </span><span class="n">panic</span><span class="p">::</span><span class="n">set_hook</span><span class="p">(</span><span class="nb">Box</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="p">{}));</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">panic</span><span class="p">::</span><span class="n">catch_unwind</span><span class="p">(</span><span class="n">f</span><span class="p">);</span>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="w">    </span><span class="n">panic</span><span class="p">::</span><span class="n">set_hook</span><span class="p">(</span><span class="n">default_hook</span><span class="p">);</span>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="w">    </span><span class="n">result</span><span class="p">.</span><span class="n">map_err</span><span class="p">(</span><span class="o">|</span><span class="n">payload</span><span class="o">|</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="w">        </span><span class="n">payload</span>
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="w">            </span><span class="p">.</span><span class="n">downcast_ref</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span><span class="p">()</span>
+<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a><span class="w">            </span><span class="p">.</span><span class="n">cloned</span><span class="p">()</span>
+<a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a><span class="w">            </span><span class="p">.</span><span class="n">or_else</span><span class="p">(</span><span class="o">||</span><span class="w"> </span><span class="n">payload</span><span class="p">.</span><span class="n">downcast_ref</span><span class="p">::</span><span class="o">&lt;&amp;</span><span class="kt">str</span><span class="o">&gt;</span><span class="p">().</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">s</span><span class="o">|</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">to_string</span><span class="p">()))</span>
+<a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a><span class="w">            </span><span class="p">.</span><span class="n">unwrap_or_else</span><span class="p">(</span><span class="o">||</span><span class="w"> </span><span class="s">&quot;&lt;non-string panic payload&gt;&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">())</span>
+<a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a><span class="w">    </span><span class="p">})</span>
+<a id="__codelineno-15-15" name="__codelineno-15-15" href="#__codelineno-15-15"></a><span class="p">}</span>
+<a id="__codelineno-15-16" name="__codelineno-15-16" href="#__codelineno-15-16"></a>
+<a id="__codelineno-15-17" name="__codelineno-15-17" href="#__codelineno-15-17"></a><span class="c1">// A tiny, honest device manager -- but one built for cudarc&#39;s actual shape,</span>
+<a id="__codelineno-15-18" name="__codelineno-15-18" href="#__codelineno-15-18"></a><span class="c1">// not a direct translation of CUDA&#39;s cudaGetDeviceCount. cudarc&#39;s device_count()</span>
+<a id="__codelineno-15-19" name="__codelineno-15-19" href="#__codelineno-15-19"></a><span class="c1">// PANICS (not Result::Err) the moment libcuda.so can&#39;t be dlopen&#39;d, so discovery</span>
+<a id="__codelineno-15-20" name="__codelineno-15-20" href="#__codelineno-15-20"></a><span class="c1">// has to happen in two layers: a genuinely non-panicking presence check first</span>
+<a id="__codelineno-15-21" name="__codelineno-15-21" href="#__codelineno-15-21"></a><span class="c1">// (is_culib_present()), and only THEN, if that succeeds, the real device count.</span>
+<a id="__codelineno-15-22" name="__codelineno-15-22" href="#__codelineno-15-22"></a><span class="k">struct</span><span class="w"> </span><span class="nc">DeviceManager</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-23" name="__codelineno-15-23" href="#__codelineno-15-23"></a><span class="w">    </span><span class="n">lib_present</span><span class="p">:</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span>
+<a id="__codelineno-15-24" name="__codelineno-15-24" href="#__codelineno-15-24"></a><span class="w">    </span><span class="n">device_count</span><span class="p">:</span><span class="w"> </span><span class="kt">i32</span><span class="p">,</span>
+<a id="__codelineno-15-25" name="__codelineno-15-25" href="#__codelineno-15-25"></a><span class="w">    </span><span class="n">discovery_succeeded</span><span class="p">:</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span>
+<a id="__codelineno-15-26" name="__codelineno-15-26" href="#__codelineno-15-26"></a><span class="p">}</span>
+<a id="__codelineno-15-27" name="__codelineno-15-27" href="#__codelineno-15-27"></a>
+<a id="__codelineno-15-28" name="__codelineno-15-28" href="#__codelineno-15-28"></a><span class="k">impl</span><span class="w"> </span><span class="n">DeviceManager</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-29" name="__codelineno-15-29" href="#__codelineno-15-29"></a><span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">new</span><span class="p">()</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nc">Self</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-30" name="__codelineno-15-30" href="#__codelineno-15-30"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">lib_present</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">cudarc</span><span class="p">::</span><span class="n">driver</span><span class="p">::</span><span class="n">sys</span><span class="p">::</span><span class="n">is_culib_present</span><span class="p">()</span><span class="w"> </span><span class="p">};</span>
+<a id="__codelineno-15-31" name="__codelineno-15-31" href="#__codelineno-15-31"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="n">lib_present</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-32" name="__codelineno-15-32" href="#__codelineno-15-32"></a><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">DeviceManager</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">lib_present</span><span class="p">:</span><span class="w"> </span><span class="nc">false</span><span class="p">,</span><span class="w"> </span><span class="n">device_count</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">discovery_succeeded</span><span class="p">:</span><span class="w"> </span><span class="nc">false</span><span class="w"> </span><span class="p">};</span>
+<a id="__codelineno-15-33" name="__codelineno-15-33" href="#__codelineno-15-33"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-15-34" name="__codelineno-15-34" href="#__codelineno-15-34"></a><span class="w">        </span><span class="c1">// The library is present, so this call is genuinely safe to attempt --</span>
+<a id="__codelineno-15-35" name="__codelineno-15-35" href="#__codelineno-15-35"></a><span class="w">        </span><span class="c1">// still wrapped defensively, since a present-but-broken driver could</span>
+<a id="__codelineno-15-36" name="__codelineno-15-36" href="#__codelineno-15-36"></a><span class="w">        </span><span class="c1">// still fail in ways worth catching rather than propagating.</span>
+<a id="__codelineno-15-37" name="__codelineno-15-37" href="#__codelineno-15-37"></a><span class="w">        </span><span class="k">match</span><span class="w"> </span><span class="n">catch_it</span><span class="p">(</span><span class="o">||</span><span class="w"> </span><span class="n">cudarc</span><span class="p">::</span><span class="n">driver</span><span class="p">::</span><span class="n">CudaContext</span><span class="p">::</span><span class="n">device_count</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-38" name="__codelineno-15-38" href="#__codelineno-15-38"></a><span class="w">            </span><span class="nb">Ok</span><span class="p">(</span><span class="nb">Ok</span><span class="p">(</span><span class="n">n</span><span class="p">))</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">DeviceManager</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">lib_present</span><span class="p">:</span><span class="w"> </span><span class="nc">true</span><span class="p">,</span><span class="w"> </span><span class="n">device_count</span><span class="p">:</span><span class="w"> </span><span class="nc">n</span><span class="p">,</span><span class="w"> </span><span class="n">discovery_succeeded</span><span class="p">:</span><span class="w"> </span><span class="nc">true</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-15-39" name="__codelineno-15-39" href="#__codelineno-15-39"></a><span class="w">            </span><span class="nb">Ok</span><span class="p">(</span><span class="nb">Err</span><span class="p">(</span><span class="n">_</span><span class="p">))</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nb">Err</span><span class="p">(</span><span class="n">_</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">DeviceManager</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">lib_present</span><span class="p">:</span><span class="w"> </span><span class="nc">true</span><span class="p">,</span><span class="w"> </span><span class="n">device_count</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">discovery_succeeded</span><span class="p">:</span><span class="w"> </span><span class="nc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-15-40" name="__codelineno-15-40" href="#__codelineno-15-40"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-15-41" name="__codelineno-15-41" href="#__codelineno-15-41"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-15-42" name="__codelineno-15-42" href="#__codelineno-15-42"></a>
+<a id="__codelineno-15-43" name="__codelineno-15-43" href="#__codelineno-15-43"></a><span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">has_device</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="kt">i32</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-44" name="__codelineno-15-44" href="#__codelineno-15-44"></a><span class="w">        </span><span class="bp">self</span><span class="p">.</span><span class="n">discovery_succeeded</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">device_count</span>
+<a id="__codelineno-15-45" name="__codelineno-15-45" href="#__codelineno-15-45"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-15-46" name="__codelineno-15-46" href="#__codelineno-15-46"></a><span class="p">}</span>
+<a id="__codelineno-15-47" name="__codelineno-15-47" href="#__codelineno-15-47"></a>
+<a id="__codelineno-15-48" name="__codelineno-15-48" href="#__codelineno-15-48"></a><span class="k">fn</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-49" name="__codelineno-15-49" href="#__codelineno-15-49"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;=== Section 10.1: Device Discovery ===</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<a id="__codelineno-15-50" name="__codelineno-15-50" href="#__codelineno-15-50"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">mgr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DeviceManager</span><span class="p">::</span><span class="n">new</span><span class="p">();</span>
+<a id="__codelineno-15-51" name="__codelineno-15-51" href="#__codelineno-15-51"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;DeviceManager::new():&quot;</span><span class="p">);</span>
+<a id="__codelineno-15-52" name="__codelineno-15-52" href="#__codelineno-15-52"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  is_culib_present() = {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">mgr</span><span class="p">.</span><span class="n">lib_present</span><span class="p">);</span>
+<a id="__codelineno-15-53" name="__codelineno-15-53" href="#__codelineno-15-53"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  discovery_succeeded={}, device_count={}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">mgr</span><span class="p">.</span><span class="n">discovery_succeeded</span><span class="p">,</span><span class="w"> </span><span class="n">mgr</span><span class="p">.</span><span class="n">device_count</span><span class="p">);</span>
+<a id="__codelineno-15-54" name="__codelineno-15-54" href="#__codelineno-15-54"></a>
+<a id="__codelineno-15-55" name="__codelineno-15-55" href="#__codelineno-15-55"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">mgr.has_device(0) = {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">mgr</span><span class="p">.</span><span class="n">has_device</span><span class="p">(</span><span class="mi">0</span><span class="p">));</span>
+<a id="__codelineno-15-56" name="__codelineno-15-56" href="#__codelineno-15-56"></a>
+<a id="__codelineno-15-57" name="__codelineno-15-57" href="#__codelineno-15-57"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">--- bypassing the layered manager: calling device_count() directly ---&quot;</span><span class="p">);</span>
+<a id="__codelineno-15-58" name="__codelineno-15-58" href="#__codelineno-15-58"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;code that skips is_culib_present() and calls CudaContext::device_count() directly:&quot;</span><span class="p">);</span>
+<a id="__codelineno-15-59" name="__codelineno-15-59" href="#__codelineno-15-59"></a><span class="w">    </span><span class="k">match</span><span class="w"> </span><span class="n">catch_it</span><span class="p">(</span><span class="o">||</span><span class="w"> </span><span class="n">cudarc</span><span class="p">::</span><span class="n">driver</span><span class="p">::</span><span class="n">CudaContext</span><span class="p">::</span><span class="n">device_count</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-60" name="__codelineno-15-60" href="#__codelineno-15-60"></a><span class="w">        </span><span class="nb">Ok</span><span class="p">(</span><span class="nb">Ok</span><span class="p">(</span><span class="n">n</span><span class="p">))</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  device_count() -&gt; Ok({}) (did not panic)&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">),</span>
+<a id="__codelineno-15-61" name="__codelineno-15-61" href="#__codelineno-15-61"></a><span class="w">        </span><span class="nb">Ok</span><span class="p">(</span><span class="nb">Err</span><span class="p">(</span><span class="n">e</span><span class="p">))</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  device_count() -&gt; Err({:?})&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">e</span><span class="p">),</span>
+<a id="__codelineno-15-62" name="__codelineno-15-62" href="#__codelineno-15-62"></a><span class="w">        </span><span class="nb">Err</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-63" name="__codelineno-15-63" href="#__codelineno-15-63"></a><span class="w">            </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  device_count() -&gt; PANICKED (caught here only for this demo -- see below):&quot;</span><span class="p">);</span>
+<a id="__codelineno-15-64" name="__codelineno-15-64" href="#__codelineno-15-64"></a><span class="w">            </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">msg</span><span class="p">.</span><span class="n">lines</span><span class="p">().</span><span class="n">next</span><span class="p">().</span><span class="n">unwrap_or</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">));</span>
+<a id="__codelineno-15-65" name="__codelineno-15-65" href="#__codelineno-15-65"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-15-66" name="__codelineno-15-66" href="#__codelineno-15-66"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-15-67" name="__codelineno-15-67" href="#__codelineno-15-67"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  same underlying fact the manager already knew -- but reached through a&quot;</span><span class="p">);</span>
+<a id="__codelineno-15-68" name="__codelineno-15-68" href="#__codelineno-15-68"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  panic rather than a checked return value, and only caught here because&quot;</span><span class="p">);</span>
+<a id="__codelineno-15-69" name="__codelineno-15-69" href="#__codelineno-15-69"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  this specific call is wrapped; see bypass_crash_demo.rs for what happens&quot;</span><span class="p">);</span>
+<a id="__codelineno-15-70" name="__codelineno-15-70" href="#__codelineno-15-70"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  when nothing catches it at all.&quot;</span><span class="p">);</span>
+<a id="__codelineno-15-71" name="__codelineno-15-71" href="#__codelineno-15-71"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>cargo<span class="w"> </span>run<span class="w"> </span>--release<span class="w"> </span>--bin<span class="w"> </span>01_device_discovery
+</code></pre></div>
+<p>Produces exactly the output shown in Worked Examples 10.1.1 and 10.1.2 above.</p>
+<h3 id="file-bypass_crash_demors">File: <code>bypass_crash_demo.rs</code><a class="headerlink" href="#file-bypass_crash_demors" title="Permanent link">&para;</a></h3>
+<p>Kept separate from the two numbered files above — not because it fails to compile (it compiles perfectly cleanly, and <code>cargo build --release</code> for this chapter's whole package succeeds with it included), but because it is a deliberately unguarded program whose entire purpose is to crash when run, which makes it unsuitable to invoke as part of any normal build-and-run sequence.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1">// Deliberately UNGUARDED: no is_culib_present() check, no catch_unwind.</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="c1">// Kept as its own binary, outside the &quot;Complete Runnable Code&quot; set, purely to</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="c1">// demonstrate what genuinely happens when a caller bypasses DeviceManager</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="c1">// entirely and calls a cudarc device operation directly. This program is</span>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="c1">// EXPECTED to crash the whole process -- that crash is the point.</span>
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="k">fn</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;about to call CudaContext::device_count() with no guard at all...&quot;</span><span class="p">);</span>
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cudarc</span><span class="p">::</span><span class="n">driver</span><span class="p">::</span><span class="n">CudaContext</span><span class="p">::</span><span class="n">device_count</span><span class="p">();</span>
+<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;device_count() = {:?} (if you see this, a device was genuinely found)&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">);</span>
+<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>cargo<span class="w"> </span>run<span class="w"> </span>--release<span class="w"> </span>--bin<span class="w"> </span>bypass_crash_demo
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;exit code: </span><span class="nv">$?</span><span class="s2">&quot;</span>
+</code></pre></div>
+<p>Produces exactly the crash and exit code <code>101</code> shown in Worked Example 10.1.2 above.</p>
+<h3 id="file-02_device_aware_allocatorrs">File: <code>02_device_aware_allocator.rs</code><a class="headerlink" href="#file-02_device_aware_allocatorrs" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="k">use</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">alloc</span><span class="p">::{</span><span class="n">alloc</span><span class="p">,</span><span class="w"> </span><span class="n">dealloc</span><span class="p">,</span><span class="w"> </span><span class="n">Layout</span><span class="p">};</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="k">use</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">panic</span><span class="p">;</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="k">use</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">time</span><span class="p">::</span><span class="n">Instant</span><span class="p">;</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="k">fn</span><span class="w"> </span><span class="nf">catch_it</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span><span class="n">f</span><span class="p">:</span><span class="w"> </span><span class="nc">impl</span><span class="w"> </span><span class="nb">FnOnce</span><span class="p">()</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">panic</span><span class="p">::</span><span class="n">UnwindSafe</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Result</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="w"> </span><span class="nb">String</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">default_hook</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">panic</span><span class="p">::</span><span class="n">take_hook</span><span class="p">();</span>
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="w">    </span><span class="n">panic</span><span class="p">::</span><span class="n">set_hook</span><span class="p">(</span><span class="nb">Box</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="p">{}));</span>
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">panic</span><span class="p">::</span><span class="n">catch_unwind</span><span class="p">(</span><span class="n">f</span><span class="p">);</span>
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="w">    </span><span class="n">panic</span><span class="p">::</span><span class="n">set_hook</span><span class="p">(</span><span class="n">default_hook</span><span class="p">);</span>
+<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a><span class="w">    </span><span class="n">result</span><span class="p">.</span><span class="n">map_err</span><span class="p">(</span><span class="o">|</span><span class="n">payload</span><span class="o">|</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a><span class="w">        </span><span class="n">payload</span>
+<a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a><span class="w">            </span><span class="p">.</span><span class="n">downcast_ref</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span><span class="p">()</span>
+<a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a><span class="w">            </span><span class="p">.</span><span class="n">cloned</span><span class="p">()</span>
+<a id="__codelineno-19-14" name="__codelineno-19-14" href="#__codelineno-19-14"></a><span class="w">            </span><span class="p">.</span><span class="n">or_else</span><span class="p">(</span><span class="o">||</span><span class="w"> </span><span class="n">payload</span><span class="p">.</span><span class="n">downcast_ref</span><span class="p">::</span><span class="o">&lt;&amp;</span><span class="kt">str</span><span class="o">&gt;</span><span class="p">().</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">s</span><span class="o">|</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">to_string</span><span class="p">()))</span>
+<a id="__codelineno-19-15" name="__codelineno-19-15" href="#__codelineno-19-15"></a><span class="w">            </span><span class="p">.</span><span class="n">unwrap_or_else</span><span class="p">(</span><span class="o">||</span><span class="w"> </span><span class="s">&quot;&lt;non-string panic payload&gt;&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">())</span>
+<a id="__codelineno-19-16" name="__codelineno-19-16" href="#__codelineno-19-16"></a><span class="w">    </span><span class="p">})</span>
+<a id="__codelineno-19-17" name="__codelineno-19-17" href="#__codelineno-19-17"></a><span class="p">}</span>
+<a id="__codelineno-19-18" name="__codelineno-19-18" href="#__codelineno-19-18"></a>
+<a id="__codelineno-19-19" name="__codelineno-19-19" href="#__codelineno-19-19"></a><span class="c1">// Routes to a cudarc device context when the manager reports a device,</span>
+<a id="__codelineno-19-20" name="__codelineno-19-20" href="#__codelineno-19-20"></a><span class="c1">// falling back to a plain host Vec&lt;u8&gt; otherwise -- and ALSO falls back if</span>
+<a id="__codelineno-19-21" name="__codelineno-19-21" href="#__codelineno-19-21"></a><span class="c1">// the device path itself panics despite device_available, since discovery is</span>
+<a id="__codelineno-19-22" name="__codelineno-19-22" href="#__codelineno-19-22"></a><span class="c1">// a snapshot that can go stale (or, here, be flat-out wrong) between the</span>
+<a id="__codelineno-19-23" name="__codelineno-19-23" href="#__codelineno-19-23"></a><span class="c1">// check and the actual allocation attempt.</span>
+<a id="__codelineno-19-24" name="__codelineno-19-24" href="#__codelineno-19-24"></a><span class="k">struct</span><span class="w"> </span><span class="nc">DeviceAwareAllocator</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-19-25" name="__codelineno-19-25" href="#__codelineno-19-25"></a><span class="w">    </span><span class="n">device_available</span><span class="p">:</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span>
+<a id="__codelineno-19-26" name="__codelineno-19-26" href="#__codelineno-19-26"></a><span class="p">}</span>
+<a id="__codelineno-19-27" name="__codelineno-19-27" href="#__codelineno-19-27"></a>
+<a id="__codelineno-19-28" name="__codelineno-19-28" href="#__codelineno-19-28"></a><span class="k">impl</span><span class="w"> </span><span class="n">DeviceAwareAllocator</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-19-29" name="__codelineno-19-29" href="#__codelineno-19-29"></a><span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">allocate</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">bytes</span><span class="p">:</span><span class="w"> </span><span class="kt">usize</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="p">(</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;&#39;</span><span class="nb">static</span><span class="w"> </span><span class="kt">str</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-19-30" name="__codelineno-19-30" href="#__codelineno-19-30"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">device_available</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-19-31" name="__codelineno-19-31" href="#__codelineno-19-31"></a><span class="w">            </span><span class="k">match</span><span class="w"> </span><span class="n">catch_it</span><span class="p">(</span><span class="o">||</span><span class="w"> </span><span class="n">cudarc</span><span class="p">::</span><span class="n">driver</span><span class="p">::</span><span class="n">CudaContext</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-19-32" name="__codelineno-19-32" href="#__codelineno-19-32"></a><span class="w">                </span><span class="nb">Ok</span><span class="p">(</span><span class="nb">Ok</span><span class="p">(</span><span class="n">_ctx</span><span class="p">))</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-19-33" name="__codelineno-19-33" href="#__codelineno-19-33"></a><span class="w">                    </span><span class="c1">// Real hardware would continue: ctx.default_stream().alloc_zeros(...).</span>
+<a id="__codelineno-19-34" name="__codelineno-19-34" href="#__codelineno-19-34"></a><span class="w">                    </span><span class="c1">// UNVERIFIED -- pending real-GPU test; unreachable in this sandbox.</span>
+<a id="__codelineno-19-35" name="__codelineno-19-35" href="#__codelineno-19-35"></a><span class="w">                    </span><span class="p">(</span><span class="fm">vec!</span><span class="p">[</span><span class="mi">0</span><span class="k">u8</span><span class="p">;</span><span class="w"> </span><span class="n">bytes</span><span class="p">],</span><span class="w"> </span><span class="s">&quot;cudarc CudaContext (device) [UNVERIFIED -- pending real-GPU test]&quot;</span><span class="p">)</span>
+<a id="__codelineno-19-36" name="__codelineno-19-36" href="#__codelineno-19-36"></a><span class="w">                </span><span class="p">}</span>
+<a id="__codelineno-19-37" name="__codelineno-19-37" href="#__codelineno-19-37"></a><span class="w">                </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">(</span><span class="fm">vec!</span><span class="p">[</span><span class="mi">0</span><span class="k">u8</span><span class="p">;</span><span class="w"> </span><span class="n">bytes</span><span class="p">],</span><span class="w"> </span><span class="s">&quot;Vec&lt;u8&gt; (host fallback -- CudaContext::new panicked despite device_available)&quot;</span><span class="p">),</span>
+<a id="__codelineno-19-38" name="__codelineno-19-38" href="#__codelineno-19-38"></a><span class="w">            </span><span class="p">}</span>
+<a id="__codelineno-19-39" name="__codelineno-19-39" href="#__codelineno-19-39"></a><span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-19-40" name="__codelineno-19-40" href="#__codelineno-19-40"></a><span class="w">            </span><span class="p">(</span><span class="fm">vec!</span><span class="p">[</span><span class="mi">0</span><span class="k">u8</span><span class="p">;</span><span class="w"> </span><span class="n">bytes</span><span class="p">],</span><span class="w"> </span><span class="s">&quot;Vec&lt;u8&gt; (host fallback -- no device reported by discovery)&quot;</span><span class="p">)</span>
+<a id="__codelineno-19-41" name="__codelineno-19-41" href="#__codelineno-19-41"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-19-42" name="__codelineno-19-42" href="#__codelineno-19-42"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-19-43" name="__codelineno-19-43" href="#__codelineno-19-43"></a><span class="p">}</span>
+<a id="__codelineno-19-44" name="__codelineno-19-44" href="#__codelineno-19-44"></a>
+<a id="__codelineno-19-45" name="__codelineno-19-45" href="#__codelineno-19-45"></a><span class="k">fn</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-19-46" name="__codelineno-19-46" href="#__codelineno-19-46"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;=== Section 10.2: Memory Management and Allocation ===</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<a id="__codelineno-19-47" name="__codelineno-19-47" href="#__codelineno-19-47"></a>
+<a id="__codelineno-19-48" name="__codelineno-19-48" href="#__codelineno-19-48"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;--- routing condition, both reachable combinations in this environment ---&quot;</span><span class="p">);</span>
+<a id="__codelineno-19-49" name="__codelineno-19-49" href="#__codelineno-19-49"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">lib_present</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">cudarc</span><span class="p">::</span><span class="n">driver</span><span class="p">::</span><span class="n">sys</span><span class="p">::</span><span class="n">is_culib_present</span><span class="p">()</span><span class="w"> </span><span class="p">};</span>
+<a id="__codelineno-19-50" name="__codelineno-19-50" href="#__codelineno-19-50"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">honest_allocator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DeviceAwareAllocator</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">device_available</span><span class="p">:</span><span class="w"> </span><span class="nc">lib_present</span><span class="w"> </span><span class="p">};</span>
+<a id="__codelineno-19-51" name="__codelineno-19-51" href="#__codelineno-19-51"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">p1</span><span class="p">,</span><span class="w"> </span><span class="n">strategy1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">honest_allocator</span><span class="p">.</span><span class="n">allocate</span><span class="p">(</span><span class="mi">1024</span><span class="p">);</span>
+<a id="__codelineno-19-52" name="__codelineno-19-52" href="#__codelineno-19-52"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;Case 1 (device_available={}, the real, measured discovery result):&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lib_present</span><span class="p">);</span>
+<a id="__codelineno-19-53" name="__codelineno-19-53" href="#__codelineno-19-53"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  strategy used: {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">strategy1</span><span class="p">);</span>
+<a id="__codelineno-19-54" name="__codelineno-19-54" href="#__codelineno-19-54"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  allocation succeeded: {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">!</span><span class="n">p1</span><span class="p">.</span><span class="n">is_empty</span><span class="p">()</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="mi">1024</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<a id="__codelineno-19-55" name="__codelineno-19-55" href="#__codelineno-19-55"></a>
+<a id="__codelineno-19-56" name="__codelineno-19-56" href="#__codelineno-19-56"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">forced_allocator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DeviceAwareAllocator</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">device_available</span><span class="p">:</span><span class="w"> </span><span class="nc">true</span><span class="w"> </span><span class="p">};</span><span class="w"> </span><span class="c1">// simulate discovery having (wrongly) reported a device</span>
+<a id="__codelineno-19-57" name="__codelineno-19-57" href="#__codelineno-19-57"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">p2</span><span class="p">,</span><span class="w"> </span><span class="n">strategy2</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">forced_allocator</span><span class="p">.</span><span class="n">allocate</span><span class="p">(</span><span class="mi">1024</span><span class="p">);</span>
+<a id="__codelineno-19-58" name="__codelineno-19-58" href="#__codelineno-19-58"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">Case 2 (device_available=true, FORCED, to test the failure-recovery path):&quot;</span><span class="p">);</span>
+<a id="__codelineno-19-59" name="__codelineno-19-59" href="#__codelineno-19-59"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  strategy used: {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">strategy2</span><span class="p">);</span>
+<a id="__codelineno-19-60" name="__codelineno-19-60" href="#__codelineno-19-60"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  allocation succeeded: {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">!</span><span class="n">p2</span><span class="p">.</span><span class="n">is_empty</span><span class="p">()</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="mi">1024</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<a id="__codelineno-19-61" name="__codelineno-19-61" href="#__codelineno-19-61"></a>
+<a id="__codelineno-19-62" name="__codelineno-19-62" href="#__codelineno-19-62"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">--- the alignment parameter that never arrives ---&quot;</span><span class="p">);</span>
+<a id="__codelineno-19-63" name="__codelineno-19-63" href="#__codelineno-19-63"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;checking whether the host-fallback path honors a 256-byte alignment request&quot;</span><span class="p">);</span>
+<a id="__codelineno-19-64" name="__codelineno-19-64" href="#__codelineno-19-64"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;it was never actually told about:&quot;</span><span class="p">);</span>
+<a id="__codelineno-19-65" name="__codelineno-19-65" href="#__codelineno-19-65"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">misaligned_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-19-66" name="__codelineno-19-66" href="#__codelineno-19-66"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="o">..</span><span class="mi">5</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-19-67" name="__codelineno-19-67" href="#__codelineno-19-67"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">v</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span><span class="mi">0</span><span class="k">u8</span><span class="p">;</span><span class="w"> </span><span class="mi">1024</span><span class="p">];</span>
+<a id="__codelineno-19-68" name="__codelineno-19-68" href="#__codelineno-19-68"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">addr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v</span><span class="p">.</span><span class="n">as_ptr</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">;</span>
+<a id="__codelineno-19-69" name="__codelineno-19-69" href="#__codelineno-19-69"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">addr</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">256</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-19-70" name="__codelineno-19-70" href="#__codelineno-19-70"></a><span class="w">            </span><span class="n">misaligned_count</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<a id="__codelineno-19-71" name="__codelineno-19-71" href="#__codelineno-19-71"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-19-72" name="__codelineno-19-72" href="#__codelineno-19-72"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-19-73" name="__codelineno-19-73" href="#__codelineno-19-73"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  {} of 5 Vec&lt;u8&gt; allocations were NOT 256-byte aligned&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">misaligned_count</span><span class="p">);</span>
+<a id="__codelineno-19-74" name="__codelineno-19-74" href="#__codelineno-19-74"></a>
+<a id="__codelineno-19-75" name="__codelineno-19-75" href="#__codelineno-19-75"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">layout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Layout</span><span class="p">::</span><span class="n">from_size_align</span><span class="p">(</span><span class="mi">1024</span><span class="p">,</span><span class="w"> </span><span class="mi">256</span><span class="p">).</span><span class="n">unwrap</span><span class="p">();</span>
+<a id="__codelineno-19-76" name="__codelineno-19-76" href="#__codelineno-19-76"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">aligned_ptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">alloc</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span><span class="w"> </span><span class="p">};</span>
+<a id="__codelineno-19-77" name="__codelineno-19-77" href="#__codelineno-19-77"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">addr2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">aligned_ptr</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">;</span>
+<a id="__codelineno-19-78" name="__codelineno-19-78" href="#__codelineno-19-78"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  std::alloc::alloc with Layout::from_size_align(_, 256), by contrast: aligned to 256 bytes? {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">addr2</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">256</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<a id="__codelineno-19-79" name="__codelineno-19-79" href="#__codelineno-19-79"></a><span class="w">    </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">dealloc</span><span class="p">(</span><span class="n">aligned_ptr</span><span class="p">,</span><span class="w"> </span><span class="n">layout</span><span class="p">)</span><span class="w"> </span><span class="p">};</span>
+<a id="__codelineno-19-80" name="__codelineno-19-80" href="#__codelineno-19-80"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  a device-aware allocator that silently falls back to plain Vec&lt;u8&gt; loses&quot;</span><span class="p">);</span>
+<a id="__codelineno-19-81" name="__codelineno-19-81" href="#__codelineno-19-81"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  whatever alignment guarantee the device path would have honored -- exactly&quot;</span><span class="p">);</span>
+<a id="__codelineno-19-82" name="__codelineno-19-82" href="#__codelineno-19-82"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  the kind of silently-dropped parameter Chapter 7.3 warned about generally.&quot;</span><span class="p">);</span>
+<a id="__codelineno-19-83" name="__codelineno-19-83" href="#__codelineno-19-83"></a>
+<a id="__codelineno-19-84" name="__codelineno-19-84" href="#__codelineno-19-84"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">--- reading a benchmark&#39;s ledger honestly ---&quot;</span><span class="p">);</span>
+<a id="__codelineno-19-85" name="__codelineno-19-85" href="#__codelineno-19-85"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">trials</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span>
+<a id="__codelineno-19-86" name="__codelineno-19-86" href="#__codelineno-19-86"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">t0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Instant</span><span class="p">::</span><span class="n">now</span><span class="p">();</span>
+<a id="__codelineno-19-87" name="__codelineno-19-87" href="#__codelineno-19-87"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">real_failures</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-19-88" name="__codelineno-19-88" href="#__codelineno-19-88"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="o">..</span><span class="n">trials</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-19-89" name="__codelineno-19-89" href="#__codelineno-19-89"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">catch_it</span><span class="p">(</span><span class="o">||</span><span class="w"> </span><span class="n">cudarc</span><span class="p">::</span><span class="n">driver</span><span class="p">::</span><span class="n">CudaContext</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="mi">0</span><span class="p">)).</span><span class="n">is_err</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-19-90" name="__codelineno-19-90" href="#__codelineno-19-90"></a><span class="w">            </span><span class="n">real_failures</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<a id="__codelineno-19-91" name="__codelineno-19-91" href="#__codelineno-19-91"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-19-92" name="__codelineno-19-92" href="#__codelineno-19-92"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-19-93" name="__codelineno-19-93" href="#__codelineno-19-93"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">cudarc_ms</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t0</span><span class="p">.</span><span class="n">elapsed</span><span class="p">().</span><span class="n">as_secs_f64</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">1000.0</span><span class="p">;</span>
+<a id="__codelineno-19-94" name="__codelineno-19-94" href="#__codelineno-19-94"></a>
+<a id="__codelineno-19-95" name="__codelineno-19-95" href="#__codelineno-19-95"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">t2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Instant</span><span class="p">::</span><span class="n">now</span><span class="p">();</span>
+<a id="__codelineno-19-96" name="__codelineno-19-96" href="#__codelineno-19-96"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="o">..</span><span class="n">trials</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-19-97" name="__codelineno-19-97" href="#__codelineno-19-97"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">v</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span><span class="mi">0</span><span class="k">u8</span><span class="p">;</span><span class="w"> </span><span class="mi">1024</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">4</span><span class="p">];</span>
+<a id="__codelineno-19-98" name="__codelineno-19-98" href="#__codelineno-19-98"></a><span class="w">        </span><span class="nb">drop</span><span class="p">(</span><span class="n">v</span><span class="p">);</span>
+<a id="__codelineno-19-99" name="__codelineno-19-99" href="#__codelineno-19-99"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-19-100" name="__codelineno-19-100" href="#__codelineno-19-100"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">vec_ms</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t2</span><span class="p">.</span><span class="n">elapsed</span><span class="p">().</span><span class="n">as_secs_f64</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">1000.0</span><span class="p">;</span>
+<a id="__codelineno-19-101" name="__codelineno-19-101" href="#__codelineno-19-101"></a>
+<a id="__codelineno-19-102" name="__codelineno-19-102" href="#__codelineno-19-102"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span>
+<a id="__codelineno-19-103" name="__codelineno-19-103" href="#__codelineno-19-103"></a><span class="w">        </span><span class="s">&quot;  {} catch_unwind(CudaContext::new) calls (all {} panicked): {:.3} ms total, {:.5} ms/call&quot;</span><span class="p">,</span>
+<a id="__codelineno-19-104" name="__codelineno-19-104" href="#__codelineno-19-104"></a><span class="w">        </span><span class="n">trials</span><span class="p">,</span><span class="w"> </span><span class="n">real_failures</span><span class="p">,</span><span class="w"> </span><span class="n">cudarc_ms</span><span class="p">,</span><span class="w"> </span><span class="n">cudarc_ms</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">trials</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f64</span>
+<a id="__codelineno-19-105" name="__codelineno-19-105" href="#__codelineno-19-105"></a><span class="w">    </span><span class="p">);</span>
+<a id="__codelineno-19-106" name="__codelineno-19-106" href="#__codelineno-19-106"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span>
+<a id="__codelineno-19-107" name="__codelineno-19-107" href="#__codelineno-19-107"></a><span class="w">        </span><span class="s">&quot;  {} Vec&lt;u8&gt; allocations (all succeeded): {:.3} ms total, {:.5} ms/call&quot;</span><span class="p">,</span>
+<a id="__codelineno-19-108" name="__codelineno-19-108" href="#__codelineno-19-108"></a><span class="w">        </span><span class="n">trials</span><span class="p">,</span><span class="w"> </span><span class="n">vec_ms</span><span class="p">,</span><span class="w"> </span><span class="n">vec_ms</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">trials</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f64</span>
+<a id="__codelineno-19-109" name="__codelineno-19-109" href="#__codelineno-19-109"></a><span class="w">    </span><span class="p">);</span>
+<a id="__codelineno-19-110" name="__codelineno-19-110" href="#__codelineno-19-110"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">  honest reading: this is NOT </span><span class="se">\&quot;</span><span class="s">device allocation vs host allocation</span><span class="se">\&quot;</span><span class="s"> performance --&quot;</span><span class="p">);</span>
+<a id="__codelineno-19-111" name="__codelineno-19-111" href="#__codelineno-19-111"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  see the chapter text for what these two numbers actually measure, and why&quot;</span><span class="p">);</span>
+<a id="__codelineno-19-112" name="__codelineno-19-112" href="#__codelineno-19-112"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  the direction of this specific comparison is itself a real, Rust-specific&quot;</span><span class="p">);</span>
+<a id="__codelineno-19-113" name="__codelineno-19-113" href="#__codelineno-19-113"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;  finding rather than a repeat of the CUDA edition&#39;s own conclusion.&quot;</span><span class="p">);</span>
+<a id="__codelineno-19-114" name="__codelineno-19-114" href="#__codelineno-19-114"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>cargo<span class="w"> </span>run<span class="w"> </span>--release<span class="w"> </span>--bin<span class="w"> </span>02_device_aware_allocator
+</code></pre></div>
+<p>Produces exactly the output shown in Worked Examples 10.2.1 through 10.2.3 above.</p>
+<p><code>Cargo.toml</code> for all three binaries:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="k">[package]</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;rust_ch10&quot;</span>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="n">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;0.1.0&quot;</span>
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="n">edition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;2024&quot;</span>
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a><span class="k">[dependencies]</span>
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a><span class="n">cudarc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;0.19&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">default-features</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="n">features</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;driver&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;std&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;dynamic-loading&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;cuda-12060&quot;</span><span class="p">]</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p>Every number here was independently verified earlier in this chapter, including the isolated five-call timing check that pinned down exactly why Worked Example 10.2.3's benchmark runs the direction it does. All three files genuinely compile and run in this sandbox against the real <code>cudarc</code> crate; none of their output is projected or assumed, including the parts of this chapter that turned out to disagree with the CUDA edition's own numbers.</p>
+<h2 id="chapter-summary">Chapter Summary<a class="headerlink" href="#chapter-summary" title="Permanent link">&para;</a></h2>
+<p><code>DeviceManager</code> still turns "ask and see what happens" into "ask once, cache the answer," but cudarc's own shape forces that discovery into two layers rather than CUDA's one: a non-panicking <code>is_culib_present()</code> check first, and only then, if that succeeds, the real device count — because <code>CudaContext::device_count()</code> panics outright the moment the underlying library can't be found, rather than returning the checked error CUDA's own Runtime API would. Bypassing the manager here isn't merely worse in the same way the CUDA edition described; it's categorically worse, genuinely capable of crashing the entire process with exit code <code>101</code>, since nothing about a <code>Result</code>-returning function's signature warns a caller that it might not actually return at all. <code>DeviceAwareAllocator</code> routes between a <code>cudarc</code> device path and a <code>Vec&lt;u8&gt;</code> host fallback, and — exactly as in the CUDA edition — that fallback silently drops the alignment guarantee the device path would have provided. And this chapter's own benchmark of "device path versus host allocation" timing produced a genuinely different, opposite-direction result from the CUDA edition's, for a real and fully traced reason: <code>OnceLock</code>'s documented behavior of never caching a panicking initializer means every guarded attempt at the device path pays the full, uncached library-search cost again, roughly three orders of magnitude slower than the host fallback it's supposedly a defensive wrapper around — a genuine, measured architectural consequence of building "ask once" discipline on top of a resource that doesn't cache its own failures the way CUDA's runtime does.</p>
+<h2 id="self-check-questions">Self-Check Questions<a class="headerlink" href="#self-check-questions" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Why can't <code>DeviceManager::new()</code> simply call <code>CudaContext::device_count()</code> directly and interpret a <code>Result::Err</code> the way the CUDA edition's <code>DeviceManager</code> interprets a non-<code>cudaSuccess</code> return code?</li>
+<li><code>is_culib_present()</code> and <code>CudaContext::device_count()</code> both ultimately search for the same <code>libcuda.so</code>/<code>libnvcuda.so</code> candidate names. What's the one concrete difference in how each function is implemented that lets one of them stay panic-free?</li>
+<li><code>bypass_crash_demo.rs</code> compiles without any errors or warnings, yet is described as "deliberately broken." In what sense is it broken, if the compiler accepts it without complaint?</li>
+<li><code>DeviceAwareAllocator::allocate()</code>'s device-path branch, on real hardware, would satisfy some CUDA-driver-documented alignment guarantee "as a side effect," not because the allocator explicitly requested it. Why does this make the guarantee fragile even before the host-fallback branch is considered at all?</li>
+<li>Worked Example 10.2.3 found the device path roughly a thousand times slower than the host fallback, the opposite direction from the CUDA edition's own benchmark. If cudarc's <code>CudaContext::new</code> call <em>succeeded</em> on real hardware (a device genuinely present), would this same "no caching across calls" mechanism still apply on the next <code>CudaContext::new</code> call, or does it only affect the panicking path? Reason from <code>OnceLock</code>'s actual caching rule, not from this chapter's specific (failing) numbers.</li>
+</ol>
+<h2 id="where-we-go-next">Where We Go Next<a class="headerlink" href="#where-we-go-next" title="Permanent link">&para;</a></h2>
+<p><code>DeviceAwareAllocator</code> still returns a plain <code>Vec&lt;u8&gt;</code> or an unused device context and expects the caller to manage its own lifetime from there — exactly the manual-lifetime problem Chapter 6's ownership rules solved for a single <code>Tensor</code>, not yet extended to something shared across multiple views or reused across repeated allocations. Chapter 11 builds the memory management layer this book's actual <code>Tensor</code> needs on top of everything Part 1 has built so far: shared ownership across multiple <code>Tensor</code> views of the same buffer, and a pooled allocator that reuses freed memory instead of paying this chapter's own discovery and allocation costs on every single request.</p>
+<h2 id="worked-solutions">Worked Solutions<a class="headerlink" href="#worked-solutions" title="Permanent link">&para;</a></h2>
+<p><strong>1.</strong> Because <code>CudaContext::device_count()</code> doesn't reliably <em>reach</em> the point of returning a <code>Result</code> at all when the library is missing — the missing-library case is a <code>panic!</code>, not an <code>Err</code>, so a caller who only pattern-matches on <code>Ok</code>/<code>Err</code> and never wraps the call in <code>catch_unwind</code> would simply crash instead of ever seeing the <code>Err</code> branch execute. The CUDA edition's <code>cudaGetDeviceCount</code> always returns a value (success or a specific error code) no matter what's missing on the system; cudarc's <code>device_count()</code> only returns a value when the dynamic library load itself has already succeeded, making a same-day error-code check insufficient on its own.</p>
+<p><strong>2.</strong> <code>is_culib_present()</code>'s own implementation calls <code>Library::new(choice).is_ok()</code> directly inside an ordinary loop, checking each candidate name with a <code>Result</code> it inspects itself and never propagates as a panic. <code>CudaContext::device_count()</code> (via the FFI thunk it calls into) instead calls <code>culib()</code>, whose <code>OnceLock::get_or_init</code> closure calls <code>panic_no_lib_found(...)</code> if every candidate fails — a deliberate design choice in that specific code path, not an unavoidable consequence of trying the same library names.</p>
+<p><strong>3.</strong> It's "broken" in the sense that its author's evident intent — printing a <code>device_count()</code> result — is never fulfilled the way a normal successful run would fulfill it; the moment the unguarded call panics, the rest of <code>main()</code> never executes, and the process terminates with a nonzero exit code rather than completing normally. This is a runtime defect, not a type error or a borrow-checker violation, and Rust's compiler has no mechanism to catch it — nothing in <code>CudaContext::device_count()</code>'s type signature (<code>Result&lt;i32, DriverError&gt;</code>) discloses that calling it can also <em>not</em> return a <code>Result</code> at all.</p>
+<p><strong>4.</strong> Because nothing about the allocator's own type or method signature records that the guarantee exists or depends on the device path being taken — a caller who happens to rely on it (say, to safely reinterpret the returned buffer as a wider SIMD type) has no compile-time or even type-level signal that switching to the fallback branch (discovery reporting no device, or a stale <code>device_available</code> flag) would silently invalidate an assumption their code depends on. A guarantee that exists only "as a side effect of which branch happened to run" is invisible exactly where it matters most: at the call site that assumes it holds.</p>
+<p><strong>5.</strong> The mechanism is specific to a panicking initializer, not to <code>CudaContext::new</code> calls in general — <code>OnceLock::get_or_init</code> caches a value only when its closure <em>returns</em> one, and on real hardware, a successful <code>CudaContext::new(0)</code> call means the underlying <code>culib()</code> <code>OnceLock</code> closure actually completed and returned the loaded library handle, which <em>does</em> get cached from that point forward. Every <em>subsequent</em> call, on that same successful hardware, would reuse the cached library handle rather than repeating the dlopen search — this chapter's slow, repeated-search behavior is a direct consequence of the closure never completing (because it panics), and would not appear at all once the underlying resource is genuinely, successfully initialized even once.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../04-specialized-tensor-types/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 9. Specialized Tensor Types">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                9. Specialized Tensor Types
+              </div>
+            </div>
+          </a>
+        
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 Oluwaseyi Awoga
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/maximumbeings" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
