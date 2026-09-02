@@ -13,28 +13,26 @@
       
       
       
-        <link rel="prev" href="..">
+        <link rel="prev" href="../../part7/01-quantitative-finance-examples/">
       
-      
-        <link rel="next" href="../part0/01-variables-ownership-types/">
       
       
         
       
       
-      <link rel="icon" href="../assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>Getting Started - Rust From First Principles — Under Development</title>
+        <title>A. Practice Quiz - Rust From First Principles — Under Development</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -53,7 +51,7 @@
       
     
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -78,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#getting-started" class="md-skip">
+        <a href="#appendix-a-practice-quiz" class="md-skip">
           Skip to content
         </a>
       
@@ -94,7 +92,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="Rust From First Principles — Under Development" class="md-header__button md-logo" aria-label="Rust From First Principles — Under Development" data-md-component="logo">
+    <a href="../.." title="Rust From First Principles — Under Development" class="md-header__button md-logo" aria-label="Rust From First Principles — Under Development" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="m508.5 249.8-21.8-13.5c-.2-2-.3-3.9-.5-5.9l18.7-17.5c.9-.9 1.6-1.9 2-3.1s.5-2.5.2-3.7-.8-2.4-1.6-3.3-1.8-1.7-3-2.1l-24-9c-.5-1.9-1.1-3.8-1.7-5.6l15-20.8c.7-1 1.2-2.2 1.3-3.4s0-2.5-.5-3.7-1.2-2.2-2.2-2.9-2.1-1.3-3.4-1.5l-25.4-4.2c-.9-1.7-1.8-3.4-2.7-5.2l10.7-23.4c.5-1.1.7-2.4.6-3.6s-.5-2.4-1.2-3.5-1.6-1.9-2.8-2.5-2.4-.8-3.6-.8l-25.8.9c-1.2-1.5-2.4-2.9-3.6-4.4l5.8-25.3c.3-1.2.3-2.5-.1-3.7s-1-2.3-1.9-3.2-2-1.5-3.2-1.9-2.5-.4-3.7-.1l-25.1 6c-1.4-1.2-2.9-2.4-4.4-3.6l.9-25.8c.1-1.3-.2-2.5-.8-3.6s-1.4-2.1-2.5-2.8-2.2-1.1-3.5-1.2-2.5.1-3.7.6l-23.3 10.7-5.1-2.7-4.2-25.4c-.2-1.2-.7-2.4-1.5-3.4s-1.8-1.7-2.9-2.2-2.4-.7-3.7-.5-2.4.6-3.4 1.3l-20.9 15c-1.9-.6-3.8-1.1-5.6-1.7l-9-24c-.4-1.2-1.2-2.2-2.1-3S307.2 5.2 306 5s-2.5-.2-3.7.2-2.3 1.1-3.1 2l-17.6 18.7c-2-.2-3.9-.4-5.9-.5L262.3 3.5c-.7-1.1-1.6-1.9-2.7-2.6S257.3 0 256 0s-2.5.3-3.6.9-2 1.5-2.7 2.6l-13.5 21.8c-2 .2-3.9.3-5.9.6L212.9 7.1c-.9-.9-1.9-1.6-3.1-2s-2.5-.5-3.7-.2-2.4.8-3.3 1.6-1.7 1.8-2.1 3l-9 24c-1.9.6-3.8 1.1-5.7 1.7l-20.8-15c-1-.7-2.2-1.2-3.4-1.3s-2.5 0-3.7.5-2.2 1.2-2.9 2.2-1.3 2.1-1.5 3.4l-4.2 25.4c-1.7.9-3.4 1.8-5.2 2.7l-23.4-10.5c-1.1-.5-2.4-.7-3.7-.6s-2.5.5-3.5 1.2-1.9 1.7-2.5 2.8-.8 2.4-.8 3.6l.9 25.8c-1.5 1.2-3 2.4-4.4 3.6l-25.1-6c-1.2-.3-2.5-.3-3.7.1s-2.3 1-3.2 1.9-1.5 2-1.9 3.2-.4 2.5-.1 3.7l6 25.1c-1.2 1.4-2.4 2.9-3.6 4.4l-25.8-.9c-1.3 0-2.5.2-3.6.8s-2.1 1.4-2.8 2.4-1.1 2.2-1.2 3.5.1 2.5.6 3.6l10.7 23.4c-.9 1.7-1.8 3.4-2.7 5.2l-25.4 4.1c-1.2.2-2.4.7-3.4 1.5s-1.7 1.8-2.2 2.9-.7 2.4-.5 3.7.6 2.4 1.3 3.4l15 20.8c-.6 1.9-1.1 3.8-1.7 5.7l-24 9c-1.2.4-2.2 1.2-3 2.1s-1.4 2.1-1.6 3.3-.2 2.5.2 3.7 1.1 2.3 2 3.1l18.7 17.5c-.2 2-.4 3.9-.6 5.9L3.5 249.8c-1.1.7-1.9 1.6-2.6 2.7s-.9 2.3-.9 3.6.3 2.5.9 3.6 1.5 2 2.6 2.7l21.8 13.5c.2 2 .3 3.9.6 5.9L7.1 299.1c-.9.9-1.6 1.9-2 3.1s-.5 2.5-.2 3.7.8 2.4 1.6 3.3 1.8 1.7 3 2.1l24 9c.6 1.9 1.1 3.8 1.7 5.6l-15 20.8c-.7 1-1.2 2.2-1.3 3.4s0 2.5.5 3.7 1.2 2.2 2.2 2.9 2.1 1.3 3.4 1.5l25.4 4.2 2.7 5.1-10.5 23.6c-.5 1.1-.7 2.4-.6 3.6s.5 2.5 1.2 3.5c.7 1.1 1.6 1.9 2.7 2.5s2.4.8 3.6.8l25.8-.9c1.2 1.5 2.4 2.9 3.6 4.4L73 430.2c-.3 1.2-.3 2.5.1 3.7s1 2.3 1.9 3.2 2 1.5 3.2 1.9 2.5.4 3.7.1l25.2-5.9c1.5 1.2 2.9 2.4 4.4 3.6l-.9 25.8c0 1.3.2 2.5.8 3.6s1.4 2.1 2.5 2.8 2.2 1.1 3.5 1.2 2.5-.1 3.6-.6l23.4-10.7 5.1 2.7 4.2 25.4c.2 1.2.7 2.4 1.5 3.4s1.8 1.8 2.9 2.2 2.4.7 3.7.5 2.4-.6 3.4-1.3l20.8-15c1.9.6 3.8 1.1 5.6 1.7l9 24c.4 1.2 1.2 2.2 2.1 3s2.1 1.4 3.3 1.6 2.5.2 3.7-.2 2.3-1.1 3.1-2l17.5-18.7c2 .2 3.9.4 5.9.6l13.5 21.8c.7 1.1 1.6 1.9 2.7 2.6s2.3.9 3.6.9 2.5-.3 3.6-.9 2-1.5 2.7-2.6l13.5-21.8c2-.2 3.9-.3 5.9-.6l17.5 18.7c.9.9 1.9 1.6 3.1 2s2.5.5 3.7.2 2.4-.8 3.3-1.6 1.7-1.8 2.1-3l9-24c1.9-.6 3.8-1.1 5.6-1.7l20.8 15c1 .7 2.2 1.2 3.4 1.3s2.5 0 3.7-.5 2.2-1.2 2.9-2.2 1.3-2.1 1.5-3.4l4.2-25.4 5.1-2.7 23.4 10.7c1.1.5 2.4.7 3.6.6s2.4-.5 3.5-1.2 1.9-1.6 2.5-2.8.8-2.4.8-3.6l-.9-25.8c1.5-1.2 2.9-2.4 4.4-3.6l25.2 5.9c1.2.3 2.5.3 3.7-.1s2.3-1 3.2-1.9 1.5-2 1.9-3.2.4-2.5.1-3.7l-5.9-25.2c1.2-1.4 2.4-2.9 3.6-4.4l25.8.9c1.3.1 2.5-.2 3.6-.8s2.1-1.4 2.8-2.5c.7-1 1.1-2.2 1.2-3.5s-.1-2.5-.6-3.6l-10.7-23.4 2.7-5.1 25.4-4.2c1.2-.2 2.4-.7 3.4-1.5s1.8-1.8 2.2-2.9.7-2.4.5-3.7-.6-2.4-1.3-3.4l-15-20.8c.6-1.9 1.1-3.8 1.7-5.6l24-9c1.2-.4 2.2-1.2 3-2.1s1.4-2.1 1.6-3.3.2-2.5-.2-3.7-1.1-2.3-2-3.1l-18.7-17.5c.2-1.9.4-3.9.6-5.9l21.8-13.5c1.1-.7 1.9-1.6 2.6-2.7s.9-2.3.9-3.6-.3-2.5-.9-3.6-1.5-2-2.6-2.7m-151 129.1c-3.6-.8-7.4-.1-10.5 1.9s-5.3 5.2-6 8.8l-7.6 35.7c-24.6 11.1-51.3 16.8-78.3 16.7s-53.6-6.1-78.1-17.4l-7.6-35.7c-.4-1.8-1.1-3.5-2.1-5s-2.4-2.8-3.9-3.8-3.2-1.7-5-2-3.6-.3-5.4.1l-31.5 6.8c-5.8-6-11.3-12.5-16.3-19.2h153.2c1.7 0 2.9-.3 2.9-1.9v-54.2c0-1.6-1.2-1.9-2.9-1.9h-44.8v-34.4h48.5c4.4 0 23.7 1.3 29.8 25.9 1.9 7.5 6.2 32.1 9.1 40 2.9 8.8 14.6 26.5 27.1 26.5h79c-5.3 7.1-11.1 13.8-17.3 20.1l-32.1-6.9zm25.8 34.5c0 3-.9 6-2.6 8.5s-4 4.5-6.8 5.6-5.8 1.5-8.8.9-5.7-2-7.8-4.2-3.6-4.8-4.2-7.8-.3-6 .8-8.8 3.1-5.2 5.6-6.9 5.4-2.6 8.5-2.6h.4c4 .1 7.7 1.8 10.5 4.6s4.3 6.7 4.3 10.6h.1zm-225.6-.7c0 3-.9 6-2.6 8.5s-4.1 4.5-6.8 5.6-5.8 1.5-8.8.9-5.7-2-7.8-4.2-3.6-4.8-4.2-7.8-.3-6 .9-8.8 3.1-5.2 5.6-6.8 5.4-2.6 8.5-2.6h.5c4 .1 7.7 1.8 10.5 4.6s4.3 6.7 4.3 10.6h.1zM69.6 234.2l32.8-14.6c1.7-.7 3.2-1.8 4.4-3.1s2.2-2.9 2.9-4.6 1-3.5.9-5.3-.5-3.6-1.2-5.3l-6.8-15.2h26.6v119.7H75.6c-6.6-23.2-8.7-47.6-6.1-71.6zm-11.3-36.1c0-2 .4-4 1.2-5.8s1.9-3.5 3.3-4.9 3.1-2.5 4.9-3.3 3.8-1.2 5.8-1.2h.5c3 .1 5.9 1 8.3 2.8s4.3 4.1 5.4 6.9 1.3 5.8.7 8.8-2.1 5.6-4.3 7.7-4.9 3.5-7.8 4.1-6 .2-8.7-.9-5.1-3.1-6.8-5.6-2.5-5.4-2.5-8.4zm155.2 24.5v-35.3h63.3c3.3 0 23.1 3.8 23.1 18.6 0 12.3-15.2 16.7-27.7 16.7zM399 306.7c-9.8 1.1-20.6-4.1-22-10.1-5.8-32.5-15.4-39.4-30.6-51.4 18.9-12 38.5-29.6 38.5-53.3 0-25.5-17.5-41.6-29.4-49.5-16.8-11-35.3-13.2-40.3-13.2H116.3c27.5-30.7 64.4-51.5 104.9-59.2l23.5 24.6c1.3 1.3 2.8 2.4 4.4 3.1s3.5 1.1 5.3 1.2 3.6-.3 5.3-.9 3.2-1.7 4.6-2.9l26.3-25c26.8 5 52.1 15.8 74.3 31.6s40.6 36.2 54.1 59.9l-18 40.6c-1.5 3.4-1.5 7.2-.2 10.6s3.9 6.2 7.3 7.7l34.6 15.3c1.1 10.8 1.2 21.7.4 32.5h-19.3c-1.9 0-2.7 1.3-2.7 3.1v8.8c0 20.8-11.7 25.3-22 26.5zM240 60.2c0-4 1.6-7.9 4.5-10.7s6.7-4.5 10.7-4.5h.4c3 .1 5.9 1 8.4 2.8s4.3 4.1 5.4 6.9 1.3 5.8.7 8.8-2.1 5.6-4.3 7.7-4.9 3.5-7.8 4-6 .2-8.7-.9-5.1-3.1-6.8-5.6-2.5-5.4-2.5-8.4zM436.8 214c-2 0-4-.4-5.8-1.2s-3.5-1.9-4.9-3.3-2.5-3.1-3.3-4.9-1.2-3.8-1.2-5.8.4-4 1.2-5.8 1.9-3.5 3.3-4.9 3.1-2.5 4.9-3.3 3.8-1.2 5.8-1.2h.4c4 .1 7.9 1.7 10.7 4.6s4.4 6.8 4.3 10.8-1.7 7.9-4.6 10.7-6.8 4.4-10.8 4.3"/></svg>
@@ -114,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Getting Started
+              A. Practice Quiz
             
           </span>
         </div>
@@ -220,7 +218,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="Rust From First Principles — Under Development" class="md-nav__button md-logo" aria-label="Rust From First Principles — Under Development" data-md-component="logo">
+    <a href="../.." title="Rust From First Principles — Under Development" class="md-nav__button md-logo" aria-label="Rust From First Principles — Under Development" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="m508.5 249.8-21.8-13.5c-.2-2-.3-3.9-.5-5.9l18.7-17.5c.9-.9 1.6-1.9 2-3.1s.5-2.5.2-3.7-.8-2.4-1.6-3.3-1.8-1.7-3-2.1l-24-9c-.5-1.9-1.1-3.8-1.7-5.6l15-20.8c.7-1 1.2-2.2 1.3-3.4s0-2.5-.5-3.7-1.2-2.2-2.2-2.9-2.1-1.3-3.4-1.5l-25.4-4.2c-.9-1.7-1.8-3.4-2.7-5.2l10.7-23.4c.5-1.1.7-2.4.6-3.6s-.5-2.4-1.2-3.5-1.6-1.9-2.8-2.5-2.4-.8-3.6-.8l-25.8.9c-1.2-1.5-2.4-2.9-3.6-4.4l5.8-25.3c.3-1.2.3-2.5-.1-3.7s-1-2.3-1.9-3.2-2-1.5-3.2-1.9-2.5-.4-3.7-.1l-25.1 6c-1.4-1.2-2.9-2.4-4.4-3.6l.9-25.8c.1-1.3-.2-2.5-.8-3.6s-1.4-2.1-2.5-2.8-2.2-1.1-3.5-1.2-2.5.1-3.7.6l-23.3 10.7-5.1-2.7-4.2-25.4c-.2-1.2-.7-2.4-1.5-3.4s-1.8-1.7-2.9-2.2-2.4-.7-3.7-.5-2.4.6-3.4 1.3l-20.9 15c-1.9-.6-3.8-1.1-5.6-1.7l-9-24c-.4-1.2-1.2-2.2-2.1-3S307.2 5.2 306 5s-2.5-.2-3.7.2-2.3 1.1-3.1 2l-17.6 18.7c-2-.2-3.9-.4-5.9-.5L262.3 3.5c-.7-1.1-1.6-1.9-2.7-2.6S257.3 0 256 0s-2.5.3-3.6.9-2 1.5-2.7 2.6l-13.5 21.8c-2 .2-3.9.3-5.9.6L212.9 7.1c-.9-.9-1.9-1.6-3.1-2s-2.5-.5-3.7-.2-2.4.8-3.3 1.6-1.7 1.8-2.1 3l-9 24c-1.9.6-3.8 1.1-5.7 1.7l-20.8-15c-1-.7-2.2-1.2-3.4-1.3s-2.5 0-3.7.5-2.2 1.2-2.9 2.2-1.3 2.1-1.5 3.4l-4.2 25.4c-1.7.9-3.4 1.8-5.2 2.7l-23.4-10.5c-1.1-.5-2.4-.7-3.7-.6s-2.5.5-3.5 1.2-1.9 1.7-2.5 2.8-.8 2.4-.8 3.6l.9 25.8c-1.5 1.2-3 2.4-4.4 3.6l-25.1-6c-1.2-.3-2.5-.3-3.7.1s-2.3 1-3.2 1.9-1.5 2-1.9 3.2-.4 2.5-.1 3.7l6 25.1c-1.2 1.4-2.4 2.9-3.6 4.4l-25.8-.9c-1.3 0-2.5.2-3.6.8s-2.1 1.4-2.8 2.4-1.1 2.2-1.2 3.5.1 2.5.6 3.6l10.7 23.4c-.9 1.7-1.8 3.4-2.7 5.2l-25.4 4.1c-1.2.2-2.4.7-3.4 1.5s-1.7 1.8-2.2 2.9-.7 2.4-.5 3.7.6 2.4 1.3 3.4l15 20.8c-.6 1.9-1.1 3.8-1.7 5.7l-24 9c-1.2.4-2.2 1.2-3 2.1s-1.4 2.1-1.6 3.3-.2 2.5.2 3.7 1.1 2.3 2 3.1l18.7 17.5c-.2 2-.4 3.9-.6 5.9L3.5 249.8c-1.1.7-1.9 1.6-2.6 2.7s-.9 2.3-.9 3.6.3 2.5.9 3.6 1.5 2 2.6 2.7l21.8 13.5c.2 2 .3 3.9.6 5.9L7.1 299.1c-.9.9-1.6 1.9-2 3.1s-.5 2.5-.2 3.7.8 2.4 1.6 3.3 1.8 1.7 3 2.1l24 9c.6 1.9 1.1 3.8 1.7 5.6l-15 20.8c-.7 1-1.2 2.2-1.3 3.4s0 2.5.5 3.7 1.2 2.2 2.2 2.9 2.1 1.3 3.4 1.5l25.4 4.2 2.7 5.1-10.5 23.6c-.5 1.1-.7 2.4-.6 3.6s.5 2.5 1.2 3.5c.7 1.1 1.6 1.9 2.7 2.5s2.4.8 3.6.8l25.8-.9c1.2 1.5 2.4 2.9 3.6 4.4L73 430.2c-.3 1.2-.3 2.5.1 3.7s1 2.3 1.9 3.2 2 1.5 3.2 1.9 2.5.4 3.7.1l25.2-5.9c1.5 1.2 2.9 2.4 4.4 3.6l-.9 25.8c0 1.3.2 2.5.8 3.6s1.4 2.1 2.5 2.8 2.2 1.1 3.5 1.2 2.5-.1 3.6-.6l23.4-10.7 5.1 2.7 4.2 25.4c.2 1.2.7 2.4 1.5 3.4s1.8 1.8 2.9 2.2 2.4.7 3.7.5 2.4-.6 3.4-1.3l20.8-15c1.9.6 3.8 1.1 5.6 1.7l9 24c.4 1.2 1.2 2.2 2.1 3s2.1 1.4 3.3 1.6 2.5.2 3.7-.2 2.3-1.1 3.1-2l17.5-18.7c2 .2 3.9.4 5.9.6l13.5 21.8c.7 1.1 1.6 1.9 2.7 2.6s2.3.9 3.6.9 2.5-.3 3.6-.9 2-1.5 2.7-2.6l13.5-21.8c2-.2 3.9-.3 5.9-.6l17.5 18.7c.9.9 1.9 1.6 3.1 2s2.5.5 3.7.2 2.4-.8 3.3-1.6 1.7-1.8 2.1-3l9-24c1.9-.6 3.8-1.1 5.6-1.7l20.8 15c1 .7 2.2 1.2 3.4 1.3s2.5 0 3.7-.5 2.2-1.2 2.9-2.2 1.3-2.1 1.5-3.4l4.2-25.4 5.1-2.7 23.4 10.7c1.1.5 2.4.7 3.6.6s2.4-.5 3.5-1.2 1.9-1.6 2.5-2.8.8-2.4.8-3.6l-.9-25.8c1.5-1.2 2.9-2.4 4.4-3.6l25.2 5.9c1.2.3 2.5.3 3.7-.1s2.3-1 3.2-1.9 1.5-2 1.9-3.2.4-2.5.1-3.7l-5.9-25.2c1.2-1.4 2.4-2.9 3.6-4.4l25.8.9c1.3.1 2.5-.2 3.6-.8s2.1-1.4 2.8-2.5c.7-1 1.1-2.2 1.2-3.5s-.1-2.5-.6-3.6l-10.7-23.4 2.7-5.1 25.4-4.2c1.2-.2 2.4-.7 3.4-1.5s1.8-1.8 2.2-2.9.7-2.4.5-3.7-.6-2.4-1.3-3.4l-15-20.8c.6-1.9 1.1-3.8 1.7-5.6l24-9c1.2-.4 2.2-1.2 3-2.1s1.4-2.1 1.6-3.3.2-2.5-.2-3.7-1.1-2.3-2-3.1l-18.7-17.5c.2-1.9.4-3.9.6-5.9l21.8-13.5c1.1-.7 1.9-1.6 2.6-2.7s.9-2.3.9-3.6-.3-2.5-.9-3.6-1.5-2-2.6-2.7m-151 129.1c-3.6-.8-7.4-.1-10.5 1.9s-5.3 5.2-6 8.8l-7.6 35.7c-24.6 11.1-51.3 16.8-78.3 16.7s-53.6-6.1-78.1-17.4l-7.6-35.7c-.4-1.8-1.1-3.5-2.1-5s-2.4-2.8-3.9-3.8-3.2-1.7-5-2-3.6-.3-5.4.1l-31.5 6.8c-5.8-6-11.3-12.5-16.3-19.2h153.2c1.7 0 2.9-.3 2.9-1.9v-54.2c0-1.6-1.2-1.9-2.9-1.9h-44.8v-34.4h48.5c4.4 0 23.7 1.3 29.8 25.9 1.9 7.5 6.2 32.1 9.1 40 2.9 8.8 14.6 26.5 27.1 26.5h79c-5.3 7.1-11.1 13.8-17.3 20.1l-32.1-6.9zm25.8 34.5c0 3-.9 6-2.6 8.5s-4 4.5-6.8 5.6-5.8 1.5-8.8.9-5.7-2-7.8-4.2-3.6-4.8-4.2-7.8-.3-6 .8-8.8 3.1-5.2 5.6-6.9 5.4-2.6 8.5-2.6h.4c4 .1 7.7 1.8 10.5 4.6s4.3 6.7 4.3 10.6h.1zm-225.6-.7c0 3-.9 6-2.6 8.5s-4.1 4.5-6.8 5.6-5.8 1.5-8.8.9-5.7-2-7.8-4.2-3.6-4.8-4.2-7.8-.3-6 .9-8.8 3.1-5.2 5.6-6.8 5.4-2.6 8.5-2.6h.5c4 .1 7.7 1.8 10.5 4.6s4.3 6.7 4.3 10.6h.1zM69.6 234.2l32.8-14.6c1.7-.7 3.2-1.8 4.4-3.1s2.2-2.9 2.9-4.6 1-3.5.9-5.3-.5-3.6-1.2-5.3l-6.8-15.2h26.6v119.7H75.6c-6.6-23.2-8.7-47.6-6.1-71.6zm-11.3-36.1c0-2 .4-4 1.2-5.8s1.9-3.5 3.3-4.9 3.1-2.5 4.9-3.3 3.8-1.2 5.8-1.2h.5c3 .1 5.9 1 8.3 2.8s4.3 4.1 5.4 6.9 1.3 5.8.7 8.8-2.1 5.6-4.3 7.7-4.9 3.5-7.8 4.1-6 .2-8.7-.9-5.1-3.1-6.8-5.6-2.5-5.4-2.5-8.4zm155.2 24.5v-35.3h63.3c3.3 0 23.1 3.8 23.1 18.6 0 12.3-15.2 16.7-27.7 16.7zM399 306.7c-9.8 1.1-20.6-4.1-22-10.1-5.8-32.5-15.4-39.4-30.6-51.4 18.9-12 38.5-29.6 38.5-53.3 0-25.5-17.5-41.6-29.4-49.5-16.8-11-35.3-13.2-40.3-13.2H116.3c27.5-30.7 64.4-51.5 104.9-59.2l23.5 24.6c1.3 1.3 2.8 2.4 4.4 3.1s3.5 1.1 5.3 1.2 3.6-.3 5.3-.9 3.2-1.7 4.6-2.9l26.3-25c26.8 5 52.1 15.8 74.3 31.6s40.6 36.2 54.1 59.9l-18 40.6c-1.5 3.4-1.5 7.2-.2 10.6s3.9 6.2 7.3 7.7l34.6 15.3c1.1 10.8 1.2 21.7.4 32.5h-19.3c-1.9 0-2.7 1.3-2.7 3.1v8.8c0 20.8-11.7 25.3-22 26.5zM240 60.2c0-4 1.6-7.9 4.5-10.7s6.7-4.5 10.7-4.5h.4c3 .1 5.9 1 8.4 2.8s4.3 4.1 5.4 6.9 1.3 5.8.7 8.8-2.1 5.6-4.3 7.7-4.9 3.5-7.8 4-6 .2-8.7-.9-5.1-3.1-6.8-5.6-2.5-5.4-2.5-8.4zM436.8 214c-2 0-4-.4-5.8-1.2s-3.5-1.9-4.9-3.3-2.5-3.1-3.3-4.9-1.2-3.8-1.2-5.8.4-4 1.2-5.8 1.9-3.5 3.3-4.9 3.1-2.5 4.9-3.3 3.8-1.2 5.8-1.2h.4c4 .1 7.9 1.7 10.7 4.6s4.4 6.8 4.3 10.8-1.7 7.9-4.6 10.7-6.8 4.4-10.8 4.3"/></svg>
@@ -238,7 +236,7 @@
   
   
     <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -262,37 +260,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Getting Started
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
         
   
   
@@ -308,70 +279,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#environment" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Environment
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#verify-the-toolchain" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Verify the toolchain
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#gpu-toolchain-needed-for-part-0-chapter-4-onward-and-the-gpu-appendices" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        GPU toolchain (needed for Part 0 Chapter 4 onward, and the GPU appendices)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-this-book-verifies-its-claims" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How this book verifies its claims
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -437,7 +344,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../part0/01-variables-ownership-types/" class="md-nav__link">
+      <a href="../../part0/01-variables-ownership-types/" class="md-nav__link">
         
   
   
@@ -465,7 +372,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../part0/02-struct-design-patterns/" class="md-nav__link">
+      <a href="../../part0/02-struct-design-patterns/" class="md-nav__link">
         
   
   
@@ -493,7 +400,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../part0/03-memory-layout-strategies/" class="md-nav__link">
+      <a href="../../part0/03-memory-layout-strategies/" class="md-nav__link">
         
   
   
@@ -521,7 +428,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../part0/04-gpu-programming-introduction/" class="md-nav__link">
+      <a href="../../part0/04-gpu-programming-introduction/" class="md-nav__link">
         
   
   
@@ -549,7 +456,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../part0/05-simd-and-vectorization/" class="md-nav__link">
+      <a href="../../part0/05-simd-and-vectorization/" class="md-nav__link">
         
   
   
@@ -638,7 +545,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../part1/01-core-tensor-structure/" class="md-nav__link">
+      <a href="../../part1/01-core-tensor-structure/" class="md-nav__link">
         
   
   
@@ -666,7 +573,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../part1/02-memory-layout-design/" class="md-nav__link">
+      <a href="../../part1/02-memory-layout-design/" class="md-nav__link">
         
   
   
@@ -694,7 +601,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../part1/03-tensor-creation-functions/" class="md-nav__link">
+      <a href="../../part1/03-tensor-creation-functions/" class="md-nav__link">
         
   
   
@@ -722,7 +629,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../part1/04-specialized-tensor-types/" class="md-nav__link">
+      <a href="../../part1/04-specialized-tensor-types/" class="md-nav__link">
         
   
   
@@ -750,7 +657,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../part1/05-device-abstraction-layer/" class="md-nav__link">
+      <a href="../../part1/05-device-abstraction-layer/" class="md-nav__link">
         
   
   
@@ -778,7 +685,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../part1/06-memory-management-system/" class="md-nav__link">
+      <a href="../../part1/06-memory-management-system/" class="md-nav__link">
         
   
   
@@ -867,7 +774,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../part2/01-element-wise-operations/" class="md-nav__link">
+      <a href="../../part2/01-element-wise-operations/" class="md-nav__link">
         
   
   
@@ -895,7 +802,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../part2/02-matrix-operations/" class="md-nav__link">
+      <a href="../../part2/02-matrix-operations/" class="md-nav__link">
         
   
   
@@ -923,7 +830,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../part2/03-reduction-operations/" class="md-nav__link">
+      <a href="../../part2/03-reduction-operations/" class="md-nav__link">
         
   
   
@@ -1012,7 +919,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../part3/01-graph-node-architecture/" class="md-nav__link">
+      <a href="../../part3/01-graph-node-architecture/" class="md-nav__link">
         
   
   
@@ -1101,7 +1008,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../part4/01-backward-function-implementation/" class="md-nav__link">
+      <a href="../../part4/01-backward-function-implementation/" class="md-nav__link">
         
   
   
@@ -1129,7 +1036,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../part4/02-gradient-computation-engine/" class="md-nav__link">
+      <a href="../../part4/02-gradient-computation-engine/" class="md-nav__link">
         
   
   
@@ -1218,7 +1125,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../part5/01-gpu-kernel-implementation/" class="md-nav__link">
+      <a href="../../part5/01-gpu-kernel-implementation/" class="md-nav__link">
         
   
   
@@ -1246,7 +1153,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../part5/02-performance-optimization/" class="md-nav__link">
+      <a href="../../part5/02-performance-optimization/" class="md-nav__link">
         
   
   
@@ -1335,7 +1242,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../part6/01-neural-network-layers/" class="md-nav__link">
+      <a href="../../part6/01-neural-network-layers/" class="md-nav__link">
         
   
   
@@ -1363,7 +1270,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../part6/02-advanced-features/" class="md-nav__link">
+      <a href="../../part6/02-advanced-features/" class="md-nav__link">
         
   
   
@@ -1452,7 +1359,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../part7/01-quantitative-finance-examples/" class="md-nav__link">
+      <a href="../../part7/01-quantitative-finance-examples/" class="md-nav__link">
         
   
   
@@ -1484,8 +1391,10 @@
       
   
   
+    
   
   
+  
     
     
     
@@ -1496,13 +1405,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_11" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" checked>
         
           
           <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="">
@@ -1523,7 +1430,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_11">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1538,10 +1445,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../appendix/practice-quiz/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    A. Practice Quiz
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1557,6 +1491,48 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Solutions
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1596,10 +1572,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#environment" class="md-nav__link">
+  <a href="#questions" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Environment
+        Questions
       
     </span>
   </a>
@@ -1607,32 +1583,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#verify-the-toolchain" class="md-nav__link">
+  <a href="#worked-solutions" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Verify the toolchain
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#gpu-toolchain-needed-for-part-0-chapter-4-onward-and-the-gpu-appendices" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        GPU toolchain (needed for Part 0 Chapter 4 onward, and the GPU appendices)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-this-book-verifies-its-claims" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How this book verifies its claims
+        Worked Solutions
       
     </span>
   </a>
@@ -1656,63 +1610,55 @@
 
 
 
-<h1 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h1>
-<p>This book targets stable Rust throughout — every CPU-side listing compiles and runs on the current stable toolchain, no nightly required. GPU chapters (built on the <code>cudarc</code> crate) compile their host-side code on stable too; the kernels themselves need a real NVIDIA GPU and CUDA toolkit to execute, which this book flags explicitly wherever it applies (see <a href="#how-this-book-verifies-its-claims">How this book verifies its claims</a> below).</p>
-<h2 id="environment">Environment<a class="headerlink" href="#environment" title="Permanent link">&para;</a></h2>
-<p>Install Rust via <code>rustup</code>, the standard toolchain manager:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>curl<span class="w"> </span>--proto<span class="w"> </span><span class="s1">&#39;=https&#39;</span><span class="w"> </span>--tlsv1.2<span class="w"> </span>-sSf<span class="w"> </span>https://sh.rustup.rs<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nb">source</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/.cargo/env&quot;</span>
-</code></pre></div>
-<p>Confirm both <code>rustc</code> and <code>cargo</code> are on your <code>PATH</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>rustc<span class="w"> </span>--version
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>cargo<span class="w"> </span>--version
-</code></pre></div>
-<p>This book was written and verified against:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>rustc 1.95.0 (59807616e 2026-04-14)
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>cargo 1.95.0 (f2d3ce0bd 2026-03-21)
-</code></pre></div>
-<p>Any reasonably recent stable toolchain (1.85+) should work identically for every CPU-side chapter — nothing in this book depends on unstable/nightly-only features.</p>
-<h2 id="verify-the-toolchain">Verify the toolchain<a class="headerlink" href="#verify-the-toolchain" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>cargo<span class="w"> </span>new<span class="w"> </span>hello_rust
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nb">cd</span><span class="w"> </span>hello_rust
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1">// src/main.rs</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="k">fn</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;Hello from Rust From First Principles!&quot;</span><span class="p">);</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">a</span><span class="p">:</span><span class="w"> </span><span class="kt">i64</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">7</span><span class="p">;</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">b</span><span class="p">:</span><span class="w"> </span><span class="kt">i64</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">35</span><span class="p">;</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;{a} + {b} = {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">);</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="p">}</span>
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>cargo<span class="w"> </span>run
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Hello from Rust From First Principles!
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>7 + 35 = 42
-</code></pre></div>
-<p>If you see that output, you're ready for <a href="../part0/01-variables-ownership-types/">Part 0: Rust Foundations</a>.</p>
-<h2 id="gpu-toolchain-needed-for-part-0-chapter-4-onward-and-the-gpu-appendices">GPU toolchain (needed for Part 0 Chapter 4 onward, and the GPU appendices)<a class="headerlink" href="#gpu-toolchain-needed-for-part-0-chapter-4-onward-and-the-gpu-appendices" title="Permanent link">&para;</a></h2>
-<p>This book's GPU chapters are written against <code>cudarc</code>, a Rust crate providing safe(r) bindings to the CUDA Driver API. Its host-side code (buffer allocation, stream/context management, kernel launch configuration) compiles on stable Rust with no CUDA toolkit installed at all, because <code>cudarc</code> resolves <code>libcuda.so</code> by dynamic loading at <em>runtime</em>, not link time:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Cargo.toml</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="k">[dependencies]</span>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">cudarc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;0.19&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">default-features</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="n">features</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;driver&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;std&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;dynamic-loading&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;cuda-12060&quot;</span><span class="p">]</span><span class="w"> </span><span class="p">}</span>
-</code></pre></div>
-<p>Swap the <code>cuda-12060</code> feature for whichever CUDA version your toolkit reports (<code>cudarc</code> supports 11.4 through 13.3 at minimum-supported-version granularity — check the crate's current feature list on <a href="https://crates.io/crates/cudarc">crates.io</a> if your version isn't listed above).</p>
-<p>Actually <em>running</em> a kernel needs a real NVIDIA GPU, its driver, and the CUDA toolkit (for <code>nvcc</code>, if you want to compile kernels from CUDA C, or a NVPTX-capable Rust nightly if you want to compile kernels from Rust source — see the note below). On Ubuntu/Debian:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>wget<span class="w"> </span>https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>sudo<span class="w"> </span>dpkg<span class="w"> </span>-i<span class="w"> </span>cuda-keyring_1.1-1_all.deb
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>cuda-toolkit-12-6
-</code></pre></div>
-<p>Confirm the driver and toolkit are both visible:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>nvidia-smi<span class="w">      </span><span class="c1"># real driver + GPU, needed to run anything</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>nvcc<span class="w"> </span>--version<span class="w">  </span><span class="c1"># compiler, needed if you compile kernels from CUDA C</span>
-</code></pre></div>
-<div class="admonition note">
-<p class="admonition-title">A note on where this book's GPU code was written</p>
-<p>This book is authored and its CPU-side listings are verified in a sandboxed environment with no NVIDIA GPU and no network access to <code>static.rust-lang.org</code> or NVIDIA's package repositories — which rules out both a Rust nightly toolchain (needed for compiling Rust source directly to PTX) and <code>nvcc</code>/NVRTC in that environment. So every GPU chapter's host-side <code>cudarc</code> code is genuinely compiled there, but kernel bodies and any runtime numbers from them are marked <strong>UNVERIFIED — pending a real-GPU test pass</strong> until independently run on real hardware and confirmed. If you're reading this after that pass, those tags should be gone and replaced with real captured output; if you still see one, that chapter hasn't been verified on hardware yet.</p>
-</div>
-<h2 id="how-this-book-verifies-its-claims">How this book verifies its claims<a class="headerlink" href="#how-this-book-verifies-its-claims" title="Permanent link">&para;</a></h2>
-<p>Every CPU-side "Worked Example" in this book embeds real, unedited output from <code>rustc</code>/<code>cargo</code> run against the exact listing shown — nothing is hand-typed or guessed. Where a chapter makes a numeric or behavioral claim, it's cross-checked by a second, independently-implemented method (a naive reference algorithm against an optimized one, or an analytic result against a Monte Carlo estimate) before it appears in the text. GPU chapters follow the same rule for their host-side code; kernel-level claims are explicitly tagged as unverified until run on real hardware, as described above.</p>
+<h1 id="appendix-a-practice-quiz">Appendix A: Practice Quiz<a class="headerlink" href="#appendix-a-practice-quiz" title="Permanent link">&para;</a></h1>
+<p>This quiz draws one question from each of the book's 22 chapters — the same Self-Check Questions each chapter itself closes with, one per chapter, picked for being self-contained and workable without the surrounding chapter open beside you. Work through the Questions section first, then check yourself against the Worked Solutions that follow, in the same style every chapter's own Worked Solutions section already uses.</p>
+<p>Two picks are worth calling out before you start. Chapter 21's question revisits this edition's own proof that Rust's borrow checker makes an entire class of C++ bug — a reference invalidated out from under you by a reallocation — impossible to even compile, let alone ship. Chapter 22's question revisits a genuine <code>f64</code>-versus-<code>f32</code> precision bug this book's own Rust port ran into and fixed while cross-checking against the CUDA edition's numbers: a reminder that porting a reference implementation faithfully means matching its arithmetic types, not just its formulas.</p>
+<h2 id="questions">Questions<a class="headerlink" href="#questions" title="Permanent link">&para;</a></h2>
+<p><strong>1. Variables, Ownership, and Types.</strong> In C++, taking a pointer to a <code>std::vector</code>'s first element and then calling <code>.push_back()</code> on the same vector compiles without any error and is undefined behavior if the vector reallocates. What does the equivalent Rust pattern do instead, and at what point does it fail?</p>
+<p><strong>2. Struct Design Patterns.</strong> <code>struct Mixed { a: u8, b: f64, c: u8 }</code> reports <code>size_of</code> of <code>16</code> bytes with Rust's default layout, but <code>24</code> bytes under <code>#[repr(C)]</code>. Explain what the compiler is doing differently in each case, and why the C-compatible version ends up larger rather than smaller.</p>
+<p><strong>3. Memory Layout Strategies.</strong> Section 3.1's naive byte-counting model predicts SoA should move <code>1.75×</code> fewer bytes than AoS for the kinetic-energy computation. Section 3.3's genuine wall-clock benchmark measured only a <code>1.11×</code> speedup. Name the two real hardware mechanisms this chapter identifies as the reason for that gap.</p>
+<p><strong>4. GPU Programming Introduction.</strong> <code>naive_matmul_kernel</code>'s inner loop reads <code>A[row * K + k]</code> and <code>B[k * N + col]</code> as <code>k</code> advances. Which of the two is coalesced across a warp sharing the same <code>row</code>, and which pays a stride penalty — and why does that follow from the same reasoning Chapter 3 applied to <code>vx[i]</code> versus <code>particles[i].vx</code>, even though neither array here is a struct?</p>
+<p><strong>5. SIMD and Vectorization.</strong> For <code>n = 1003</code> and <code>width = 8</code>, compute <code>simd_count</code> and <code>remainder</code> by hand, and state which indices the main loop covers and which the remainder loop covers.</p>
+<p><strong>6. The Tensor.</strong> For a shape <code>[4, 5, 6]</code>, compute <code>numel()</code> and <code>strides</code> (row-major) by hand, following Section 6.1 and 6.2's exact method.</p>
+<p><strong>7. Memory Layout Design.</strong> For shape <code>[5, 2]</code>, compute both the row-major and column-major strides by hand, following Worked Example 7.1.1's process in both directions.</p>
+<p><strong>8. Tensor Creation Functions.</strong> <code>arange(start=5.0, step=3.0, n=4)</code> — compute all four values by hand.</p>
+<p><strong>9. Specialized Tensor Types.</strong> A pentadiagonal matrix (5 diagonals: two below main, main, two above) of size <code>n×n</code> stores how many floats total, as a formula in <code>n</code>? At what point does this formula's stored fraction of <code>n²</code> cross below 10%?</p>
+<p><strong>10. Device Abstraction Layer.</strong> Why can't <code>DeviceManager::new()</code> simply call <code>CudaContext::device_count()</code> directly and interpret a <code>Result::Err</code> the way the CUDA edition's <code>DeviceManager</code> interprets a non-<code>cudaSuccess</code> return code?</p>
+<p><strong>11. Memory Management System.</strong> An <code>Arena</code> with <code>offset = 300</code> receives a request for <code>20</code> <code>f32</code>s (<code>80</code> bytes). Compute <code>(300 + 255) &amp; !255usize</code> by hand the way Worked Example 11.2.1 did, state the resulting aligned offset, and state how many bytes of padding were skipped.</p>
+<p><strong>12. Element-wise Operations.</strong> <code>vector_add_kernel_naive</code> is launched via <code>simulate_launch</code> with <code>blocks = 2</code> and <code>threads_per_block = 4</code> for an 8-element vector (<code>SIZE</code> updated to <code>8</code>), but the function body is left completely unchanged. Which output positions actually get written, and which ones never get touched by any simulated thread?</p>
+<p><strong>13. Matrix Operations.</strong> Trace <code>simd_matrix_multiply::&lt;2&gt;</code> computing <code>Y(1,0)</code> on this chapter's running <code>X (2×3)</code> by <code>M (3×2)</code> example (row <code>1</code> of <code>X</code> is <code>[4,5,6]</code>; column <code>0</code> of <code>M</code> is <code>[1,3,5]</code>). What are <code>a_vals</code>, <code>b_vals</code>, the lane sum, and the remainder contribution — and does the total match the scalar answer, <code>49</code>, from Worked Example 13.1.1?</p>
+<p><strong>14. Reduction Operations.</strong> Trace <code>sum_reduce_round_host</code>'s per-round logic over <code>[10, 20, 30, 40, 50]</code> (five elements) round by round the way Worked Example 14.1.2 traced <code>[2,6,3,8,5]</code>, and report the final sum along with a direct check against adding all five values.</p>
+<p><strong>15. Graph Node Architecture.</strong> <code>w = x*y + x</code> is built as <code>let z = mul(&amp;mut graph, x, y); let w = add(&amp;mut graph, z, x);</code> with <code>x=5.0, y=2.0</code>. Trace both <code>GraphNode</code>s exactly as Worked Example 15.2.1 did — report every field of <code>GraphNode #0</code> and <code>GraphNode #1</code>, including the final values of <code>z</code> and <code>w</code>.</p>
+<p><strong>16. Backward Function Implementation.</strong> For <code>w = x*y + x</code> with <code>x=5.0, y=2.0</code> (the numbers from Chapter 15's Self-Check Question 1), trace both backward steps: what does <code>AddOp::backward</code> return, what does <code>MulOp::backward</code> return, and what is the final <code>x.grad</code>?</p>
+<p><strong>17. Gradient Computation Engine.</strong> <code>accumulate_gradient</code> is called three times in sequence for the same tensor <code>p</code>, with incoming gradients <code>2.0</code>, <code>3.0</code>, and <code>5.0</code>, in that order. Trace each call: which branch fires each time, and what is <code>p</code>'s accumulated gradient after each one?</p>
+<p><strong>18. GPU Kernel Implementation.</strong> For <code>size = 5,000</code> and <code>THREADS_PER_BLOCK = 512</code>, compute <code>num_blocks</code>, the total number of threads launched, the number wasted, and how many threads in the last block are actually active.</p>
+<p><strong>19. Performance Optimization Techniques.</strong> For <code>size = 33</code> with a vector width of <code>4</code>, compute <code>simd_count</code>, the number of vector instructions, and the number of scalar remainder instructions.</p>
+<p><strong>20. Neural Network Layers.</strong> A confusion matrix has <code>tp=8, tn=1, fp=1, fneg=0</code>. Compute accuracy, precision, recall, and F1, and explain why accuracy alone would make this classifier look far better than precision and recall reveal it to be.</p>
+<p><strong>21. Advanced Features.</strong> Section 21.2's chapter text describes attempting a direct Rust translation of the CUDA edition's reference-invalidation bug and having <code>rustc</code> refuse to compile it. What specific rule does the borrow checker enforce that makes that bug impossible to express in safe Rust, and why does copying <code>op</code>, <code>a</code>, and <code>b</code> out of <code>tape.nodes[idx]</code> by value before calling <code>tape.mul</code>/<code>tape.add</code> satisfy that rule?</p>
+<p><strong>22. Quantitative Finance Examples.</strong> Section 22.4's chapter text describes a genuine bug found while porting <code>monte_carlo_call_price</code>/<code>monte_carlo_put_price</code> to Rust: computing <code>risk_free_rate</code> and <code>maturity</code> as <code>f64</code> instead of <code>f32</code> silently changed a printed digit (<code>103.0455</code> instead of the correct <code>103.0454</code>). Why does this specific type change affect the result at all, given that <code>sum_payoff</code> and <code>mean_payoff</code> are <code>f64</code> either way — and why does it change only the <em>last</em> digit shown rather than something larger?</p>
+<h2 id="worked-solutions">Worked Solutions<a class="headerlink" href="#worked-solutions" title="Permanent link">&para;</a></h2>
+<p><strong>1.</strong> Rust's borrow checker rejects the pattern at compile time, categorically, regardless of whether that specific <code>push</code> call would have actually triggered a reallocation. <code>&amp;v[0]</code> creates a shared (<code>&amp;</code>) borrow of <code>v</code>; <code>v.push(4)</code> requires an exclusive (<code>&amp;mut</code>) borrow, because a push might reallocate the entire backing buffer, which would invalidate every existing reference into it. Rust's "any number of shared borrows, or exactly one exclusive borrow, never both" rule makes holding a reference to an element across the <code>push</code> call a compile error — <code>error[E0502]: cannot borrow v as mutable because it is also borrowed as immutable</code> — rather than allowing the program to compile and potentially dereference a dangling pointer at runtime, which is exactly what C++'s equivalent pattern risks.</p>
+<p><strong>2.</strong> With no <code>#[repr]</code> attribute, Rust's compiler is free to reorder <code>Mixed</code>'s fields to minimize padding, and genuinely does: it places the 8-byte-aligned <code>f64</code> field <code>b</code> first (at offset 0, needing no padding before it), then packs both 1-byte <code>u8</code> fields (<code>a</code> and <code>c</code>) into the remaining space, for a total of 16 bytes. <code>#[repr(C)]</code> forces C's rule instead — fields stay in declaration order, so <code>a</code> sits at offset 0, <code>b</code> must be padded out to the next 8-byte boundary (offset 8), and the whole struct is padded to a multiple of 8 afterward to keep repeated instances (as in an array) properly aligned, landing at 24 bytes. The C-compatible layout is larger specifically because it's <em>not</em> allowed to reorder fields to close the gaps the default layout is free to close.</p>
+<p><strong>3.</strong> Two mechanisms: cache-line-granularity DRAM bursts (memory is fetched in fixed 64-byte chunks regardless of layout, so bytes that happen to share a line with genuinely needed bytes are effectively "free," softening AoS's penalty), and hardware prefetching (a CPU's prefetcher recognizes a sequential access pattern and starts fetching ahead of the code equally well whether it's walking an AoS array or an SoA array, since both patterns here are purely sequential).</p>
+<p><strong>4.</strong> For threads sharing the same <code>row</code> (varying only in <code>col</code>, and therefore in which warp-lane they occupy for a fixed <code>k</code>), <code>B[k * N + col]</code> is the array where consecutive threads read consecutive <code>col</code> values apart by exactly <code>sizeof(float)</code> — the coalesced case. <code>A[row * K + k]</code> is read identically by <em>every</em> thread in that same warp (since <code>row</code> and <code>k</code> are shared, only <code>col</code> varies across the warp, and <code>A</code>'s index doesn't depend on <code>col</code> at all) — not a stride penalty in the classic sense, but a broadcast read of the same address by the whole warp. The actual stride penalty in this kernel is paid by <code>B</code> across <em>iterations</em> of <code>k</code> for one fixed thread: as <code>k</code> advances by 1, <code>B</code>'s index advances by <code>N</code> elements, exactly Chapter 3's <code>particles[i].vx</code>-style stride, restated inside a loop instead of across a struct's fields — the underlying mechanism (constant-stride access forcing the memory system to move more bytes than are used) is identical, the "struct" is simply <code>B</code>'s own row-major layout playing the interleaving role Chapter 3's <code>Particle</code> struct played.</p>
+<p><strong>5.</strong> <code>simd_count = (1003 / 8) * 8</code>. Integer division truncates: <code>1003 / 8 = 125</code> (since <code>125 × 8 = 1000 ≤ 1003 &lt; 1008 = 126 × 8</code>), so <code>simd_count = 125 × 8 = 1000</code>. <code>remainder = 1003 - 1000 = 3</code>. The main SIMD loop covers indices <code>0</code> through <code>999</code> (125 chunks of 8 elements each), and the scalar remainder loop covers indices <code>1000</code>, <code>1001</code>, and <code>1002</code>.</p>
+<p><strong>6.</strong> <code>numel() = 4 × 5 × 6 = 120</code>. Strides, computed right to left: <code>strides[2] = 1</code> (base case), <code>running = 1 × 6 = 6</code>; <code>strides[1] = 6</code>, <code>running = 6 × 5 = 30</code>; <code>strides[0] = 30</code>. Result: <code>strides = [30, 6, 1]</code> — moving one step along dimension 0 skips 30 elements (one whole <code>[5,6]</code> sub-tensor), matching <code>numel()/dims[0] = 120/4 = 30</code> exactly.</p>
+<p><strong>7.</strong> Row-major, right-to-left: <code>i=1</code> sets <code>strides[1] = 1</code> (running starts at 1), then <code>running = 1 × dims[1] = 1 × 2 = 2</code>; <code>i=0</code> sets <code>strides[0] = 2</code>. Row-major strides: <code>[2, 1]</code>. Column-major, left-to-right: <code>i=0</code> sets <code>strides[0] = 1</code> (running starts at 1), then <code>running = 1 × dims[0] = 1 × 5 = 5</code>; <code>i=1</code> sets <code>strides[1] = 5</code>. Column-major strides: <code>[1, 5]</code>.</p>
+<p><strong>8.</strong> <code>arange(5.0, 3.0, 4)</code>: <code>i=0</code> gives <code>5 + 0*3 = 5</code>; <code>i=1</code> gives <code>5 + 1*3 = 8</code>; <code>i=2</code> gives <code>5 + 2*3 = 11</code>; <code>i=3</code> gives <code>5 + 3*3 = 14</code>. Result: <code>[5, 8, 11, 14]</code>.</p>
+<p><strong>9.</strong> Two below main, main, two above main means 5 diagonals: lengths <code>n-2, n-1, n, n-1, n-2</code>, summing to <code>5n - 6</code>. As a fraction of <code>n²</code>: <code>(5n-6)/n²</code>. Setting <code>(5n-6)/n² &lt; 0.10</code> and solving approximately: <code>5n - 6 &lt; 0.1n²</code>, or <code>0.1n² - 5n + 6 &gt; 0</code>. Using the quadratic formula, this crosses zero near <code>n ≈ 48.8</code>; for <code>n = 50</code>, stored <code>= 5(50)-6 = 244</code>, dense <code>= 2500</code>, fraction <code>= 9.76%</code> — just under 10%, confirming the crossing point lands close to <code>n ≈ 49</code>.</p>
+<p><strong>10.</strong> Because <code>CudaContext::device_count()</code> doesn't reliably <em>reach</em> the point of returning a <code>Result</code> at all when the library is missing — the missing-library case is a <code>panic!</code>, not an <code>Err</code>, so a caller who only pattern-matches on <code>Ok</code>/<code>Err</code> and never wraps the call in <code>catch_unwind</code> would simply crash instead of ever seeing the <code>Err</code> branch execute. The CUDA edition's <code>cudaGetDeviceCount</code> always returns a value (success or a specific error code) no matter what's missing on the system; cudarc's <code>device_count()</code> only returns a value when the dynamic library load itself has already succeeded, making a plain error-code check insufficient on its own.</p>
+<p><strong>11.</strong> <code>(300 + 255) &amp; !255usize = 555 &amp; !255usize</code>. <code>555 = 2×256 + 43</code>, so clearing the low 8 bits removes the <code>43</code> and leaves <code>512</code>. The aligned offset is <code>512</code>, and the padding skipped is <code>512 - 300 = 212</code> bytes.</p>
+<p><strong>12.</strong> With <code>blocks = 2</code> and <code>threads_per_block = 4</code>, <code>thread_idx</code> ranges over <code>0, 1, 2, 3</code> in <em>both</em> simulated blocks (block index isn't part of the formula at all). Block <code>0</code>'s four threads compute <code>output[0]</code> through <code>output[3]</code>; block <code>1</code>'s four threads also compute <code>i = 0, 1, 2, 3</code> and write to the exact same <code>output[0]</code> through <code>output[3]</code> — a redundant rewrite of the same four positions (a genuine data race on real hardware, where both blocks could run concurrently). <code>output[4]</code> through <code>output[7]</code> are never written by any thread in either block, even though <code>SIZE = 8</code> and the bounds check <code>if i &lt; SIZE</code> would happily allow indices up to <code>7</code> — nothing in the function ever produces an <code>i</code> value of <code>4</code> or higher, because <code>thread_idx</code> alone tops out at <code>3</code> regardless of which block is running.</p>
+<p><strong>13.</strong> <code>a_vals = [X.get(1,0), X.get(1,1)] = [4, 5]</code>; <code>b_vals = [M.get(0,0), M.get(1,0)] = [1, 3]</code>; <code>vector_sum = [4×1, 5×3] = [4, 15]</code>, lane sum <code>= 4 + 15 = 19</code>. Remainder (<code>k=2</code>): <code>X.get(1,2) × M.get(2,0) = 6 × 5 = 30</code>. Total: <code>19 + 30 = 49</code> — matching the scalar answer for <code>Y(1,0)</code> exactly.</p>
+<p><strong>14.</strong> Round <code>0</code> (<code>current_size=5</code>, <code>next_size=3</code>): thread <code>0</code>: <code>10+20=30</code>. Thread <code>1</code>: <code>30+40=70</code>. Thread <code>2</code>: leftover, passes <code>50</code> through. Round <code>0</code> output: <code>[30, 70, 50]</code>. Round <code>1</code> (<code>current_size=3</code>, <code>next_size=2</code>): thread <code>0</code>: <code>30+70=100</code>. Thread <code>1</code>: leftover, passes <code>50</code> through. Round <code>1</code> output: <code>[100, 50]</code>. Round <code>2</code> (<code>next_size=1</code>): thread <code>0</code>: <code>100+50=150</code>. Final sum: <code>150</code>. Direct check: <code>10+20+30+40+50=150</code> — matches exactly.</p>
+<p><strong>15.</strong> <code>z = x*y = 5.0 × 2.0 = 10.0</code>; <code>w = z + x = 10.0 + 5.0 = 15.0</code>. <code>GraphNode #0</code>: <code>op_name="mul"</code>, <code>inputs=[x=5.0, y=2.0]</code>, <code>output=z=10.0</code>, <code>grad=0.0</code>. <code>GraphNode #1</code>: <code>op_name="add"</code>, <code>inputs=[z=10.0, x=5.0]</code>, <code>output=w=15.0</code>, <code>grad=0.0</code>.</p>
+<p><strong>16.</strong> <code>AddOp::backward</code> (seed <code>1.0</code>) returns <code>[1.0, 1.0]</code> — <code>z</code>'s gradient and <code>x</code>'s first contribution. <code>MulOp::backward</code>, receiving <code>z</code>'s gradient of <code>1.0</code> and <code>inputs = [x=5.0, y=2.0]</code>, computes <code>grad_x = 1.0 × y = 1.0 × 2.0 = 2.0</code> and <code>grad_y = 1.0 × x = 1.0 × 5.0 = 5.0</code>. Final <code>x.grad = 1.0 (from AddOp) + 2.0 (from MulOp) = 3.0</code>; <code>y.grad = 5.0</code> directly. Cross-check with calculus: <code>∂w/∂x = y+1 = 2+1 = 3</code> and <code>∂w/∂y = x = 5</code> — both match, and both were genuinely recomputed rather than assumed.</p>
+<p><strong>17.</strong> Call 1: <code>p</code> has no entry yet → <code>or_insert(0.0)</code> inserts a fresh <code>0.0</code>, then <code>+= 2.0</code> brings it to <code>2.0</code>. Call 2: <code>p</code> already has an entry → <code>+= 3.0</code> brings it to <code>2.0 + 3.0 = 5.0</code>. Call 3: <code>+= 5.0</code> again → <code>5.0 + 5.0 = 10.0</code>. Final: <code>p</code>'s gradient is <code>10.0</code>, the sum of all three contributions.</p>
+<p><strong>18.</strong> <code>num_blocks = (5,000 + 511) / 512 = 5,511 / 512 = 10</code>. Total threads launched: <code>10 × 512 = 5,120</code>. Wasted: <code>5,120 - 5,000 = 120</code>. The last block is block <code>9</code>, covering global indices <code>9 × 512 = 4,608</code> through <code>5,119</code>. Valid indices are <code>4,608</code> through <code>4,999</code> — <code>392</code> active threads — leaving <code>512 - 392 = 120</code> idle threads in that one block, exactly matching the wasted count computed from the totals.</p>
+<p><strong>19.</strong> <code>simd_count = (33 / 4) * 4 = 8 * 4 = 32</code>. The main loop covers elements <code>0</code>-<code>31</code> in <code>8</code> vector instructions (each covering <code>4</code> elements). One element, index <code>32</code>, falls to the scalar remainder — <code>1</code> scalar instruction. Total: <code>8</code> vector instructions plus <code>1</code> scalar instruction.</p>
+<p><strong>20.</strong> Accuracy: <code>(8+1)/10 = 0.90</code>. Precision: <code>8/(8+1) ≈ 0.889</code>. Recall: <code>8/(8+0) = 1.0</code>. F1: <code>2×0.889×1.0/(0.889+1.0) ≈ 0.941</code>. All four numbers actually look reasonably strong here — but the <em>scenario</em> to watch for is a heavily imbalanced dataset where <code>tn</code> dominates: if instead <code>tp=1, tn=90, fp=0, fneg=9</code> (predicting "negative" almost every time on a dataset that's <code>90%</code> negative), accuracy would be <code>91/100=0.91</code> — misleadingly high — while recall would be a dismal <code>1/10=0.10</code>, revealing that the classifier is essentially failing to find positives at all. Accuracy alone can't distinguish "a genuinely strong classifier" from "a classifier that has learned to exploit a skewed class balance," which is exactly why precision and recall are reported separately rather than folded into one number.</p>
+<p><strong>21.</strong> The rule is Rust's core aliasing guarantee: at any point in the program, a value behind a <code>&amp;mut</code> reference (or accessed through one, such as <code>tape.mul</code>'s <code>&amp;mut self</code>) may not simultaneously be reachable through any other live reference, mutable or shared. Holding <code>let node = &amp;tape.nodes[i];</code> and then calling <code>tape.mul(...)</code>, which requires <code>&amp;mut tape</code>, would let the same underlying <code>Vec&lt;TapeNode&gt;</code> be reached both through <code>node</code> (shared) and through the <code>&amp;mut self</code> inside <code>mul</code> (exclusive) at the same time — exactly the situation that, in C++, let <code>push_back</code>'s reallocation invalidate a reference still being read from. Copying <code>op</code>, <code>a</code>, and <code>b</code> out of <code>tape.nodes[idx]</code> into plain <code>OpType</code>/<code>usize</code> locals <em>before</em> calling <code>tape.mul</code>/<code>tape.add</code> ends the borrow of <code>tape.nodes[idx]</code> at that copy — those three values no longer point into the <code>Vec</code> at all, they're independent stack values — so the subsequent <code>&amp;mut self</code> call has no live shared borrow left to conflict with, and the borrow checker accepts it.</p>
+<p><strong>22.</strong> The type change matters because <code>exp()</code> itself is evaluated at whatever precision its argument carries, independent of what happens to the result afterward: <code>f32</code>'s <code>exp</code> rounds its result to about seven significant decimal digits at every step, while <code>f64</code>'s <code>exp</code> carries roughly sixteen. <code>risk_free_rate * maturity</code> for this run is <code>0.03 * 1.0 = 0.03</code>, and <code>exp(-0.03)</code> differs, in its last few representable bits, between the two precisions — a difference so small (on the order of <code>10⁻⁸</code>) that it is invisible in the <code>{:.6}</code> discount-factor print (<code>0.970446</code> either way) but large enough, once multiplied through <code>mean_payoff</code> (itself an average of 200,000 simulated payoffs, each with its own accumulated floating-point rounding) and printed to four decimal places, to flip the last displayed digit of <code>s0*e^(mu*T)</code> from <code>103.0454</code> to <code>103.0455</code>. It changes only the last digit rather than something larger precisely because both precisions agree to roughly seven significant figures — <code>f32</code>'s own limit — and <code>103.0454</code> already uses all seven of those before the difference appears. The general lesson, not specific to this one exponential: matching a reference implementation's floating-point types exactly is part of correctness, not an optional detail — "the more precise type" is not automatically "the more correct answer" when the code being ported is supposed to reproduce another program's specific arithmetic.</p>
 
 
 
@@ -1748,7 +1694,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href=".." class="md-footer__link md-footer__link--prev" aria-label="Previous: Home">
+          <a href="../../part7/01-quantitative-finance-examples/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 22. Quantitative Finance Examples">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1758,27 +1704,11 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Home
+                22. Quantitative Finance Examples
               </div>
             </div>
           </a>
         
-        
-          
-          <a href="../part0/01-variables-ownership-types/" class="md-footer__link md-footer__link--next" aria-label="Next: 1. Variables, Ownership, and Types">
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              <div class="md-ellipsis">
-                1. Variables, Ownership, and Types
-              </div>
-            </div>
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
-            </div>
-          </a>
         
       </nav>
     
@@ -1828,10 +1758,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>
