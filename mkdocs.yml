@@ -74,6 +74,7 @@ nav:
   - "Part 2 — Basic Tensor Operations":
       - "12. Element-wise Operations": part2/01-element-wise-operations.md
       - "13. Matrix Operations": part2/02-matrix-operations.md
+      - "14. Reduction Operations": part2/03-reduction-operations.md
 
 extra:
   social:
