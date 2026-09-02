@@ -94,6 +94,7 @@ nav:
       - "C. The SM as a Pipeline and the Tiling Payoff": appendix/sm-pipeline-tiling.md
       - "D. Tensor Contractions (CPU)": appendix/tensor-contractions-cpu.md
       - "E. Tensor Contractions (GPU)": appendix/tensor-contractions-gpu.md
+      - "F. A Risk Engine (VaR/XVA)": appendix/risk-engine.md
 
 extra:
   social:
