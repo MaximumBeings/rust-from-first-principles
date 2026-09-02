@@ -73,6 +73,7 @@ nav:
       - "11. Memory Management System": part1/06-memory-management-system.md
   - "Part 2 — Basic Tensor Operations":
       - "12. Element-wise Operations": part2/01-element-wise-operations.md
+      - "13. Matrix Operations": part2/02-matrix-operations.md
 
 extra:
   social:
