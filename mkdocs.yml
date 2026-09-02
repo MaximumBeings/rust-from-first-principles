@@ -85,6 +85,7 @@ nav:
       - "19. Performance Optimization Techniques": part5/02-performance-optimization.md
   - "Part 6 — Neural Network Building Blocks":
       - "20. Neural Network Layers": part6/01-neural-network-layers.md
+      - "21. Advanced Features": part6/02-advanced-features.md
 
 extra:
   social:
