@@ -83,6 +83,8 @@ nav:
   - "Part 5 — GPU Acceleration and Performance":
       - "18. GPU Kernel Implementation": part5/01-gpu-kernel-implementation.md
       - "19. Performance Optimization Techniques": part5/02-performance-optimization.md
+  - "Part 6 — Neural Network Building Blocks":
+      - "20. Neural Network Layers": part6/01-neural-network-layers.md
 
 extra:
   social:
