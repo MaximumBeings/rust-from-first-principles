@@ -80,6 +80,8 @@ nav:
   - "Part 4 — Automatic Differentiation Engine":
       - "16. Backward Function Implementation": part4/01-backward-function-implementation.md
       - "17. Gradient Computation Engine": part4/02-gradient-computation-engine.md
+  - "Part 5 — GPU Acceleration and Performance":
+      - "18. GPU Kernel Implementation": part5/01-gpu-kernel-implementation.md
 
 extra:
   social:
