@@ -91,6 +91,7 @@ nav:
   - Appendix:
       - "A. Practice Quiz": appendix/practice-quiz.md
       - "B. CUDA Memory Architecture": appendix/cuda-memory-architecture.md
+      - "C. The SM as a Pipeline and the Tiling Payoff": appendix/sm-pipeline-tiling.md
 
 extra:
   social:
