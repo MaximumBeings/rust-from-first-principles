@@ -82,6 +82,7 @@ nav:
       - "17. Gradient Computation Engine": part4/02-gradient-computation-engine.md
   - "Part 5 — GPU Acceleration and Performance":
       - "18. GPU Kernel Implementation": part5/01-gpu-kernel-implementation.md
+      - "19. Performance Optimization Techniques": part5/02-performance-optimization.md
 
 extra:
   social:
