@@ -75,6 +75,8 @@ nav:
       - "12. Element-wise Operations": part2/01-element-wise-operations.md
       - "13. Matrix Operations": part2/02-matrix-operations.md
       - "14. Reduction Operations": part2/03-reduction-operations.md
+  - "Part 3 — Computational Graph Foundation":
+      - "15. Graph Node Architecture": part3/01-graph-node-architecture.md
 
 extra:
   social:
